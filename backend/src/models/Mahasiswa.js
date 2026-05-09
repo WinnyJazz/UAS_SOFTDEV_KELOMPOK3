@@ -35,62 +35,32 @@ const MahasiswaSchema = new mongoose.Schema(
       default: "mahasiswa",
       enum: ["mahasiswa"],
     },
+
+    // === Email Verification ===
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      default: null,
+    },
+    verificationTokenExpiry: {
+      type: Date,
+      default: null,
+    },
+
     createdAt: {
       type: Date,
       default: Date.now,
     },
   },
   {
-    timestamps: false, // handle manual via createdAt
     versionKey: false,
   }
 );
 
 MahasiswaSchema.plugin(NotifiablePlugin);
-
-MahasiswaSchema.methods.login = async function (email, nim, password) {
-  return this;
-};
-
-MahasiswaSchema.methods.register = async function (
-  nama,
-  nim,
-  email,
-  password
-) {
-  return this;
-};
-
-MahasiswaSchema.methods.logout = function () {
-
-};
-
-MahasiswaSchema.methods.getAllInformasi = async function () {
-  const Informasi = mongoose.model("Informasi");
-  return await Informasi.find({});
-};
-
-MahasiswaSchema.methods.getAllBarang = async function () {
-  const Barang = mongoose.model("Barang");
-  return await Barang.find({});
-};
-
-MahasiswaSchema.methods.createAspirasi = async function ({
-  judul,
-  deskripsi,
-  kategori,
-  lampiran,
-}) {
-  const Aspirasi = mongoose.model("Aspirasi");
-  return await Aspirasi.create({
-    userId: this.userId,
-    judul,
-    deskripsi,
-    kategori,
-    lampiran, 
-    status: "pending",
-  });
-};
 
 MahasiswaSchema.methods.getPesanNotifikasi = function () {
   return `Notifikasi untuk mahasiswa: ${this.nama}`;

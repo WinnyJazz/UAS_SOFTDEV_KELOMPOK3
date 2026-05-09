@@ -1,12 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db'); // 1. Import fungsi koneksi DB
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
 
-// Load variabel dari .env
 dotenv.config();
-
-// 2. Jalankan fungsi koneksi MongoDB
 connectDB();
 
 const app = express();
@@ -16,9 +14,12 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('Server Backend UAS Kelompok 3 Berjalan dan Terhubung ke Database!');
+    res.send('Server Backend UAS Kelompok 3 Berjalan dan Terhubung ke Database!');
 });
 
+// Routes
+app.use('/api/auth', authRoutes);
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
