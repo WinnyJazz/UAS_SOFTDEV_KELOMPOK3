@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Mahasiswa = require("../models/Mahasiswa");
+const Admin = require("../models/Admin");
 const { sendVerificationEmail } = require("../utils/emailService");
 
 // ─────────────────────────────────────────
@@ -116,34 +117,51 @@ const login = async (req, res) => {
         .json({ message: "Email/NIM dan password harus diisi." });
     }
 
-    // Cari mahasiswa by email atau NIM
-    const query = email ? { email } : { nim };
-    const mahasiswa = await Mahasiswa.findOne(query);
+    let user = null;
+    let userType = "";
 
-    if (!mahasiswa) {
+    // Cari di Mahasiswa dulu
+    if (email || nim) {
+      const query = email ? { email } : { nim };
+      user = await Mahasiswa.findOne(query);
+      if (user) {
+        userType = "mahasiswa";
+      }
+    }
+
+    // Jika tidak ditemukan di Mahasiswa, cari di Admin
+    if (!user && email) {
+      user = await Admin.findOne({ email });
+      if (user) {
+        userType = "admin";
+      }
+    }
+
+    if (!user) {
       return res.status(401).json({ message: "Email/NIM atau password salah." });
     }
 
-    // Cek apakah sudah verifikasi email
-    if (!mahasiswa.isVerified) {
+    // Cek password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Email/NIM atau password salah." });
+    }
+
+    // Untuk Mahasiswa, cek verifikasi email
+    if (userType === "mahasiswa" && !user.isVerified) {
       return res.status(403).json({
         message:
           "Akun belum diverifikasi. Cek email kamu untuk link verifikasi.",
       });
     }
 
-    // Cek password
-    const isPasswordValid = await bcrypt.compare(password, mahasiswa.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Email/NIM atau password salah." });
-    }
-
     // Generate JWT
     const token = jwt.sign(
       {
-        userId: mahasiswa.userId,
-        email: mahasiswa.email,
-        role: mahasiswa.role,
+        userId: user.userId || user.adminId,
+        email: user.email,
+        role: user.role,
+        userType,
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
@@ -153,11 +171,12 @@ const login = async (req, res) => {
       message: "Login berhasil.",
       token,
       data: {
-        userId: mahasiswa.userId,
-        nama: mahasiswa.nama,
-        email: mahasiswa.email,
-        nim: mahasiswa.nim,
-        role: mahasiswa.role,
+        userId: user.userId || user.adminId,
+        nama: user.nama,
+        email: user.email,
+        nim: user.nim || null,
+        role: user.role,
+        userType,
       },
     });
   } catch (error) {
@@ -208,4 +227,232 @@ const resendVerification = async (req, res) => {
   }
 };
 
-module.exports = { register, verifyEmail, login, resendVerification };
+// ─────────────────────────────────────────
+// POST /api/auth/register-admin (hanya superadmin)
+// ─────────────────────────────────────────
+const registerAdmin = async (req, res) => {
+  try {
+    const { nama, email, password, role } = req.body;
+
+    // Validasi input
+    if (!nama || !email || !password) {
+      return res.status(400).json({ message: "Nama, email, dan password harus diisi." });
+    }
+
+    // Cek role user yang request
+    if (req.user.role !== "superadmin") {
+      return res.status(403).json({ message: "Hanya superadmin yang bisa register admin." });
+    }
+
+    // Validasi role
+    if (role && !["admin", "superadmin"].includes(role)) {
+      return res.status(400).json({ message: "Role harus 'admin' atau 'superadmin'." });
+    }
+
+    // Cek duplikat email
+    const emailExist = await Admin.findOne({ email });
+    if (emailExist) {
+      return res.status(409).json({ message: "Email sudah terdaftar." });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Simpan admin baru
+    const admin = await Admin.create({
+      nama,
+      email,
+      password: hashedPassword,
+      role: role || "admin",
+    });
+
+    return res.status(201).json({
+      message: "Admin berhasil didaftarkan.",
+      data: {
+        adminId: admin.adminId,
+        nama: admin.nama,
+        email: admin.email,
+        role: admin.role,
+      },
+    });
+  } catch (error) {
+    console.error("[registerAdmin]", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
+};
+
+// ─────────────────────────────────────────
+// GET /api/auth/users (hanya admin/superadmin)
+// ─────────────────────────────────────────
+const getAllUsers = async (req, res) => {
+  try {
+    if (!["admin", "superadmin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Akses ditolak." });
+    }
+
+    const mahasiswas = await Mahasiswa.find({}, { password: 0, verificationToken: 0, verificationTokenExpiry: 0 });
+    const admins = await Admin.find({}, { password: 0 });
+
+    // Ambil mahasiswa yang rolenya sudah admin, gabungkan ke list admins
+    const mahasiswaYangJadiAdmin = mahasiswas
+      .filter(m => m.role === "admin")
+      .map(m => ({
+        adminId: m.userId, // Pakai user id
+        nama: m.nama,
+        email: m.email,
+        nim: m.nim,    
+        role: m.role,
+      }));
+
+    const allAdmins = [
+                        ...admins.map(a => ({
+                          adminId: a.adminId,
+                          nama: a.nama,
+                          email: a.email,
+                          nim: a.nim ?? null,
+                          role: a.role,
+                        })),
+                        ...mahasiswaYangJadiAdmin
+                      ];
+    const mahasiswaBiasa = mahasiswas.filter(m => m.role === "mahasiswa");
+
+    return res.status(200).json({
+      message: "Data user berhasil diambil.",
+      data: {
+        mahasiswas: mahasiswaBiasa,
+        admins: allAdmins,
+        total: mahasiswas.length + admins.length
+      }
+    });
+  } catch (error) {
+    console.error("[getAllUsers]", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
+};
+// ─────────────────────────────────────────
+// POST /api/auth/change-role
+// Hanya superadmin yang bisa ubah role mahasiswa
+// ─────────────────────────────────────────
+const changeRole = async (req, res) => {
+  try {
+    const { userIds, newRole } = req.body;
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0 || !newRole) {
+      return res.status(400).json({ message: "userIds dan newRole harus diisi." });
+    }
+
+    if (req.user.role !== "superadmin") {
+      return res.status(403).json({ message: "Hanya superadmin yang bisa mengubah role." });
+    }
+
+    if (!["mahasiswa", "admin"].includes(newRole)) {
+      return res.status(400).json({ message: "Role baru harus 'mahasiswa' atau 'admin'." });
+    }
+
+    const updatedUsers = [];
+
+    for (const userId of userIds) {
+      const mahasiswa = await Mahasiswa.findOne({ userId });
+      if (!mahasiswa) continue;
+
+      if (newRole === "admin") {
+        // Cek apakah sudah ada di Admin collection
+        const existingAdmin = await Admin.findOne({ email: mahasiswa.email });
+        if (!existingAdmin) {
+          // Pindahkan ke Admin collection
+          await Admin.create({
+            nama: mahasiswa.nama,
+            email: mahasiswa.email,
+            password: mahasiswa.password,
+            role: "admin",
+            nim: mahasiswa.nim,
+          });
+        } else {
+          existingAdmin.role = "admin";
+          await existingAdmin.save();
+        }
+
+        // Hapus dari Mahasiswa collection
+        await Mahasiswa.deleteOne({ userId });
+
+        updatedUsers.push({ nama: mahasiswa.nama, email: mahasiswa.email, role: "admin" });
+      } else {
+        // Downgrade langsung di Mahasiswa
+        mahasiswa.role = newRole;
+        await mahasiswa.save();
+        updatedUsers.push({ userId: mahasiswa.userId, nama: mahasiswa.nama, email: mahasiswa.email, role: mahasiswa.role });
+      }
+    }
+
+    return res.status(200).json({
+      message: `Role berhasil diubah untuk ${updatedUsers.length} user.`,
+      data: updatedUsers,
+    });
+  } catch (error) {
+    console.error("[changeRole]", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
+};
+// ─────────────────────────────────────────
+// POST /api/auth/downgrade-admin
+// Hanya superadmin yang bisa downgrade admin ke mahasiswa
+// ─────────────────────────────────────────
+const downgradeAdmin = async (req, res) => {
+  try {
+    const { userIds } = req.body;
+
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ message: "userIds (array) harus diisi dan tidak kosong." });
+    }
+
+    if (req.user.role !== "superadmin") {
+      return res.status(403).json({ message: "Hanya superadmin yang bisa downgrade admin." });
+    }
+
+    const downgradedUsers = [];
+
+    for (const id of userIds) {
+      // Coba cari di Admin collection dulu (admin murni)
+      const adminDoc = await Admin.findOne({ adminId: id, role: "admin" });
+
+    if (adminDoc) {
+        const existing = await Mahasiswa.findOne({ email: adminDoc.email });
+        if (existing) {
+          existing.role = "mahasiswa";
+          await existing.save();
+        } else {
+          await Mahasiswa.create({
+            nama: adminDoc.nama,
+            email: adminDoc.email,
+            password: adminDoc.password,
+            nim: adminDoc.nim || `ADMIN-${adminDoc.adminId.slice(-6)}`,
+            role: "mahasiswa",
+            isVerified: true,
+          });
+        }
+        await Admin.deleteOne({ adminId: id });
+        downgradedUsers.push({ nama: adminDoc.nama, email: adminDoc.email, role: "mahasiswa" });
+        continue;
+      }
+
+      // Kalau tidak ada di Admin collection, cari di Mahasiswa collection (mahasiswa yang di-upgrade)
+      const mahasiswaDoc = await Mahasiswa.findOne({ userId: id, role: "admin" });
+      if (mahasiswaDoc) {
+        mahasiswaDoc.role = "mahasiswa";
+        await mahasiswaDoc.save();
+        downgradedUsers.push({ nama: mahasiswaDoc.nama, email: mahasiswaDoc.email, role: "mahasiswa" });
+      }
+    }
+
+    return res.status(200).json({
+      message: `${downgradedUsers.length} admin berhasil di-downgrade ke mahasiswa.`,
+      data: downgradedUsers,
+    });
+  } catch (error) {
+    console.error("[downgradeAdmin]", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
+};
+
+module.exports = { register, verifyEmail, login, resendVerification, registerAdmin, getAllUsers, changeRole, downgradeAdmin };

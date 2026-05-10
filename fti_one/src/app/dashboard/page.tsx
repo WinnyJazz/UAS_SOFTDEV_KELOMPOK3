@@ -24,7 +24,19 @@ export default function Dashboard() {
       return;
     }
 
-    setUser(JSON.parse(storedUser));
+    const parsedUser = JSON.parse(storedUser);
+
+    // Redirect admin dan superadmin ke halaman khusus
+    if (parsedUser.role === 'admin') {
+      router.push('/admin');
+      return;
+    }
+    if (parsedUser.role === 'superadmin') {
+      router.push('/superadmin');
+      return;
+    }
+
+    setUser(parsedUser);
     setLoading(false);
   }, [router]);
 

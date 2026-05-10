@@ -31,4 +31,24 @@ const verifyAdmin = (req, res, next) => {
   });
 };
 
-module.exports = { verifyToken, verifyAdmin };
+// Middleware khusus untuk role superadmin
+const verifySuperAdmin = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (req.user.role !== "superadmin") {
+      return res.status(403).json({ message: "Akses ditolak. Hanya superadmin." });
+    }
+    next();
+  });
+};
+
+// Middleware untuk admin atau superadmin
+const verifyAdminOrSuperAdmin = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (!["admin", "superadmin"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Akses ditolak. Hanya admin atau superadmin." });
+    }
+    next();
+  });
+};
+
+module.exports = { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminOrSuperAdmin };
