@@ -294,27 +294,31 @@ const getAllUsers = async (req, res) => {
     const mahasiswas = await Mahasiswa.find({}, { password: 0, verificationToken: 0, verificationTokenExpiry: 0 });
     const admins = await Admin.find({}, { password: 0 });
 
-    // Ambil mahasiswa yang rolenya sudah admin, gabungkan ke list admins
+    // Email yang sudah ada di Admin collection (mencegah double)
+    const adminEmails = new Set(admins.map(a => a.email));
+
+    // Mahasiswa yang role-nya admin tapi TIDAK ada di Admin collection
     const mahasiswaYangJadiAdmin = mahasiswas
-      .filter(m => m.role === "admin")
+      .filter(m => m.role === "admin" && !adminEmails.has(m.email))
       .map(m => ({
-        adminId: m.userId, // Pakai user id
+        adminId: m.userId,
         nama: m.nama,
         email: m.email,
-        nim: m.nim,    
+        nim: m.nim,
         role: m.role,
       }));
 
     const allAdmins = [
-                        ...admins.map(a => ({
-                          adminId: a.adminId,
-                          nama: a.nama,
-                          email: a.email,
-                          nim: a.nim ?? null,
-                          role: a.role,
-                        })),
-                        ...mahasiswaYangJadiAdmin
-                      ];
+      ...admins.map(a => ({
+        adminId: a.adminId,
+        nama: a.nama,
+        email: a.email,
+        nim: a.nim ?? null,
+        role: a.role,
+      })),
+      ...mahasiswaYangJadiAdmin
+    ];
+
     const mahasiswaBiasa = mahasiswas.filter(m => m.role === "mahasiswa");
 
     return res.status(200).json({
@@ -352,8 +356,8 @@ const changeRole = async (req, res) => {
 
     const updatedUsers = [];
 
-    for (const userId of userIds) {
-      const mahasiswa = await Mahasiswa.findOne({ userId });
+    for (const userId of userIds) {          
+      const mahasiswa = await Mahasiswa.findOne({ userId }); 
       if (!mahasiswa) continue;
 
       if (newRole === "admin") {
@@ -365,16 +369,16 @@ const changeRole = async (req, res) => {
             nama: mahasiswa.nama,
             email: mahasiswa.email,
             password: mahasiswa.password,
-            role: "admin",
             nim: mahasiswa.nim,
+            role: "admin",
           });
         } else {
           existingAdmin.role = "admin";
           await existingAdmin.save();
         }
 
-        // Hapus dari Mahasiswa collection
-        await Mahasiswa.deleteOne({ userId });
+        mahasiswa.role = "admin";
+        await mahasiswa.save();
 
         updatedUsers.push({ nama: mahasiswa.nama, email: mahasiswa.email, role: "admin" });
       } else {
@@ -383,7 +387,7 @@ const changeRole = async (req, res) => {
         await mahasiswa.save();
         updatedUsers.push({ userId: mahasiswa.userId, nama: mahasiswa.nama, email: mahasiswa.email, role: mahasiswa.role });
       }
-    }
+    }                                         
 
     return res.status(200).json({
       message: `Role berhasil diubah untuk ${updatedUsers.length} user.`,
@@ -416,17 +420,18 @@ const downgradeAdmin = async (req, res) => {
       // Coba cari di Admin collection dulu (admin murni)
       const adminDoc = await Admin.findOne({ adminId: id, role: "admin" });
 
-    if (adminDoc) {
+      if (adminDoc) {
         const existing = await Mahasiswa.findOne({ email: adminDoc.email });
         if (existing) {
-          existing.role = "mahasiswa";
+          existing.role = "mahasiswa";  // restore role, NIM tetap sama
           await existing.save();
         } else {
+          // Fallback kalau memang tidak ada (edge case)
           await Mahasiswa.create({
             nama: adminDoc.nama,
             email: adminDoc.email,
             password: adminDoc.password,
-            nim: adminDoc.nim || `ADMIN-${adminDoc.adminId.slice(-6)}`,
+            nim: adminDoc.nim,  // pakai NIM dari Admin collection
             role: "mahasiswa",
             isVerified: true,
           });
