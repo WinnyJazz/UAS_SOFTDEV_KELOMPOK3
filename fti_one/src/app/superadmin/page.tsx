@@ -140,7 +140,7 @@ export default function SuperAdminDashboard() {
                             disabled={changingRole}
                             className={styles.buttonPrimary}
                         >
-                            {changingRole ? 'Memproses...' : '📈 Jadikan Admin'}
+                            {changingRole ? 'Memproses...' : 'Jadikan Admin'}
                         </button>
                     </div>
                 )}
@@ -204,7 +204,7 @@ export default function SuperAdminDashboard() {
                 disabled={downgradingAdmin}
                 className={styles.buttonDanger}
             >
-                {downgradingAdmin ? 'Memproses...' : '📉 Turunkan ke Mahasiswa'}
+                {downgradingAdmin ? 'Memproses...' : 'Turunkan ke Mahasiswa'}
             </button>
         </div>
     )}
