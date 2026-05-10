@@ -5,7 +5,13 @@ const {
   verifyEmail,
   login,
   resendVerification,
+  registerAdmin,
+  getAllUsers,
+  changeRole,
+  downgradeAdmin,
 } = require("../controllers/authController");
+
+const { verifySuperAdmin, verifyAdminOrSuperAdmin } = require("../middleware/authMiddleware");
 
 // POST /api/auth/register
 router.post("/register", register);
@@ -16,7 +22,19 @@ router.get("/verify-email", verifyEmail);
 // POST /api/auth/login
 router.post("/login", login);
 
+// POST /api/auth/register-admin (hanya superadmin)
+router.post("/register-admin", verifySuperAdmin, registerAdmin);
+
+// GET /api/auth/users (admin/superadmin)
+router.get("/users", verifyAdminOrSuperAdmin, getAllUsers);
+
 // POST /api/auth/resend-verification
 router.post("/resend-verification", resendVerification);
+
+// POST /api/auth/change-role (hanya superadmin)
+router.post("/change-role", verifySuperAdmin, changeRole);
+
+// POST /api/auth/downgrade-admin (hanya superadmin)
+router.post("/downgrade-admin", verifySuperAdmin, downgradeAdmin);
 
 module.exports = router;

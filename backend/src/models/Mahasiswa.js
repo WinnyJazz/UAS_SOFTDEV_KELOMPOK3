@@ -33,7 +33,7 @@ const MahasiswaSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "mahasiswa",
-      enum: ["mahasiswa"],
+      enum: ["mahasiswa", "admin"],
     },
 
     // === Email Verification ===
