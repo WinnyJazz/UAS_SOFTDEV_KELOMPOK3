@@ -5,6 +5,7 @@ import styles from './register.module.css';
 
 interface RegistrationResponse {
   message: string;
+  errors?: string[];
   data?: {
     userId: string;
     nama: string;
@@ -51,8 +52,12 @@ export default function Register() {
         setMessage(data.message || 'Registrasi berhasil! Cek email kamu.');
         setFormData({ nama: '', nim: '', email: '', password: '' });
       } else {
-        setIsSuccess(false);
-        setMessage(data.message || 'Registrasi gagal. Coba lagi.');
+            setIsSuccess(false);
+            if (data.errors && data.errors.length > 0) {
+              setMessage(data.errors.join('\n'));
+            } else {
+              setMessage(data.message || 'Registrasi gagal. Coba lagi.');
+            }
       }
     } catch (error) {
       setIsSuccess(false);
@@ -124,7 +129,7 @@ export default function Register() {
 
           {message && (
             <div className={`${styles.message} ${isSuccess ? styles.success : styles.error}`}>
-              {message}
+              <span style={{ whiteSpace: 'pre-line' }}>{message}</span>
               {isSuccess && (
                 <div className={styles.extraInfo}>
                   <p>Jika kamu tidak menerima email dalam beberapa menit, cek folder Spam kamu.</p>

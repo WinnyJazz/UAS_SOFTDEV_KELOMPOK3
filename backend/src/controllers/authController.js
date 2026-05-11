@@ -6,6 +6,55 @@ const Admin = require("../models/Admin");
 const { sendVerificationEmail } = require("../utils/emailService");
 
 // ─────────────────────────────────────────
+// HELPER: Validasi input registrasi
+// ─────────────────────────────────────────
+const validateRegistrationInput = (nama, nim, email, password) => {
+  const errors = [];
+
+  // Validasi email: harus @stu.untar.ac.id
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@stu\.untar\.ac\.id$/;
+  if (!emailRegex.test(email)) {
+    errors.push("Email harus menggunakan domain @stu.untar.ac.id");
+  }
+
+  // Validasi NIM: harus 9 digit angka
+  const nimRegex = /^\d{9}$/;
+  if (!nimRegex.test(nim)) {
+    errors.push("NIM harus terdiri dari 9 digit angka.");
+  } else {
+    // Validasi awalan NIM: 525 (TI) atau 825 (SI)
+    const nimPrefix = nim.substring(0, 3);
+    if (!["535", "825"].includes(nimPrefix)) {
+      errors.push("NIM tidak valid. Hanya mahasiswa FTI (TI: 525xxx, SI: 825xxx) yang bisa mendaftar.");
+    }
+  }
+
+  // Validasi password:
+  // - Minimal 8 karakter
+  // - Minimal 1 huruf besar
+  // - Minimal 1 huruf kecil
+  // - Minimal 1 angka
+  // - Minimal 1 karakter spesial
+  if (password.length < 8) {
+    errors.push("Password minimal 8 karakter.");
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password harus mengandung minimal 1 huruf besar.");
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password harus mengandung minimal 1 huruf kecil.");
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push("Password harus mengandung minimal 1 angka.");
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    errors.push("Password harus mengandung minimal 1 karakter spesial (!@#$%^&* dll).");
+  }
+
+  return errors;
+};
+
+// ─────────────────────────────────────────
 // POST /api/auth/register
 // ─────────────────────────────────────────
 const register = async (req, res) => {
@@ -15,6 +64,15 @@ const register = async (req, res) => {
     // Validasi input
     if (!nama || !nim || !email || !password) {
       return res.status(400).json({ message: "Semua field harus diisi." });
+    }
+
+    //Cek ketentuan
+    const validationErrors = validateRegistrationInput(nama, nim, email, password);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        message: "Validasi gagal.",
+        errors: validationErrors,
+      });
     }
 
     // Cek duplikat email atau NIM
