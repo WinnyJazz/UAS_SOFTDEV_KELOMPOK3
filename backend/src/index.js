@@ -1,12 +1,12 @@
 require('dns').setServers(['8.8.8.8', '8.8.4.4']);
+require('dotenv').config(); // Load FIRST sebelum require apapun
+
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const barangRoutes = require('./routes/barangRoutes');
 
-dotenv.config();
 connectDB();
 
 const app = express();
