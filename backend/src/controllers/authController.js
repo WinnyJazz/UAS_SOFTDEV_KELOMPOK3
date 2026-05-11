@@ -36,19 +36,27 @@ const register = async (req, res) => {
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 jam
 
-    // Simpan mahasiswa baru (auto-verified untuk dev)
+    // Simpan mahasiswa baru (belum verified)
     const mahasiswa = await Mahasiswa.create({
       nama,
       nim,
       email,
       password: hashedPassword,
-      verificationToken: null,
-      verificationTokenExpiry: null,
-      isVerified: true,
+      verificationToken,
+      verificationTokenExpiry,
+      isVerified: false,
     });
 
+    // Kirim verification email
+    try {
+      await sendVerificationEmail(email, nama, verificationToken);
+    } catch (emailError) {
+      console.warn("[register] Email send warning:", emailError.message);
+      // Lanjut meski email gagal
+    }
+
     return res.status(201).json({
-      message: "Registrasi berhasil! Silakan login.",
+      message: "Registrasi berhasil! Cek email kamu untuk link verifikasi.",
       data: {
         userId: mahasiswa.userId,
         nama: mahasiswa.nama,
@@ -58,8 +66,14 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("[register]", error);
-    return res.status(500).json({ message: "Terjadi kesalahan server." });
+    console.error("[register] Error:", error.message);
+
+    // Cek asal eror
+    if (error.message.includes("email") || error.code === 11000) {
+      return res.status(409).json({ message: "Email atau NIM sudah terdaftar." });
+    }
+
+    return res.status(500).json({ message: "Terjadi kesalahan server: " + error.message });
   }
 };
 
@@ -216,14 +230,20 @@ const resendVerification = async (req, res) => {
     mahasiswa.verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await mahasiswa.save();
 
-    await sendVerificationEmail(email, mahasiswa.nama, verificationToken);
+    // Kirim email
+    try {
+      await sendVerificationEmail(email, mahasiswa.nama, verificationToken);
+    } catch (emailError) {
+      console.warn("[resendVerification] Email send warning:", emailError.message);
+      // Token sudah disimpan, kirim response optimis
+    }
 
     return res.status(200).json({
       message: "Link verifikasi baru sudah dikirim ke email kamu.",
     });
   } catch (error) {
-    console.error("[resendVerification]", error);
-    return res.status(500).json({ message: "Terjadi kesalahan server." });
+    console.error("[resendVerification]", error.message);
+    return res.status(500).json({ message: "Terjadi kesalahan server: " + error.message });
   }
 };
 
@@ -356,8 +376,8 @@ const changeRole = async (req, res) => {
 
     const updatedUsers = [];
 
-    for (const userId of userIds) {          
-      const mahasiswa = await Mahasiswa.findOne({ userId }); 
+    for (const userId of userIds) {
+      const mahasiswa = await Mahasiswa.findOne({ userId });
       if (!mahasiswa) continue;
 
       if (newRole === "admin") {
@@ -387,7 +407,7 @@ const changeRole = async (req, res) => {
         await mahasiswa.save();
         updatedUsers.push({ userId: mahasiswa.userId, nama: mahasiswa.nama, email: mahasiswa.email, role: mahasiswa.role });
       }
-    }                                         
+    }
 
     return res.status(200).json({
       message: `Role berhasil diubah untuk ${updatedUsers.length} user.`,

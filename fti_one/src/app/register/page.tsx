@@ -125,6 +125,15 @@ export default function Register() {
           {message && (
             <div className={`${styles.message} ${isSuccess ? styles.success : styles.error}`}>
               {message}
+              {isSuccess && (
+                <div className={styles.extraInfo}>
+                  <p>Jika kamu tidak menerima email dalam beberapa menit, cek folder Spam kamu.</p>
+                  <p>
+                    Email tidak datang?{' '}
+                    <a href="/resend-verification">Kirim ulang link verifikasi</a>
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
