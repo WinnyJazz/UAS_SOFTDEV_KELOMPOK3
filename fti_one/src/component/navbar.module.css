@@ -1,0 +1,166 @@
+/* ===========================
+   NAVBAR - DPM FTI
+   =========================== */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 62px;
+  background: linear-gradient(135deg, #3b1a7a 0%, #5c2d9e 40%, #7b3fc4 70%, #6a2fa8 100%);
+  box-shadow: 0 2px 20px rgba(80, 20, 160, 0.45);
+}
+
+/* ===========================
+   LOGO
+   =========================== */
+
+.logoLink {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoCircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.2s, transform 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.logoCircle:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.06);
+}
+
+.logoText {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.logoSub {
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.08em;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ===========================
+   NAV LINKS
+   =========================== */
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+  border-radius: 6px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  letter-spacing: 0.01em;
+  transition: background 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.navItem.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ===========================
+   PROFILE
+   =========================== */
+
+.profileLink {
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.profileAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.profileAvatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.5);
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+    height: 56px;
+  }
+
+  .navLinks {
+    gap: 0;
+  }
+
+  .navItem {
+    padding: 6px 8px;
+    font-size: 12.5px;
+  }
+
+  .logoCircle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .profileAvatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 520px) {
+  .navLinks {
+    display: none;
+  }
+}

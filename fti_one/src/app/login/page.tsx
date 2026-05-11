@@ -50,7 +50,16 @@ export default function Login() {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.data));
         }
-        setTimeout(() => router.push('/dashboard'), 1500);
+        const role = data.data?.role;
+        setTimeout(() => {
+          if (role === 'superadmin') {
+            router.push('/superadmin');
+          } else if (role === 'admin') {
+            router.push('/admin/lost-found');
+          } else {
+            router.push('/dashboard');
+          }
+        }, 1500);
       } else {
         setIsSuccess(false);
         setMessage(data.message || 'Login gagal. Cek email dan password.');
