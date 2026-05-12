@@ -18,7 +18,6 @@ interface RegistrationResponse {
 export default function Register() {
   const [formData, setFormData] = useState({
     nama: '',
-    nim: '',
     email: '',
     password: '',
   });
@@ -50,14 +49,14 @@ export default function Register() {
       if (response.ok) {
         setIsSuccess(true);
         setMessage(data.message || 'Registrasi berhasil! Cek email kamu.');
-        setFormData({ nama: '', nim: '', email: '', password: '' });
+        setFormData({ nama: '', email: '', password: '' });
       } else {
-            setIsSuccess(false);
-            if (data.errors && data.errors.length > 0) {
-              setMessage(data.errors.join('\n'));
-            } else {
-              setMessage(data.message || 'Registrasi gagal. Coba lagi.');
-            }
+        setIsSuccess(false);
+        if (data.errors && data.errors.length > 0) {
+          setMessage(data.errors.join('\n'));
+        } else {
+          setMessage(data.message || 'Registrasi gagal. Coba lagi.');
+        }
       }
     } catch (error) {
       setIsSuccess(false);
@@ -157,19 +156,6 @@ export default function Register() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="nim">NIM</label>
-              <input
-                type="text"
-                id="nim"
-                name="nim"
-                value={formData.nim}
-                onChange={handleChange}
-                required
-                placeholder="Masukkan NIM"
-              />
-            </div>
-
-            <div className={styles.formGroup}>
               <label htmlFor="email">Email</label>
               <input
                 type="email"
@@ -178,8 +164,9 @@ export default function Register() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                placeholder="Masukkan Email"
+                placeholder="nama.NIM@stu.untar.ac.id"
               />
+              
             </div>
 
             <div className={styles.formGroup}>

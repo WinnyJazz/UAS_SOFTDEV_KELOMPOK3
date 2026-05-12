@@ -49,7 +49,14 @@ const MahasiswaSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordTokenExpiry: {
+      type: Date,
+      default: null,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

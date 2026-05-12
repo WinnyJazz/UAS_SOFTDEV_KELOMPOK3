@@ -9,6 +9,8 @@ const {
   getAllUsers,
   changeRole,
   downgradeAdmin,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/authController");
 
 const { verifySuperAdmin, verifyAdminOrSuperAdmin } = require("../middleware/authMiddleware");
@@ -21,6 +23,12 @@ router.get("/verify-email", verifyEmail);
 
 // POST /api/auth/login
 router.post("/login", login);
+
+// POST /api/auth/forgot-password
+router.post("/forgot-password", forgotPassword);
+
+// POST /api/auth/reset-password
+router.post("/reset-password", resetPassword);
 
 // POST /api/auth/register-admin (hanya superadmin)
 router.post("/register-admin", verifySuperAdmin, registerAdmin);
