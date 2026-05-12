@@ -294,6 +294,10 @@ export default function Login() {
           <p className={styles.footer}>
             Belum punya akun? <a href="/register">Daftar di sini</a>
           </p>
+
+          <p className={styles.forgotPassword}>
+            <a href="/forgot-password">Lupa Password?</a>
+          </p>
         </div>
 
       </div>
