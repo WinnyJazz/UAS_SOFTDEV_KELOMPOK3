@@ -13,6 +13,15 @@ const MahasiswaSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    nickname: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    profilePhoto: {
+      type: String,
+      default: null,
+    },
     email: {
       type: String,
       required: true,
