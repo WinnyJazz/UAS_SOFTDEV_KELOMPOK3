@@ -11,9 +11,10 @@ const {
   downgradeAdmin,
   forgotPassword,
   resetPassword,
+  updateProfile,
 } = require("../controllers/authController");
 
-const { verifySuperAdmin, verifyAdminOrSuperAdmin } = require("../middleware/authMiddleware");
+const { verifyToken, verifySuperAdmin, verifyAdminOrSuperAdmin } = require("../middleware/authMiddleware");
 
 // POST /api/auth/register
 router.post("/register", register);
@@ -29,6 +30,9 @@ router.post("/forgot-password", forgotPassword);
 
 // POST /api/auth/reset-password
 router.post("/reset-password", resetPassword);
+
+// PUT /api/auth/update-profile (hanya user yang terautentikasi)
+router.put("/update-profile", verifyToken, updateProfile);
 
 // POST /api/auth/register-admin (hanya superadmin)
 router.post("/register-admin", verifySuperAdmin, registerAdmin);

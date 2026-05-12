@@ -281,6 +281,8 @@ const login = async (req, res) => {
       data: {
         userId: user.userId || user.adminId,
         nama: user.nama,
+        nickname: user.nickname || null,
+        profilePhoto: user.profilePhoto || null,
         email: user.email,
         nim: user.nim || null,
         role: user.role,
@@ -676,4 +678,53 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { register, verifyEmail, login, resendVerification, registerAdmin, getAllUsers, changeRole, downgradeAdmin, forgotPassword, resetPassword };
+// ─────────────────────────────────────────
+// PUT /api/auth/update-profile
+// Update nickname dan profilePhoto user
+// ─────────────────────────────────────────
+const updateProfile = async (req, res) => {
+  try {
+    const { userId } = req.user; // dari JWT token
+    const { nickname, profilePhoto } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User tidak terautentikasi." });
+    }
+
+    const mahasiswa = await Mahasiswa.findOne({ userId });
+
+    if (!mahasiswa) {
+      return res.status(404).json({ message: "User tidak ditemukan." });
+    }
+
+    // Update nickname jika dikirim
+    if (nickname !== undefined && nickname !== null) {
+      mahasiswa.nickname = nickname.trim() || null;
+    }
+
+    // Update profilePhoto jika dikirim
+    if (profilePhoto !== undefined && profilePhoto !== null) {
+      mahasiswa.profilePhoto = profilePhoto;
+    }
+
+    await mahasiswa.save();
+
+    return res.status(200).json({
+      message: "Profil berhasil diperbarui.",
+      data: {
+        userId: mahasiswa.userId,
+        nama: mahasiswa.nama,
+        nickname: mahasiswa.nickname,
+        email: mahasiswa.email,
+        nim: mahasiswa.nim,
+        profilePhoto: mahasiswa.profilePhoto,
+        role: mahasiswa.role,
+      },
+    });
+  } catch (error) {
+    console.error("[updateProfile]", error.message);
+    return res.status(500).json({ message: "Terjadi kesalahan server: " + error.message });
+  }
+};
+
+module.exports = { register, verifyEmail, login, resendVerification, registerAdmin, getAllUsers, changeRole, downgradeAdmin, forgotPassword, resetPassword, updateProfile };
