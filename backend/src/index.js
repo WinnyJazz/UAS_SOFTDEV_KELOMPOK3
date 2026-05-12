@@ -6,6 +6,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const barangRoutes = require('./routes/barangRoutes');
+const claimRoutes = require('./routes/claimRoutes');
 
 connectDB();
 
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/barang', barangRoutes);
+app.use('/api/claim', claimRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

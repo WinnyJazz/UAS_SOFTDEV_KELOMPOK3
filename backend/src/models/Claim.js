@@ -19,6 +19,22 @@ const ClaimSchema = new mongoose.Schema(
       required: true,
       ref: "Barang",
     },
+    nama: {
+      type: String,
+      required: true,
+    },
+    nim: {
+      type: String,
+      required: true,
+    },
+    nomorTelepon: {
+      type: String,
+      required: true,
+    },
+    fotoKTM: {
+      type: String, // Cloudinary URL
+      required: true,
+    },
     tanggal: {
       type: Date,
       default: Date.now,

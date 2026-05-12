@@ -7,25 +7,30 @@ import styles from "./navbar.module.css";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [lostFoundHref, setLostFoundHref] = useState("/lost-found");
+  const [navLinks, setNavLinks] = useState([
+    { label: "Home", href: "/" },
+    { label: "About Us", href: "/about" },
+    { label: "Aspirasi", href: "/aspirasi" },
+    { label: "Info", href: "/info" },
+    { label: "Lost & Found", href: "/lost-found" },
+  ]);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
       const user = JSON.parse(stored);
       if (user.role === "admin" || user.role === "superadmin") {
-        setLostFoundHref("/admin/lost-found");
+        setNavLinks([
+          { label: "Home", href: "/" },
+          { label: "About Us", href: "/about" },
+          { label: "Aspirasi", href: "/aspirasi" },
+          { label: "Info", href: "/info" },
+          { label: "Lost & Found", href: "/admin/lost-found" },
+          { label: "Claims", href: "/admin/claims" },
+        ]);
       }
     }
   }, []);
-
-  const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "About Us", href: "/about" },
-    { label: "Aspirasi", href: "/aspirasi" },
-    { label: "Info", href: "/info" },
-    { label: "Loste&Found", href: lostFoundHref },
-  ];
 
   return (
     <nav className={styles.navbar}>
