@@ -34,14 +34,57 @@ export default function Navbar() {
             { label: "Claims", href: "/admin/claims" },
           ]);
         }
+      } else {
+        setProfilePhoto(null);
       }
     };
 
+    // Handle logout event - clear profile photo
+    const handleLogout = () => {
+      setProfilePhoto(null);
+      setNavLinks([
+        { label: "Home", href: "/" },
+        { label: "About Us", href: "/about" },
+        { label: "Aspirasi", href: "/aspirasi" },
+        { label: "Info", href: "/info" },
+        { label: "Lost & Found", href: "/lost-found" },
+      ]);
+    };
+
+    // Handle login event - load profile photo immediately
+    const handleLogin = () => {
+      loadUserData();
+    };
+
+    // Load on mount
     loadUserData();
 
-    // Listen for storage changes (from other tabs or profile update)
+    // Listen for storage changes (from other tabs)
     window.addEventListener("storage", loadUserData);
-    return () => window.removeEventListener("storage", loadUserData);
+
+    // Listen for custom profile update event
+    window.addEventListener("profileUpdated", loadUserData as EventListener);
+
+    // Listen for login event
+    window.addEventListener("userLoggedIn", handleLogin as EventListener);
+
+    // Listen for logout event
+    window.addEventListener("userLoggedOut", handleLogout as EventListener);
+
+    // Listen for window focus - reload photo when tab regains focus
+    const handleWindowFocus = () => {
+      loadUserData();
+    };
+    window.addEventListener("focus", handleWindowFocus);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("storage", loadUserData);
+      window.removeEventListener("profileUpdated", loadUserData as EventListener);
+      window.removeEventListener("userLoggedIn", handleLogin as EventListener);
+      window.removeEventListener("userLoggedOut", handleLogout as EventListener);
+      window.removeEventListener("focus", handleWindowFocus);
+    };
   }, []);
 
   return (

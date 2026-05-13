@@ -55,6 +55,11 @@ export default function Profile() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+
+        // Dispatch custom event untuk clear profile photo di navbar
+        const logoutEvent = new CustomEvent('userLoggedOut');
+        window.dispatchEvent(logoutEvent);
+
         router.push('/login');
     };
 
@@ -121,6 +126,12 @@ export default function Profile() {
 
                 setUser(updatedUser);
                 localStorage.setItem('user', JSON.stringify(updatedUser));
+
+                // Dispatch custom event untuk update navbar
+                const profileUpdateEvent = new CustomEvent('profileUpdated', {
+                    detail: { profilePhoto: data.data.profilePhoto }
+                });
+                window.dispatchEvent(profileUpdateEvent);
 
                 setMessage('Profil berhasil diperbarui!');
                 setMessageType('success');
