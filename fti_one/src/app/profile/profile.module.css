@@ -1,0 +1,466 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+}
+
+.inner {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    justify-content: center;
+}
+
+.card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    width: 100%;
+}
+
+.card h1 {
+    color: #333;
+    font-size: 28px;
+    margin: 0 0 30px 0;
+    text-align: center;
+    font-weight: 600;
+}
+
+.message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.messageSuccess {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.messageError {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.profileContent {
+    margin-bottom: 30px;
+}
+
+/* Avatar Section */
+.avatarSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.avatarCircle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.avatarIcon {
+    width: 60px;
+    height: 60px;
+    color: white;
+}
+
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.nimDisplay {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* Info Section */
+.infoSection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.infoItem:hover {
+    background: #efefef;
+    transform: translateX(4px);
+}
+
+.infoLabel {
+    font-weight: 600;
+    color: #666;
+    min-width: 80px;
+    font-size: 14px;
+}
+
+.infoValue {
+    color: #333;
+    font-size: 16px;
+    word-break: break-word;
+    flex: 1;
+}
+
+/* Action Buttons */
+.actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.editBtn,
+.logoutBtn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.editBtn {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.editBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+}
+
+.editBtn:active {
+    transform: translateY(0);
+}
+
+.logoutBtn {
+    background: #f5f5f5;
+    color: #d32f2f;
+    border: 2px solid #d32f2f;
+}
+
+.logoutBtn:hover {
+    background: #ffebee;
+}
+
+.logoutBtn:active {
+    transform: scale(0.98);
+}
+
+.loadingCard,
+.errorCard {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+}
+
+.errorCard {
+    color: #d32f2f;
+    font-weight: 600;
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal h2 {
+    color: #333;
+    font-size: 24px;
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+.modalMessage {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    background: #e3f2fd;
+    color: #1565c0;
+    text-align: center;
+}
+
+/* Photo Upload Section */
+.photoUploadSection {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.photoPreview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    overflow: hidden;
+    border: 3px solid #f0f0f0;
+}
+
+.photoPreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photoPreview svg {
+    width: 50px;
+    height: 50px;
+    color: white;
+    stroke-width: 2;
+}
+
+.photoInput {
+    display: none;
+}
+
+.photoLabel {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #f5f5f5;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.photoLabel:hover {
+    background: #efefef;
+    border-color: #7c3aed;
+    color: #7c3aed;
+}
+
+/* Form Group */
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.inputField {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* Modal Actions */
+.modalActions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.saveBtn,
+.cancelBtn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.saveBtn {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.saveBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cancelBtn {
+    background: #f5f5f5;
+    color: #666;
+    border: 2px solid #e0e0e0;
+}
+
+.cancelBtn:hover:not(:disabled) {
+    background: #efefef;
+    border-color: #999;
+}
+
+.cancelBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .card {
+        padding: 24px;
+        border-radius: 16px;
+    }
+
+    .card h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .avatarCircle {
+        width: 100px;
+        height: 100px;
+    }
+
+    .avatarIcon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .nimDisplay {
+        font-size: 16px;
+    }
+
+    .infoItem {
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .infoLabel {
+        min-width: auto;
+        font-size: 12px;
+        color: #999;
+    }
+
+    .infoValue {
+        font-size: 14px;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .modal {
+        max-width: 90%;
+        padding: 20px;
+    }
+
+    .modal h2 {
+        font-size: 20px;
+    }
+
+    .photoPreview {
+        width: 80px;
+        height: 80px;
+    }
+
+    .photoPreview svg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .modalActions {
+        flex-direction: column;
+    }
+}

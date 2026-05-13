@@ -14,22 +14,77 @@ export default function Navbar() {
     { label: "Info", href: "/info" },
     { label: "Lost & Found", href: "/lost-found" },
   ]);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      const user = JSON.parse(stored);
-      if (user.role === "admin" || user.role === "superadmin") {
-        setNavLinks([
-          { label: "Home", href: "/" },
-          { label: "About Us", href: "/about" },
-          { label: "Aspirasi", href: "/aspirasi" },
-          { label: "Info", href: "/info" },
-          { label: "Lost & Found", href: "/admin/lost-found" },
-          { label: "Claims", href: "/admin/claims" },
-        ]);
+    // Load initial user data
+    const loadUserData = () => {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const user = JSON.parse(stored);
+        setProfilePhoto(user.profilePhoto || null);
+
+        if (user.role === "admin" || user.role === "superadmin") {
+          setNavLinks([
+            { label: "Home", href: "/" },
+            { label: "About Us", href: "/about" },
+            { label: "Aspirasi", href: "/aspirasi" },
+            { label: "Info", href: "/info" },
+            { label: "Lost & Found", href: "/admin/lost-found" },
+            { label: "Claims", href: "/admin/claims" },
+          ]);
+        }
+      } else {
+        setProfilePhoto(null);
       }
-    }
+    };
+
+    // Handle logout event - clear profile photo
+    const handleLogout = () => {
+      setProfilePhoto(null);
+      setNavLinks([
+        { label: "Home", href: "/" },
+        { label: "About Us", href: "/about" },
+        { label: "Aspirasi", href: "/aspirasi" },
+        { label: "Info", href: "/info" },
+        { label: "Lost & Found", href: "/lost-found" },
+      ]);
+    };
+
+    // Handle login event - load profile photo immediately
+    const handleLogin = () => {
+      loadUserData();
+    };
+
+    // Load on mount
+    loadUserData();
+
+    // Listen for storage changes (from other tabs)
+    window.addEventListener("storage", loadUserData);
+
+    // Listen for custom profile update event
+    window.addEventListener("profileUpdated", loadUserData as EventListener);
+
+    // Listen for login event
+    window.addEventListener("userLoggedIn", handleLogin as EventListener);
+
+    // Listen for logout event
+    window.addEventListener("userLoggedOut", handleLogout as EventListener);
+
+    // Listen for window focus - reload photo when tab regains focus
+    const handleWindowFocus = () => {
+      loadUserData();
+    };
+    window.addEventListener("focus", handleWindowFocus);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("storage", loadUserData);
+      window.removeEventListener("profileUpdated", loadUserData as EventListener);
+      window.removeEventListener("userLoggedIn", handleLogin as EventListener);
+      window.removeEventListener("userLoggedOut", handleLogout as EventListener);
+      window.removeEventListener("focus", handleWindowFocus);
+    };
   }, []);
 
   return (
@@ -48,9 +103,8 @@ export default function Navbar() {
           <li key={link.href}>
             <Link
               href={link.href}
-              className={`${styles.navItem} ${
-                pathname === link.href ? styles.active : ""
-              }`}
+              className={`${styles.navItem} ${pathname === link.href ? styles.active : ""
+                }`}
             >
               {link.label}
             </Link>
@@ -61,15 +115,19 @@ export default function Navbar() {
       {/* Profile Icon */}
       <Link href="/profile" className={styles.profileLink} aria-label="Profile">
         <div className={styles.profileAvatar}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            width="22"
-            height="22"
-          >
-            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-          </svg>
+          {profilePhoto ? (
+            <img src={profilePhoto} alt="Profile" className={styles.profileAvatarImage} />
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              width="22"
+              height="22"
+            >
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+            </svg>
+          )}
         </div>
       </Link>
     </nav>
