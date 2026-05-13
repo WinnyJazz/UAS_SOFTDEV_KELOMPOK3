@@ -21,16 +21,16 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "About Us", href: "/about" },
+    { label: "About Us", href: "/aboutus" },
     { label: "Aspirasi", href: "/aspirasi" },
-    { label: "Info", href: "/info" },
+    { label: "Info", href: "/informasi" },
     { label: "Loste&Found", href: lostFoundHref },
   ];
 
   return (
     <nav className={styles.navbar}>
       {/* Logo kiri */}
-      <Link href="/about" className={styles.logoLink}>
+      <Link href="/aboutus" className={styles.logoLink}>
         <div className={styles.logoCircle}>
           <span className={styles.logoText}>DPM</span>
           <span className={styles.logoSub}>FTI</span>

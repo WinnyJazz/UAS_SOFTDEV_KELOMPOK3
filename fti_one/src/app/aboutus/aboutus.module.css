@@ -1,0 +1,226 @@
+/* ========================================
+ABOUT PAGE — CSS MODULE
+   ======================================== */
+
+.pageWrapper {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #4a00e0 0%, #7b2fbe 45%, #8e2de2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 80px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ── TAB BAR ── */
+.tabBar {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 40px;
+  padding: 6px;
+  gap: 4px;
+  margin-bottom: 28px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.tabBtn {
+  padding: 10px 24px;
+  border-radius: 30px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.22s ease, color 0.22s ease;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.tabBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.tabActive {
+  background: rgba(255, 255, 255, 0.88) !important;
+  color: #5b21b6 !important;
+  font-weight: 700;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ── CARD ── */
+.card {
+  width: 100%;
+  max-width: 700px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px 44px 52px;
+  box-shadow: 0 16px 60px rgba(74, 0, 224, 0.22);
+}
+
+/* ── SECTION wrapper ── */
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── DECORATIVE DOTS ── */
+.dotsTop {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.dotsTop span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c4b5fd;
+}
+
+.dotsTop span:nth-child(2) {
+  background: #a78bfa;
+}
+
+.dotsTop span:nth-child(3) {
+  background: #7c3aed;
+}
+
+/* ── TITLE ── */
+.mainTitle {
+  font-size: 26px;
+  font-weight: 800;
+  color: #3b0764;
+  text-align: center;
+  line-height: 1.35;
+  margin-bottom: 32px;
+  letter-spacing: -0.3px;
+}
+
+/* ── ABOUT BLOCK ── */
+.aboutBlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 32px;
+  width: 100%;
+}
+
+.logoBox {
+  flex-shrink: 0;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #e9d5ff;
+  background: #f5f3ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.aboutText {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: #374151;
+  text-align: justify;
+  margin: 0;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d8b4fe, transparent);
+  margin: 8px 0 32px;
+}
+
+/* ── VISI & MISI ── */
+.visiTitle {
+  font-size: 22px;
+  font-weight: 900;
+  color: #3b0764;
+  letter-spacing: 1.5px;
+  text-align: center;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.visiText {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: #374151;
+  text-align: justify;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+/* ── MISI LIST ── */
+.misiList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.misiItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.misiNum {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: #7c3aed;
+  min-width: 18px;
+}
+
+/* ── COMING SOON ── */
+.comingSoon {
+  color: #9ca3af;
+  font-size: 15px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .card {
+    padding: 28px 20px 40px;
+  }
+
+  .mainTitle {
+    font-size: 20px;
+  }
+
+  .aboutBlock {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .aboutText {
+    text-align: left;
+  }
+
+  .tabBtn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+}
