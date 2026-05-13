@@ -49,6 +49,12 @@ export default function Login() {
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.data));
+
+          // Dispatch custom event untuk update navbar dengan profile photo
+          const loginEvent = new CustomEvent('userLoggedIn', {
+            detail: { user: data.data }
+          });
+          window.dispatchEvent(loginEvent);
         }
         const role = data.data?.role;
         setTimeout(() => {
