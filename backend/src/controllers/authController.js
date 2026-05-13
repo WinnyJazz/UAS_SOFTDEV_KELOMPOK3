@@ -25,7 +25,7 @@ const validateRegistrationInput = (nama, nim, email, password) => {
     // Validasi awalan NIM: 525 (TI) atau 825 (SI)
     const nimPrefix = nim.substring(0, 3);
     if (!["535", "825"].includes(nimPrefix)) {
-      errors.push("NIM tidak valid. Hanya mahasiswa FTI (TI: 525xxx, SI: 825xxx) yang bisa mendaftar.");
+      errors.push("NIM tidak valid. Hanya mahasiswa FTI yang bisa mendaftar");
     }
   }
 
