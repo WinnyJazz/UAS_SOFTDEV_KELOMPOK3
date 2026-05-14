@@ -3,12 +3,46 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Mahasiswa = require("../models/Mahasiswa");
 const Admin = require("../models/Admin");
-const { sendVerificationEmail } = require("../utils/emailService");
+const { sendVerificationEmail, sendResetPasswordEmail } = require("../utils/emailService");
+
+// ─────────────────────────────────────────
+// HELPER: Extract NIM dari email
+// Format: nama.NIM@stu.untar.ac.id
+// ─────────────────────────────────────────
+const extractNimFromEmail = (email) => {
+  // Email format: nama.NIM@stu.untar.ac.id
+  const emailParts = email.split("@")[0]; // ambil bagian sebelum @
+  const parts = emailParts.split("."); // split dengan .
+
+  // NIM adalah bagian terakhir sebelum @
+  if (parts.length > 0) {
+    const nim = parts[parts.length - 1]; // ambil bagian terakhir
+    return nim;
+  }
+  return null;
+};
+
+// ─────────────────────────────────────────
+// HELPER: Validasi NIM
+// ─────────────────────────────────────────
+const validateNim = (nim) => {
+  const nimRegex = /^\d{9}$/;
+  if (!nimRegex.test(nim)) {
+    return { valid: false, error: "NIM harus terdiri dari 9 digit angka." };
+  }
+
+  const nimPrefix = nim.substring(0, 3);
+  if (!["535", "825"].includes(nimPrefix)) {
+    return { valid: false, error: "NIM tidak valid. Hanya mahasiswa FTI (TI: 535xxx, SI: 825xxx) yang bisa mendaftar." };
+  }
+
+  return { valid: true };
+};
 
 // ─────────────────────────────────────────
 // HELPER: Validasi input registrasi
 // ─────────────────────────────────────────
-const validateRegistrationInput = (nama, nim, email, password) => {
+const validateRegistrationInput = (nama, email, password) => {
   const errors = [];
 
   // Validasi email: harus @stu.untar.ac.id
@@ -17,15 +51,15 @@ const validateRegistrationInput = (nama, nim, email, password) => {
     errors.push("Email harus menggunakan domain @stu.untar.ac.id");
   }
 
-  // Validasi NIM: harus 9 digit angka
-  const nimRegex = /^\d{9}$/;
-  if (!nimRegex.test(nim)) {
-    errors.push("NIM harus terdiri dari 9 digit angka.");
+  // Extract dan validasi NIM dari email
+  const nim = extractNimFromEmail(email);
+  if (!nim) {
+    errors.push("Format email tidak valid. Gunakan format: nama.NIM@stu.untar.ac.id");
   } else {
-    // Validasi awalan NIM: 525 (TI) atau 825 (SI)
-    const nimPrefix = nim.substring(0, 3);
-    if (!["535", "825"].includes(nimPrefix)) {
-      errors.push("NIM tidak valid. Hanya mahasiswa FTI (TI: 525xxx, SI: 825xxx) yang bisa mendaftar.");
+
+    const nimValidation = validateNim(nim);
+    if (!nimValidation.valid) {
+      errors.push(nimValidation.error);
     }
   }
 
@@ -59,21 +93,24 @@ const validateRegistrationInput = (nama, nim, email, password) => {
 // ─────────────────────────────────────────
 const register = async (req, res) => {
   try {
-    const { nama, nim, email, password } = req.body;
+    const { nama, email, password } = req.body;
 
     // Validasi input
-    if (!nama || !nim || !email || !password) {
-      return res.status(400).json({ message: "Semua field harus diisi." });
+    if (!nama || !email || !password) {
+      return res.status(400).json({ message: "Nama, email, dan password harus diisi." });
     }
 
-    //Cek ketentuan
-    const validationErrors = validateRegistrationInput(nama, nim, email, password);
+    // Validasi input
+    const validationErrors = validateRegistrationInput(nama, email, password);
     if (validationErrors.length > 0) {
       return res.status(400).json({
         message: "Validasi gagal.",
         errors: validationErrors,
       });
     }
+
+    // Extract NIM dari email
+    const nim = extractNimFromEmail(email);
 
     // Cek duplikat email atau NIM
     const emailExist = await Mahasiswa.findOne({ email });
@@ -245,6 +282,8 @@ const login = async (req, res) => {
       data: {
         userId: user.userId || user.adminId,
         nama: user.nama,
+        nickname: user.nickname || null,
+        profilePhoto: user.profilePhoto || null,
         email: user.email,
         nim: user.nim || null,
         role: user.role,
@@ -538,4 +577,155 @@ const downgradeAdmin = async (req, res) => {
   }
 };
 
-module.exports = { register, verifyEmail, login, resendVerification, registerAdmin, getAllUsers, changeRole, downgradeAdmin };
+// ─────────────────────────────────────────
+// POST /api/auth/forgot-password
+// Kirim reset password link ke email
+// ─────────────────────────────────────────
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email harus diisi." });
+    }
+
+    const mahasiswa = await Mahasiswa.findOne({ email });
+
+    if (!mahasiswa) {
+      // Security: jangan kasih info spesifik
+      return res.status(200).json({
+        message: "Kalau email terdaftar, link reset password sudah dikirim.",
+      });
+    }
+
+    // Generate reset password token
+    const resetPasswordToken = crypto.randomBytes(32).toString("hex");
+    mahasiswa.resetPasswordToken = resetPasswordToken;
+    mahasiswa.resetPasswordTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 jam
+    await mahasiswa.save();
+
+    // Kirim email
+    try {
+      await sendResetPasswordEmail(email, mahasiswa.nama, resetPasswordToken);
+    } catch (emailError) {
+      console.warn("[forgotPassword] Email send warning:", emailError.message);
+      // Token sudah disimpan, kirim response optimis
+    }
+
+    return res.status(200).json({
+      message: "Link reset password sudah dikirim ke email kamu.",
+    });
+  } catch (error) {
+    console.error("[forgotPassword]", error.message);
+    return res.status(500).json({ message: "Terjadi kesalahan server: " + error.message });
+  }
+};
+
+// ─────────────────────────────────────────
+// POST /api/auth/reset-password
+// Reset password menggunakan token dari email
+// ─────────────────────────────────────────
+const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: "Token dan password baru harus diisi." });
+    }
+
+    // Validasi password baru
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "Password minimal 8 karakter." });
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      return res.status(400).json({ message: "Password harus mengandung minimal 1 huruf besar." });
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      return res.status(400).json({ message: "Password harus mengandung minimal 1 huruf kecil." });
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      return res.status(400).json({ message: "Password harus mengandung minimal 1 angka." });
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+      return res.status(400).json({ message: "Password harus mengandung minimal 1 karakter spesial." });
+    }
+
+    // Cari mahasiswa dengan token yang cocok dan belum expired
+    const mahasiswa = await Mahasiswa.findOne({
+      resetPasswordToken: token,
+      resetPasswordTokenExpiry: { $gt: new Date() },
+    });
+
+    if (!mahasiswa) {
+      return res.status(400).json({ message: "Token tidak valid atau sudah expired." });
+    }
+
+    // Hash password baru
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password & hapus token
+    mahasiswa.password = hashedPassword;
+    mahasiswa.resetPasswordToken = null;
+    mahasiswa.resetPasswordTokenExpiry = null;
+    await mahasiswa.save();
+
+    return res.status(200).json({
+      message: "Password berhasil direset! Silakan login dengan password baru.",
+    });
+  } catch (error) {
+    console.error("[resetPassword]", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
+};
+
+// ─────────────────────────────────────────
+// PUT /api/auth/update-profile
+// Update nickname dan profilePhoto user
+// ─────────────────────────────────────────
+const updateProfile = async (req, res) => {
+  try {
+    const { userId } = req.user; // dari JWT token
+    const { nickname, profilePhoto } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "User tidak terautentikasi." });
+    }
+
+    const mahasiswa = await Mahasiswa.findOne({ userId });
+
+    if (!mahasiswa) {
+      return res.status(404).json({ message: "User tidak ditemukan." });
+    }
+
+    // Update nickname jika dikirim
+    if (nickname !== undefined && nickname !== null) {
+      mahasiswa.nickname = nickname.trim() || null;
+    }
+
+    // Update profilePhoto jika dikirim
+    if (profilePhoto !== undefined && profilePhoto !== null) {
+      mahasiswa.profilePhoto = profilePhoto;
+    }
+
+    await mahasiswa.save();
+
+    return res.status(200).json({
+      message: "Profil berhasil diperbarui.",
+      data: {
+        userId: mahasiswa.userId,
+        nama: mahasiswa.nama,
+        nickname: mahasiswa.nickname,
+        email: mahasiswa.email,
+        nim: mahasiswa.nim,
+        profilePhoto: mahasiswa.profilePhoto,
+        role: mahasiswa.role,
+      },
+    });
+  } catch (error) {
+    console.error("[updateProfile]", error.message);
+    return res.status(500).json({ message: "Terjadi kesalahan server: " + error.message });
+  }
+};
+
+module.exports = { register, verifyEmail, login, resendVerification, registerAdmin, getAllUsers, changeRole, downgradeAdmin, forgotPassword, resetPassword, updateProfile };

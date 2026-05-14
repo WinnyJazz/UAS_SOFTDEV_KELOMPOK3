@@ -1,0 +1,232 @@
+.pageWrapper {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #4A00E0 0%, #7B2FBE 40%, #8E2DE2 100%);
+  padding: 40px 20px;
+  color: #fff;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 30px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* ========== TABLE STYLES ========== */
+.tableContainer {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 20px;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.claimsTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.claimsTable th {
+  padding: 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.claimsTable td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 15px;
+}
+
+.claimsTable tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.statusBadge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.statusPending { background: #F59E0B; color: #fff; }
+.statusDisetujui { background: #10B981; color: #fff; }
+.statusDitolak { background: #EF4444; color: #fff; }
+
+.btnDetail {
+  padding: 8px 16px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btnDetail:hover {
+  background: #6d28d9;
+}
+
+/* ========== MODAL STYLES ========== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: #fff;
+  color: #1e0045;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  border-radius: 24px;
+  padding: 40px;
+  position: relative;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.modalClose {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+}
+
+.modalHeader {
+  text-align: center;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 20px;
+}
+
+.modalHeader h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #4c1d95;
+}
+
+.modalBody {
+  display: flex;
+  gap: 40px;
+}
+
+.modalLeft {
+  flex: 1;
+}
+
+.modalRight {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.infoSection h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #4c1d95;
+  margin-bottom: 15px;
+  border-left: 4px solid #4c1d95;
+  padding-left: 10px;
+}
+
+.infoItem {
+  margin-bottom: 12px;
+}
+
+.infoLabel {
+  font-weight: 700;
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.infoValue {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.itemImageWrapper,
+.ktmImageWrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9; /* or 1/1 if preferred, but usually KTM is rectangular */
+  border-radius: 12px;
+  border: 2px solid #eee;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.itemImageWrapper img,
+.ktmImageWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* Consistent 'autofill' concept */
+  display: block;
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.btnApprove {
+  flex: 1;
+  padding: 14px;
+  background: #10B981;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.btnReject {
+  flex: 1;
+  padding: 14px;
+  background: #EF4444;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.btnApprove:hover, .btnReject:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.loading { text-align: center; font-size: 20px; padding: 100px; }
+.empty { text-align: center; font-size: 18px; padding: 60px; opacity: 0.7; }

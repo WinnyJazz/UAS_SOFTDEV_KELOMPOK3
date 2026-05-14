@@ -42,6 +42,9 @@ export default function LostFoundAdmin() {
     foto: null,
   });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [filterTanggal, setFilterTanggal] = useState('');
+  const [filterLokasi, setFilterLokasi] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -68,7 +71,13 @@ export default function LostFoundAdmin() {
     try {
       setLoading(true);
       const query = searchQuery !== undefined ? searchQuery : search;
-      const url = query ? `${API_URL}?search=${encodeURIComponent(query)}` : API_URL;
+      
+      const params = new URLSearchParams();
+      if (query) params.append('search', query);
+      if (filterTanggal) params.append('tanggal', filterTanggal);
+      if (filterLokasi) params.append('lokasi', filterLokasi);
+      
+      const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
@@ -246,8 +255,57 @@ export default function LostFoundAdmin() {
       <div className={styles.content}>
         <p className={styles.pageTitle}>Lost n found ADMIN</p>
 
-        {/* Search */}
+        {/* Search & Filter */}
         <div className={styles.searchWrapper}>
+          <div className={styles.adminControls}>
+            <button 
+              className={styles.btnClaimsLink}
+              onClick={() => router.push('/admin/claims')}
+            >
+              KLAIM VERIFIKASI
+            </button>
+          </div>
+
+          <div className={styles.filterContainer}>
+              <button 
+                className={styles.btnFilter} 
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+              >
+                FILTER
+              </button>
+            
+            {isFilterOpen && (
+              <div className={styles.filterDropdown}>
+                <input 
+                  type="date" 
+                  className={styles.filterInput}
+                  value={filterTanggal}
+                  onChange={(e) => setFilterTanggal(e.target.value)}
+                  placeholder="Tanggal"
+                />
+                <div className={styles.lokasiWrapper}>
+                  <input 
+                    type="text" 
+                    className={styles.filterInput}
+                    value={filterLokasi}
+                    onChange={(e) => setFilterLokasi(e.target.value)}
+                    placeholder="Lokasi"
+                  />
+                  <span className={styles.selectArrow}>⌵</span>
+                </div>
+                <button 
+                  className={styles.btnApplyFilter}
+                  onClick={() => {
+                    fetchBarang();
+                    setIsFilterOpen(false);
+                  }}
+                >
+                  Cari
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className={styles.searchBar}>
             <span className={styles.searchIcon}>🔍</span>
             <input

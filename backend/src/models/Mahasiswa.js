@@ -13,6 +13,15 @@ const MahasiswaSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    nickname: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    profilePhoto: {
+      type: String,
+      default: null,
+    },
     email: {
       type: String,
       required: true,
@@ -49,7 +58,14 @@ const MahasiswaSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordTokenExpiry: {
+      type: Date,
+      default: null,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

@@ -24,11 +24,29 @@ const getPublicIdFromUrl = (url) => {
 // GET /api/barang — Ambil semua barang
 const getAllBarang = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, tanggal, lokasi } = req.query;
     let filter = {};
 
     if (search) {
       filter.nama = { $regex: search, $options: "i" };
+    }
+
+    if (lokasi) {
+      filter.lokasi = { $regex: lokasi, $options: "i" };
+    }
+
+    if (tanggal) {
+      // Filter untuk satu hari penuh (00:00:00 s/d 23:59:59)
+      const dateStart = new Date(tanggal);
+      dateStart.setHours(0, 0, 0, 0);
+
+      const dateEnd = new Date(tanggal);
+      dateEnd.setHours(23, 59, 59, 999);
+
+      filter.tanggal = {
+        $gte: dateStart,
+        $lte: dateEnd,
+      };
     }
 
     const barangList = await Barang.find(filter).sort({ tanggal: -1 });

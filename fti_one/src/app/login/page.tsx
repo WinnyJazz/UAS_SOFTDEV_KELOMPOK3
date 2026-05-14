@@ -49,6 +49,12 @@ export default function Login() {
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.data));
+
+          // Dispatch custom event untuk update navbar dengan profile photo
+          const loginEvent = new CustomEvent('userLoggedIn', {
+            detail: { user: data.data }
+          });
+          window.dispatchEvent(loginEvent);
         }
         const role = data.data?.role;
         setTimeout(() => {
@@ -293,6 +299,10 @@ export default function Login() {
 
           <p className={styles.footer}>
             Belum punya akun? <a href="/register">Daftar di sini</a>
+          </p>
+
+          <p className={styles.forgotPassword}>
+            <a href="/forgot-password">Lupa Password?</a>
           </p>
         </div>
 
