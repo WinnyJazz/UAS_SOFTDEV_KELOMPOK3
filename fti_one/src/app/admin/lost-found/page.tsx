@@ -264,57 +264,66 @@ export default function LostFoundAdmin() {
             >
               KLAIM VERIFIKASI
             </button>
+            <button 
+              className={styles.btnClaimsLink}
+              style={{ background: 'linear-gradient(135deg, rgba(96,165,250,0.4), rgba(59,130,246,0.5))', borderColor: 'rgba(147,197,253,0.4)' }}
+              onClick={() => router.push('/admin/laporan')}
+            >
+              🔍 LAPORAN HILANG
+            </button>
           </div>
 
-          <div className={styles.filterContainer}>
-              <button 
-                className={styles.btnFilter} 
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-              >
-                FILTER
-              </button>
-            
-            {isFilterOpen && (
-              <div className={styles.filterDropdown}>
-                <input 
-                  type="date" 
-                  className={styles.filterInput}
-                  value={filterTanggal}
-                  onChange={(e) => setFilterTanggal(e.target.value)}
-                  placeholder="Tanggal"
-                />
-                <div className={styles.lokasiWrapper}>
-                  <input 
-                    type="text" 
-                    className={styles.filterInput}
-                    value={filterLokasi}
-                    onChange={(e) => setFilterLokasi(e.target.value)}
-                    placeholder="Lokasi"
-                  />
-                  <span className={styles.selectArrow}>⌵</span>
-                </div>
+          <div className={styles.rightControls}>
+            <div className={styles.filterContainer}>
                 <button 
-                  className={styles.btnApplyFilter}
-                  onClick={() => {
-                    fetchBarang();
-                    setIsFilterOpen(false);
-                  }}
+                  className={styles.btnFilter} 
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
                 >
-                  Cari
+                  FILTER
                 </button>
-              </div>
-            )}
-          </div>
+              
+              {isFilterOpen && (
+                <div className={styles.filterDropdown}>
+                  <input 
+                    type="date" 
+                    className={styles.filterInput}
+                    value={filterTanggal}
+                    onChange={(e) => setFilterTanggal(e.target.value)}
+                    placeholder="Tanggal"
+                  />
+                  <div className={styles.lokasiWrapper}>
+                    <input 
+                      type="text" 
+                      className={styles.filterInput}
+                      value={filterLokasi}
+                      onChange={(e) => setFilterLokasi(e.target.value)}
+                      placeholder="Lokasi"
+                    />
+                    <span className={styles.selectArrow}>⌵</span>
+                  </div>
+                  <button 
+                    className={styles.btnApplyFilter}
+                    onClick={() => {
+                      fetchBarang();
+                      setIsFilterOpen(false);
+                    }}
+                  >
+                    Cari
+                  </button>
+                </div>
+              )}
+            </div>
 
-          <div className={styles.searchBar}>
-            <span className={styles.searchIcon}>🔍</span>
-            <input
-              type="text"
-              placeholder="SEARCH"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              id="search-input"
-            />
+            <div className={styles.searchBar}>
+              <span className={styles.searchIcon}>🔍</span>
+              <input
+                type="text"
+                placeholder="SEARCH"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                id="search-input"
+              />
+            </div>
           </div>
         </div>
 
@@ -334,7 +343,7 @@ export default function LostFoundAdmin() {
             {barangList.map((item) => (
               <div
                 key={item.barangId}
-                className={`${styles.card} ${item.status === 'dipinjam' ? styles.statusDone : ''}`}
+                className={styles.card}
                 id={`card-${item.barangId}`}
               >
                 <div className={styles.cardImageWrapper}>
@@ -363,9 +372,13 @@ export default function LostFoundAdmin() {
                   </button>
 
                   {item.status === 'dipinjam' && (
-                    <span className={`${styles.statusBadge} ${styles.statusBadgeDone}`}>
-                      SELESAI
-                    </span>
+                    <div className={styles.doneOverlay}>
+                      <div className={styles.doneCheckmark}>
+                        <svg viewBox="0 0 24 24">
+                          <polyline points="4,12 9,17 20,6" />
+                        </svg>
+                      </div>
+                    </div>
                   )}
                 </div>
                 <div className={styles.cardBody}>

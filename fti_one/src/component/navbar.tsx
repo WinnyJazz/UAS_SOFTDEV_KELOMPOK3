@@ -31,7 +31,6 @@ export default function Navbar() {
             { label: "Aspirasi", href: "/aspirasi" },
             { label: "Info", href: "/info" },
             { label: "Lost & Found", href: "/admin/lost-found" },
-            { label: "Claims", href: "/admin/claims" },
           ]);
         }
       } else {

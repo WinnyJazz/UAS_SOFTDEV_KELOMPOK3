@@ -4,9 +4,11 @@ require('dotenv').config(); // Load FIRST sebelum require apapun
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-const barangRoutes = require('./routes/barangRoutes');
-const claimRoutes = require('./routes/claimRoutes');
+const authRoutes    = require('./routes/authRoutes');
+const barangRoutes  = require('./routes/barangRoutes');
+const claimRoutes   = require('./routes/claimRoutes');
+const laporanRoutes = require('./routes/laporanRoutes');
+const chatRoutes    = require('./routes/chatRoutes');
 
 connectDB();
 
@@ -22,9 +24,11 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/barang', barangRoutes);
-app.use('/api/claim', claimRoutes);
+app.use('/api/auth',    authRoutes);
+app.use('/api/barang',  barangRoutes);
+app.use('/api/claim',   claimRoutes);
+app.use('/api/laporan', laporanRoutes);
+app.use('/api/chat',    chatRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
