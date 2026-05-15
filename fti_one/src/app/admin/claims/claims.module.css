@@ -1,92 +1,250 @@
+/* ========== PAGE ========== */
 .pageWrapper {
   min-height: 100vh;
   background: linear-gradient(180deg, #4A00E0 0%, #7B2FBE 40%, #8E2DE2 100%);
-  padding: 40px 20px;
+  padding: 40px 20px 80px;
   color: #fff;
 }
 
 .content {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
 .title {
-  font-size: 32px;
-  font-weight: 800;
-  margin-bottom: 30px;
-  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 2px;
+  background: linear-gradient(135deg, #fff 0%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* ========== TABLE STYLES ========== */
-.tableContainer {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 20px;
-  overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.claimsTable {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.claimsTable th {
-  padding: 16px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  font-weight: 700;
-  text-transform: uppercase;
+.btnBack {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 30px;
+  color: #fff;
   font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.btnBack:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateX(-3px);
+}
+
+/* ========== CLAIMS STATS ========== */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.statCard {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 20px 24px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.statNumber {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.7;
+  text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.claimsTable td {
-  padding: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 15px;
+/* ========== CLAIMS CARD GRID ========== */
+.claimsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
-.claimsTable tr:hover {
-  background: rgba(255, 255, 255, 0.05);
+/* ========== CLAIM CARD ========== */
+.claimCard {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  backdrop-filter: blur(8px);
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.claimCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+
+.claimCard.statusPending::before  { background: #F59E0B; }
+.claimCard.statusDisetujui::before { background: #10B981; }
+.claimCard.statusDitolak::before  { background: #EF4444; }
+
+.claimCard:hover {
+  background: rgba(255,255,255,0.13);
+  transform: translateX(4px);
+  border-color: rgba(167,139,250,0.3);
+}
+
+/* Avatar */
+.claimAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #4A00E0);
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 900;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+/* Student info */
+.claimStudentInfo {
+  flex: 1.2;
+  min-width: 0;
+}
+
+.claimStudentName {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.claimStudentNim {
+  font-size: 13px;
+  opacity: 0.6;
+  font-weight: 500;
+}
+
+/* Item info */
+.claimItemInfo {
+  flex: 1.5;
+  min-width: 0;
+}
+
+.claimItemName {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.claimItemLoc {
+  font-size: 13px;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Date */
+.claimDate {
+  flex: 1;
+  font-size: 13px;
+  opacity: 0.65;
+  text-align: center;
+  min-width: 0;
+}
+
+/* Status */
+.claimStatus {
+  flex: 0 0 auto;
 }
 
 .statusBadge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
-.statusPending { background: #F59E0B; color: #fff; }
-.statusDisetujui { background: #10B981; color: #fff; }
-.statusDitolak { background: #EF4444; color: #fff; }
+.statusPendingBadge  { background: rgba(245,158,11,0.2); color: #FCD34D; border: 1px solid rgba(245,158,11,0.4); }
+.statusDisetujuiBadge { background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.4); }
+.statusDitolakBadge  { background: rgba(239,68,68,0.2);  color: #FCA5A5; border: 1px solid rgba(239,68,68,0.4); }
+
+/* Action */
+.claimAction {
+  flex: 0 0 auto;
+}
 
 .btnDetail {
-  padding: 8px 16px;
-  background: #7c3aed;
+  padding: 10px 22px;
+  background: rgba(124,58,237,0.6);
   color: #fff;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid rgba(167,139,250,0.4);
+  border-radius: 30px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .btnDetail:hover {
-  background: #6d28d9;
+  background: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.5);
 }
 
-/* ========== MODAL STYLES ========== */
+/* ========== MODAL OVERLAY ========== */
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,139 +252,336 @@
   padding: 20px;
 }
 
+/* ========== MODAL ========== */
 .modal {
-  background: #fff;
-  color: #1e0045;
+  background: linear-gradient(145deg, #2d0070 0%, #1e0050 60%, #150038 100%);
+  border: 1px solid rgba(167,139,250,0.3);
+  color: #fff;
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  border-radius: 24px;
-  padding: 40px;
+  max-width: 860px;
+  max-height: 92vh;
+  border-radius: 28px;
   position: relative;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.9) translateY(24px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ========== MODAL CLOSE ========== */
 .modalClose {
   position: absolute;
-  top: 20px;
-  right: 24px;
-  background: none;
-  border: none;
-  font-size: 24px;
+  top: 16px; right: 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  font-size: 16px;
   cursor: pointer;
-  color: #999;
+  color: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 10;
 }
 
+.modalClose:hover {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* ========== MODAL HEADER ========== */
 .modalHeader {
-  text-align: center;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 20px;
+  padding: 28px 40px 20px;
+  border-bottom: 1px solid rgba(167,139,250,0.2);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .modalHeader h2 {
-  font-size: 28px;
-  font-weight: 800;
-  color: #4c1d95;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #c4b5fd, #fff, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+.btnChatToggle {
+  padding: 8px 18px;
+  background: rgba(124,58,237,0.3);
+  border: 1px solid rgba(167,139,250,0.4);
+  border-radius: 30px;
+  color: #c4b5fd;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btnChatToggle:hover { background: rgba(124,58,237,0.5); color: #fff; }
+
+.btnChatActive {
+  background: rgba(124,58,237,0.6) !important;
+  color: #fff !important;
+  border-color: #a78bfa !important;
+  box-shadow: 0 0 12px rgba(124,58,237,0.4);
+}
+
+/* ========== MODAL BODY ========== */
 .modalBody {
   display: flex;
-  gap: 40px;
-}
-
-.modalLeft {
-  flex: 1;
-}
-
-.modalRight {
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  padding: 24px 32px;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.modalBody::-webkit-scrollbar { width: 5px; }
+.modalBody::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.4); border-radius: 3px; }
+
+/* Top row: info cards side by side */
+.infoRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Bottom row: images side by side */
+.imageRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ========== INFO SECTION ========== */
+.infoSection {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(167,139,250,0.15);
+  border-radius: 16px;
+  padding: 18px 20px;
 }
 
 .infoSection h3 {
-  font-size: 18px;
+  font-size: 11px;
   font-weight: 800;
-  color: #4c1d95;
-  margin-bottom: 15px;
-  border-left: 4px solid #4c1d95;
-  padding-left: 10px;
+  color: #c4b5fd;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoSection h3::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(to bottom, #a78bfa, #7c3aed);
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.infoItem:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .infoLabel {
+  font-size: 10px;
   font-weight: 700;
-  font-size: 14px;
-  color: #666;
+  color: rgba(196,181,253,0.65);
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .infoValue {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.itemImageWrapper,
-.ktmImageWrapper {
+/* ========== IMAGE SECTIONS ========== */
+.imageSection {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(167,139,250,0.15);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.imageSection h3 {
+  font-size: 11px;
+  font-weight: 800;
+  color: #c4b5fd;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.imageSection h3::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(to bottom, #a78bfa, #7c3aed);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.imageWrapper {
   width: 100%;
-  aspect-ratio: 16 / 9; /* or 1/1 if preferred, but usually KTM is rectangular */
-  border-radius: 12px;
-  border: 2px solid #eee;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 15px;
+  border: 1px solid rgba(167,139,250,0.2);
+  background: rgba(0,0,0,0.2);
 }
 
-.itemImageWrapper img,
-.ktmImageWrapper img {
+.imageWrapper img {
   width: 100%;
   height: 100%;
-  object-fit: fill; /* Consistent 'autofill' concept */
+  object-fit: fill;
   display: block;
 }
 
+.noImage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  opacity: 0.3;
+}
+
+/* ========== ACTION BUTTONS ========== */
 .actions {
   display: flex;
-  gap: 16px;
-  margin-top: 20px;
+  gap: 14px;
+  padding: 0 0 4px;
+  flex-shrink: 0;
 }
 
 .btnApprove {
   flex: 1;
-  padding: 14px;
-  background: #10B981;
+  padding: 16px;
+  background: linear-gradient(135deg, #059669, #10B981);
   color: #fff;
   border: none;
-  border-radius: 12px;
-  font-weight: 800;
+  border-radius: 14px;
+  font-weight: 900;
   cursor: pointer;
-  font-size: 16px;
-  transition: transform 0.2s;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(16,185,129,0.35);
+}
+
+.btnApprove:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(16,185,129,0.55);
+  filter: brightness(1.1);
 }
 
 .btnReject {
   flex: 1;
-  padding: 14px;
-  background: #EF4444;
+  padding: 16px;
+  background: linear-gradient(135deg, #dc2626, #EF4444);
   color: #fff;
   border: none;
-  border-radius: 12px;
-  font-weight: 800;
+  border-radius: 14px;
+  font-weight: 900;
   cursor: pointer;
-  font-size: 16px;
-  transition: transform 0.2s;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(239,68,68,0.35);
 }
 
-.btnApprove:hover, .btnReject:hover {
+.btnReject:hover:not(:disabled) {
   transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(239,68,68,0.55);
   filter: brightness(1.1);
 }
 
-.loading { text-align: center; font-size: 20px; padding: 100px; }
-.empty { text-align: center; font-size: 18px; padding: 60px; opacity: 0.7; }
+.btnApprove:disabled,
+.btnReject:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ========== STATUS RESULT ========== */
+.statusResult {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 14px;
+  border: 1px solid rgba(167,139,250,0.15);
+}
+
+.statusResult p {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ========== LOADING / EMPTY ========== */
+.loading { text-align: center; font-size: 20px; padding: 100px; opacity: 0.7; }
+.empty   { text-align: center; font-size: 18px; padding: 60px; opacity: 0.7; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 700px) {
+  .infoRow, .imageRow { grid-template-columns: 1fr; }
+  .claimCard { flex-wrap: wrap; }
+  .claimDate { display: none; }
+  .statsRow { grid-template-columns: 1fr; }
+}
