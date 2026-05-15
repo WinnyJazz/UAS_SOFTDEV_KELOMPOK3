@@ -26,6 +26,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/barang', barangRoutes);
 app.use('/api/claim', claimRoutes);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
 });
