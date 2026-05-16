@@ -1,5 +1,5 @@
 /* ========================================
-ABOUT PAGE — CSS MODULE
+   ABOUT PAGE — CSS MODULE
    ======================================== */
 
 .pageWrapper {
@@ -60,11 +60,13 @@ ABOUT PAGE — CSS MODULE
   padding: 40px 44px 52px;
   box-shadow: 0 16px 60px rgba(74, 0, 224, 0.22);
 }
+
 .divisionCardWrapper {
   background: transparent;
   box-shadow: none;
   padding: 0;
 }
+
 /* ── SECTION wrapper ── */
 .section {
   display: flex;
@@ -86,13 +88,8 @@ ABOUT PAGE — CSS MODULE
   background: #c4b5fd;
 }
 
-.dotsTop span:nth-child(2) {
-  background: #a78bfa;
-}
-
-.dotsTop span:nth-child(3) {
-  background: #7c3aed;
-}
+.dotsTop span:nth-child(2) { background: #a78bfa; }
+.dotsTop span:nth-child(3) { background: #7c3aed; }
 
 /* ── TITLE ── */
 .mainTitle {
@@ -204,21 +201,19 @@ ABOUT PAGE — CSS MODULE
   text-align: center;
 }
 
-
 /* ── DIVISIONS WRAPPER ── */
 .divisionsWrapper {
   width: 100%;
   max-width: 760px;
   padding: 0 8px;
 }
- 
 .divisionsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   width: 100%;
 }
- 
+
 /* ── DIVISION CARD ── */
 .divisionCard {
   background: rgba(88, 28, 180, 0.55);
@@ -228,7 +223,7 @@ ABOUT PAGE — CSS MODULE
   backdrop-filter: blur(10px);
   min-height: 220px;
 }
- 
+
 .divisionCardTitle {
   font-size: 20px;
   font-weight: 900;
@@ -237,7 +232,7 @@ ABOUT PAGE — CSS MODULE
   margin: 0 0 16px 0;
   text-transform: uppercase;
 }
- 
+
 .divisionTaskList {
   list-style: none;
   padding: 0;
@@ -246,7 +241,7 @@ ABOUT PAGE — CSS MODULE
   flex-direction: column;
   gap: 8px;
 }
- 
+
 .divisionTaskItem {
   font-size: 12px;
   line-height: 1.65;
@@ -255,35 +250,462 @@ ABOUT PAGE — CSS MODULE
   align-items: flex-start;
   gap: 6px;
 }
- 
+
 .divisionTaskIcon {
   flex-shrink: 0;
   margin-top: 2px;
   font-size: 11px;
 }
- 
+
+
+/* ======================================
+   OUR TEAM TAB
+   ====================================== */
+
+.teamWrapper {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.teamTitle {
+  font-size: 28px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 3px;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
+.teamSubtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 28px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Loading ── */
+.loadingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 60px 0;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: teamSpin 0.75s linear infinite;
+}
+
+.loadingText {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+}
+
+@keyframes teamSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Group photo ── */
+.groupPhotoSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.groupPhotoWrap {
+  position: relative;
+  width: 100%;
+}
+
+.groupImg {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 2px solid rgba(167, 139, 250, 0.35);
+  display: block;
+}
+
+.groupPhotoActions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.groupReplaceBtn,
+.groupDeleteBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  font-family: inherit;
+  transition: background 0.18s;
+}
+
+.groupReplaceBtn {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+}
+
+.groupReplaceBtn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); }
+.groupReplaceBtn:disabled             { opacity: 0.5; cursor: not-allowed; }
+
+.groupDeleteBtn {
+  background: rgba(220, 38, 38, 0.82);
+  color: #fff;
+}
+
+.groupDeleteBtn:hover:not(:disabled) { background: rgba(220, 38, 38, 1); }
+.groupDeleteBtn:disabled             { opacity: 0.5; cursor: not-allowed; }
+
+.groupPlaceholder {
+  width: 100%;
+  height: 200px;
+  border-radius: 16px;
+  border: 2px dashed rgba(167, 139, 250, 0.3);
+  background: rgba(88, 28, 180, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.groupPlaceholderText {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 13px;
+  margin: 12px 0 0;
+}
+
+.uploadGroupBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 9px 22px;
+  border-radius: 30px;
+  border: 1.5px solid rgba(167, 139, 250, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  color: #e9d5ff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.uploadGroupBtn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.18); }
+.uploadGroupBtn:disabled             { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Team divider ── */
+.teamDivider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196, 181, 253, 0.4), transparent);
+  margin-bottom: 32px;
+}
+
+/* ── Per-division section ── */
+.divSection {
+  width: 100%;
+  margin-bottom: 36px;
+}
+
+.divSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.divSectionLine {
+  flex: 1;
+  height: 1px;
+  background: rgba(167, 139, 250, 0.25);
+}
+
+.divSectionTitle {
+  font-size: 12px;
+  font-weight: 800;
+  color: #e9d5ff;
+  letter-spacing: 2.5px;
+  white-space: nowrap;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+/* ── Member grid ── */
+.memberGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 14px;
+}
+
+/* ── Member card ── */
+.memberCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.memberImgWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(88, 28, 180, 0.5);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+}
+
+.memberImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.memberDeleteBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(220, 38, 38, 0.82);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.18s;
+}
+
+.memberDeleteBtn:hover:not(:disabled) { background: rgba(220, 38, 38, 1); }
+.memberDeleteBtn:disabled             { opacity: 0.5; cursor: not-allowed; }
+
+.memberName {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* ── Upload slot ── */
+.uploadSlot {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  border: 2px dashed rgba(167, 139, 250, 0.35);
+  background: rgba(88, 28, 180, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.uploadSlot:hover { background: rgba(88, 28, 180, 0.35); border-color: rgba(167, 139, 250, 0.55); }
+
+.uploadSlotLoading {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.uploadSlotLabel {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* ── Empty state ── */
+.emptyState {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+/* ── Superadmin badge ── */
+.adminBadge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 32px;
+  padding: 8px 18px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: rgba(233, 213, 255, 0.65);
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 10, 60, 0.92);
+  color: #e9d5ff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 11px 24px;
+  border-radius: 30px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: toastIn 0.22s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Name Modal ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+.modalBox {
+  background: #1e0a45;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+
+.modalSub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 4px;
+  line-height: 1.5;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(167, 139, 250, 0.4);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s;
+}
+
+.modalInput:focus {
+  border-color: rgba(167, 139, 250, 0.8);
+}
+
+.modalInput::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.modalCancel,
+.modalConfirm {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.18s;
+  border: none;
+}
+
+.modalCancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+}
+
+.modalCancel:hover { background: rgba(255, 255, 255, 0.14); }
+
+.modalConfirm {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.modalConfirm:hover:not(:disabled) { background: #6d28d9; }
+.modalConfirm:disabled             { opacity: 0.4; cursor: not-allowed; }
+
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
-  .card {
-    padding: 28px 20px 40px;
-  }
-
-  .mainTitle {
-    font-size: 20px;
-  }
-
-  .aboutBlock {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .aboutText {
-    text-align: left;
-  }
-
-  .tabBtn {
-    padding: 8px 14px;
-    font-size: 12px;
-  }
+  .card { padding: 28px 20px 40px; }
+  .mainTitle { font-size: 20px; }
+  .aboutBlock { flex-direction: column; align-items: center; }
+  .aboutText { text-align: left; }
+  .tabBtn { padding: 8px 14px; font-size: 12px; }
+  .memberGrid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+  .divisionsGrid { grid-template-columns: 1fr; }
+  .groupPhotoActions { flex-direction: column; gap: 6px; }
 }
