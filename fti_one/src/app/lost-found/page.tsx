@@ -188,16 +188,6 @@ export default function LostFoundStudent() {
         {/* Quick Action Buttons */}
         <div className={styles.quickActions}>
           <button
-            className={styles.btnLaporan}
-            onClick={() => router.push('/lost-found/laporan')}
-          >
-            <span className={styles.btnIcon}>🔍</span>
-            <span>
-              <strong>Laporkan Barang Hilang</strong>
-              <small>Kirim laporan ke Tim DPM FTI</small>
-            </span>
-          </button>
-          <button
             className={`${styles.btnStatus} ${hasUnreadChats ? styles.btnStatusUnread : ''}`}
             onClick={() => router.push('/lost-found/status')}
           >

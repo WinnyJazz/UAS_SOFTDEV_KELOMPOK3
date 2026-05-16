@@ -4,12 +4,15 @@ require('dotenv').config(); // Load FIRST sebelum require apapun
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
-const authRoutes    = require('./routes/authRoutes');
-const barangRoutes  = require('./routes/barangRoutes');
-const claimRoutes   = require('./routes/claimRoutes');
+
+const authRoutes = require('./routes/authRoutes');
+const barangRoutes = require('./routes/barangRoutes');
+const claimRoutes = require('./routes/claimRoutes');
 const laporanRoutes = require('./routes/laporanRoutes');
 const chatRoutes    = require('./routes/chatRoutes');
 const teamPhotoRoutes = require('./routes/teamPhotoRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
 connectDB();
 
 const app = express();
@@ -34,3 +37,4 @@ app.use('/api/team-photos', teamPhotoRoutes);
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
 });
+app.use('/api/dashboard', dashboardRoutes);
