@@ -10,6 +10,7 @@ const barangRoutes = require('./routes/barangRoutes');
 const claimRoutes = require('./routes/claimRoutes');
 const laporanRoutes = require('./routes/laporanRoutes');
 const chatRoutes    = require('./routes/chatRoutes');
+const teamPhotoRoutes = require('./routes/teamPhotoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
 connectDB();
@@ -31,6 +32,7 @@ app.use('/api/barang',  barangRoutes);
 app.use('/api/claim',   claimRoutes);
 app.use('/api/laporan', laporanRoutes);
 app.use('/api/chat',    chatRoutes);
+app.use('/api/team-photos', teamPhotoRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
