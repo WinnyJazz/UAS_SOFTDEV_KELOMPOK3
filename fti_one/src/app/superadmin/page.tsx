@@ -132,19 +132,20 @@ export default function SuperAdminDashboard() {
     const [activeSection, setActiveSection] = useState<Section>('overview');
 
     // Lost & Found
-    const [lfItems, setLfItems] = useState<LFItem[]>(INITIAL_LF_ITEMS);
+    const [lfItems, setLfItems] = useState<LFItem[]>([]);
     const [lfTab, setLfTab] = useState<LFTab>('Semua');
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editStatus, setEditStatus] = useState<LFStatus>('Pending');
     const [editClaimedBy, setEditClaimedBy] = useState('');
 
     // Aspirasi
+    const [aspirasiData, setAspirasiData] = useState<Record<string, AspirasiItem[]>>({});
     const [openMonths, setOpenMonths] = useState<string[]>(['Mei 2025']);
     const [respondingId, setRespondingId] = useState<number | null>(null);
     const [responseText, setResponseText] = useState('');
 
     // Notif
-    const [notifs, setNotifs] = useState<NotifItem[]>(INITIAL_NOTIFS);
+    const [notifs, setNotifs] = useState<NotifItem[]>([]);
     const [notifReadFilter, setNotifReadFilter] = useState<NotifReadFilter>('Semua');
     const [notifCatFilter, setNotifCatFilter] = useState<NotifCategory>('Semua');
 
@@ -157,6 +158,7 @@ export default function SuperAdminDashboard() {
         if (parsedUser.role !== 'superadmin') { router.push('/dashboard'); return; }
         setUser(parsedUser);
         fetchUsers(token);
+        fetchDashboardData(token);
     }, [router]);
 
     const fetchUsers = async (token: string) => {
@@ -175,6 +177,59 @@ export default function SuperAdminDashboard() {
             setError('Terjadi kesalahan saat mengambil data');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchDashboardData = async (token: string) => {
+    try {
+
+        // LOST FOUND
+        const lfRes = await fetch(
+            'http://localhost:5000/api/dashboard/lostfound',
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        if (lfRes.ok) {
+            const lfData = await lfRes.json();
+            setLfItems(lfData.data);
+        }
+
+        // ASPIRASI
+        const aspRes = await fetch(
+                'http://localhost:5000/api/dashboard/aspirasi',
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (aspRes.ok) {
+                const aspData = await aspRes.json();
+                setAspirasiData(aspData.data);
+            }
+
+            // NOTIF
+            const notifRes = await fetch(
+                'http://localhost:5000/api/dashboard/notifikasi',
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (notifRes.ok) {
+                const notifData = await notifRes.json();
+                setNotifs(notifData.data);
+            }
+
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -235,12 +290,71 @@ export default function SuperAdminDashboard() {
         setEditClaimedBy(item.claimedBy ?? '');
     };
 
-    const saveEdit = (id: number) => {
+    const saveEdit = async (id: number) => {
         if (editStatus === 'Claimed' && !editClaimedBy) return;
-        setLfItems(prev => prev.map(i =>
-            i.id === id ? { ...i, status: editStatus, claimedBy: editStatus === 'Claimed' ? editClaimedBy : undefined } : i
-        ));
-        setEditingId(null);
+
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/dashboard/lostfound/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    status: editStatus,
+                    claimedBy: editStatus === 'Claimed' ? editClaimedBy : null,
+                }),
+            });
+
+            if (res.ok) {
+                setLfItems(prev =>
+                    prev.map(i =>
+                        i.id === id
+                            ? {
+                                ...i,
+                                status: editStatus,
+                                claimedBy:
+                                    editStatus === 'Claimed'
+                                        ? editClaimedBy
+                                        : undefined,
+                            }
+                            : i
+                    )
+                );
+
+                setEditingId(null);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const saveResponse = async (id: number) => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`http://localhost:5000/api/dashboard/aspirasi/${id}/respond`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    response: responseText,
+                }),
+            });
+
+            if (res.ok) {
+                fetchDashboardData(token);
+                setRespondingId(null);
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     // ── Aspirasi helpers ──
@@ -521,7 +635,7 @@ export default function SuperAdminDashboard() {
                                 <div className={styles.statCard}><div className={styles.statIcon}>✔️</div><div className={styles.statLabel}>Selesai</div><div className={styles.statValue}>55</div></div>
                             </div>
 
-                            {Object.entries(ASPIRASI_BY_MONTH).map(([month, items]) => (
+                            {Object.entries(aspirasiData).map(([month, items]) => (
                                 <div key={month} className={styles.monthFolder}>
                                     <button className={styles.monthHeader} onClick={() => toggleMonth(month)}>
                                         <span>📁 {month}</span>
