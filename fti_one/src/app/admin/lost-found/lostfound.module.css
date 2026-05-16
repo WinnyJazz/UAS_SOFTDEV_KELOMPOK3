@@ -3,12 +3,6 @@
 /* ══════════════════════════════════════════
    PAGE LAYOUT
 ══════════════════════════════════════════ */
-.pageWrapper {
-  min-height: 100vh;
-  background: linear-gradient(160deg, #6B21C8 0%, #7C3AED 35%, #9333EA 65%, #a855f7 100%);
-  font-family: 'Nunito', Arial, sans-serif;
-  color: #fff;
-}
 
 .content {
   max-width: 1080px;
@@ -16,6 +10,7 @@
   padding: 28px 24px 100px;
 }
 
+<<<<<<< HEAD
 /* ══════════════════════════════════════════
    TOP BAR  (tabs + bell)
 ══════════════════════════════════════════ */
@@ -329,6 +324,7 @@
 }
 .btnApplyFilter:hover { background: #6d28d9; }
 
+/* Search bar — pill with white border, right side */
 .searchBar {
   display: flex;
   align-items: center;
@@ -979,6 +975,7 @@
   padding: 20px;
 }
 
+/* ── Edit/Create Modal — light grey card (matches screenshot 2) ── */
 .modal {
   background: #e5e7eb;
   border-radius: 20px;
