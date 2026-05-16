@@ -1,142 +1,434 @@
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
+  background: radial-gradient(ellipse 110% 80% at 65% 20%, #7b3fe4 0%, #5020bc 30%, #3a10a8 55%, #280888 100%);
+  min-height: 100dvh;
   display: flex;
-  flex: 1;
   flex-direction: column;
+  overflow-x: hidden;
+  font-family: "Nunito", "Poppins", sans-serif;
+}
+
+/* ══════════════════════════
+   HERO 
+   ══════════════════════════ */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 80px;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  padding-left: 80px;
+  padding-right: 80px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  z-index: 2;
+  max-width: 560px;
+  margin-top: 60px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+}
+
+.titleWhite {
+  font-size: clamp(42px, 5.5vw, 80px);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -1px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.titlePink {
+  font-size: clamp(42px, 5.5vw, 80px);
+  font-weight: 900;
+  color: #f4b8d4;
+  letter-spacing: -1px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.exploreBtn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
-}
-
-.main {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
-}
-
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
-}
-
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
   width: fit-content;
-  font-weight: 500;
+  min-width: 210px;
+  padding: 20px 56px;
+  background: #5b21d6;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 32px rgba(70, 10, 200, 0.6);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
+.exploreBtn:hover {
+  background: #4a14c4;
+  transform: scale(1.05);
+  box-shadow: 0 8px 40px rgba(70, 10, 200, 0.75);
+}
+
+/* Mascot */
+.mascotWrapper {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 62%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mascot {
+  position: absolute;
+  right: 4%;
+  top: 50%;
+  transform: translateY(-52%);
+  width: 46%;
+  max-width: 480px;
+  height: auto;
+  object-fit: contain;
+  z-index: 2;
+  filter: drop-shadow(0 16px 48px rgba(0,0,0,0.3));
+}
+
+.orbit {
+  position: absolute;
+  right: -2%;
+  top: 50%;
+  transform: translateY(-48%);
+  width: 96%;
+  max-width: 780px;
+  height: auto;
+  object-fit: contain;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+/* ══════════════════════════
+   FEATURE SECTION
+   ══════════════════════════ */
+.featureSection {
+  width: 100%;
+  background: transparent;
+  padding: 80px 0 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+.arrowBtn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  font-size: 30px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s;
+  z-index: 5;
+  position: relative;
+}
+
+.arrowBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* ══════════════════════════
+   TRACK — sliding container
+   ══════════════════════════ */
+.track {
+  /* Clip kartu yang keluar dari viewport carousel */
+  overflow: hidden;
+  width: 980px;
+  max-width: calc(100vw - 160px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 520px;
+  flex-shrink: 0;
+}
+
+.trackInner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  will-change: transform;
+}
+
+/* ══════════════════════════
+   SLOT — wrapper per kartu
+   ══════════════════════════ */
+.slot {
+  width: 316px;
+  height: 520px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.42s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* ══════════════════════════
+   CARD BASE
+   ══════════════════════════ */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(40, 5, 120, 0.55);
+  flex-shrink: 0;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    width  0.42s cubic-bezier(0.4, 0.0, 0.2, 1),
+    height 0.42s cubic-bezier(0.4, 0.0, 0.2, 1),
+    opacity 0.42s cubic-bezier(0.4, 0.0, 0.2, 1),
+    box-shadow 0.3s ease,
+    transform 0.3s ease,
+    background 0.2s ease;
+}
+
+/* Side cards */
+.cardSide {
+  width: 230px;
+  height: 230px;
+  padding-bottom: 30px;
+  gap: 10px;
+  justify-content: flex-end;
+  background: rgba(40, 5, 120, 0.80);
+}
+
+/* Side card hover */
+.cardSideHover {
+  opacity: 0.95 !important;
+  transform: scale(1.1) translateY(-8px) !important;
+  box-shadow: 0 16px 48px rgba(80, 0, 220, 0.45);
+  background: rgba(60, 10, 160, 0.7);
+}
+
+/* Center card */
+.cardCenter {
+  width: 340px;
+  height: 340px;
+  opacity: 1;
+  padding: 30px 26px;
+  gap: 10px;
+  box-shadow: 0 20px 60px rgba(40, 0, 180, 0.55);
+  justify-content: center;
+}
+
+/* Wrapper link untuk kartu tengah — circle + teks di bawah */
+.cardCenterWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cardCenterHoverable:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 28px 72px rgba(60, 0, 220, 0.7);
+}
+
+.cardCenterText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 8px;
+  max-width: 340px;
+  text-align: center;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+/* ══════════════════════════
+   ICON ANIMATIONS
+   ══════════════════════════ */
+@keyframes iconPop {
+  0%   { transform: scale(0.6) rotate(-8deg); opacity: 0; }
+  65%  { transform: scale(1.12) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1)    rotate(0deg); opacity: 1; }
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
+.iconPop {
+  animation: iconPop 0.44s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: 0.14s;
+}
+
+@keyframes wiggle {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  20%  { transform: rotate(-10deg) scale(1.1);  }
+  40%  { transform: rotate(10deg)  scale(1.1);  }
+  60%  { transform: rotate(-6deg)  scale(1.05); }
+  80%  { transform: rotate(4deg)   scale(1.05); }
+  100% { transform: rotate(0deg)   scale(1);    }
+}
+
+.iconWiggle {
+  animation: wiggle 0.55s ease both;
+}
+
+/* ══════════════════════════
+   CARD INTERNALS
+   ══════════════════════════ */
+.cardIcon {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.42s cubic-bezier(0.4, 0.0, 0.2, 1), height 0.42s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.cardIconLarge {
+  width: 190px;
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.42s cubic-bezier(0.4, 0.0, 0.2, 1), height 0.42s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.iconImg {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+.cardLabel {
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+  margin: 0;
+}
+
+.cardLabelSide {
+  font-size: 13px;
+  font-weight: 800;
+  color: #d8c5ff;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+
+.cardDesc {
+  font-size: 12px;
+  color: #d0bcf5;
+  text-align: center;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0 10px;
+}
+
+/* ══════════════════════════
+   RESPONSIVE
+   ══════════════════════════ */
+@media (max-width: 900px) {
+  .hero {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  .mascot { width: 52%; max-width: 300px; }
+  .titleWhite, .titlePink { font-size: clamp(32px, 8vw, 56px); }
+
+  .carousel {
+    padding: 0 16px;
+    gap: 12px;
   }
 
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
+  .track {
+    width: 650px;
+    height: 300px;
   }
+
+  .slot { width: 216px; height: 300px; }
+
+  .cardSide   { width: 170px; height: 170px; }
+  .cardCenter { width: 260px; height: 260px; }
+  .cardIcon      { width: 90px;  height: 90px;  }
+  .cardIconLarge { width: 130px; height: 130px; }
 }
 
 @media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
+  .hero {
+    padding-top: 80px;
+    padding-left: 24px;
+    padding-right: 24px;
+    align-items: flex-start;
+  }
+  .heroText { margin-top: 20px; }
+
+  .mascot {
+    right: 0;
+    top: 20px;
+    transform: none;
+    width: 48%;
+    max-width: 200px;
+  }
+  .orbit {
+    right: -20px;
+    top: 30px;
+    transform: none;
+    max-width: 320px;
   }
 
-  .intro {
-    gap: 16px;
+  .exploreBtn { padding: 16px 40px; font-size: 15px; min-width: 160px; }
+
+  .carousel { gap: 6px; padding: 0 8px; }
+  .arrowBtn { width: 36px; height: 36px; font-size: 22px; }
+
+  .track {
+    width: 450px;
+    max-width: calc(100vw - 100px);
+    height: 220px;
   }
 
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
+  .slot { width: 150px; height: 220px; }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
-  }
+  .cardSide   { width: 120px; height: 120px; padding-bottom: 16px; }
+  .cardCenter { width: 190px; height: 190px; padding: 14px; }
+  .cardIcon      { width: 60px;  height: 60px;  }
+  .cardIconLarge { width: 90px;  height: 90px;  }
+  .cardLabel     { font-size: 10px; }
+  .cardLabelSide { font-size: 8px;  }
+  .cardDesc      { font-size: 8px; padding: 0 6px; }
 }
