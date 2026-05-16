@@ -26,7 +26,7 @@ export default function Navbar() {
 
         if (user.role === "admin" || user.role === "superadmin") {
           setNavLinks([
-            { label: "Home", href: "/" },
+            { label: "Home", href: "/dashboard" },
             { label: "About Us", href: "/aboutus" },
             { label: "Aspirasi", href: "/aspirasi" },
             { label: "Info", href: "/info" },

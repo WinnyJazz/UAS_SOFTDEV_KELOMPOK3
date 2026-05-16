@@ -16,13 +16,33 @@ const createClaim = async (req, res) => {
 
     // Cek apakah barang ada dan statusnya tersedia
     const barang = await Barang.findOne({ barangId });
+
     if (!barang) {
-      return res.status(404).json({ success: false, message: "Barang tidak ditemukan." });
-    }
-    if (barang.status !== "tersedia") {
-      return res.status(400).json({ success: false, message: "Barang sudah tidak tersedia untuk diklaim." });
+      return res.status(404).json({
+        success: false,
+        message: "Barang tidak ditemukan."
+      });
     }
 
+    if (barang.status !== "tersedia") {
+      return res.status(400).json({
+        success: false,
+        message: "Barang sudah tidak tersedia untuk diklaim."
+      });
+    }
+
+    // Cek apakah user sudah pernah claim barang ini
+    const existingClaim = await Claim.findOne({
+      userId,
+      barangId,
+    });
+
+    if (existingClaim) {
+      return res.status(400).json({
+        success: false,
+        message: "Kamu sudah pernah mengajukan claim untuk barang ini.",
+      });
+    }
     let fotoKtmUrl = null;
 
     // Upload foto KTM ke Cloudinary (base64)
