@@ -50,7 +50,7 @@ const ClaimSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: false,
+    timestamps: true,
     versionKey: false,
   }
 );

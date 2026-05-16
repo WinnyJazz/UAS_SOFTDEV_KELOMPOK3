@@ -41,37 +41,25 @@ function mapLFStatus(barang, claimedBarangIds) {
 }
 
 // ─────────────────────────────────────────────
-// Helper: map status Aspirasi DB → label frontend
-// ─────────────────────────────────────────────
-function mapAspirasiStatus(raw) {
-  const map = {
-    pending: "Pending",
-    diproses: "Dalam Proses",
-    disetujui: "Selesai",
-    ditolak: "Ditolak",
-  };
-  return map[raw] ?? "Pending";
-}
-
-// ─────────────────────────────────────────────
 // GET /api/dashboard/overview
 // ─────────────────────────────────────────────
 exports.getOverview = async (req, res) => {
   try {
+    // Claim yang sudah disetujui/selesai → barang dianggap "Claimed"
     // ── Lost & Found ──
     const totalBarang = await Barang.countDocuments();
 
-    // Claim yang sudah disetujui/selesai → barang dianggap "Claimed"
-    const claimedClaims = await Claim.find({
-      status: { $in: ["disetujui", "selesai"] },
-    }).select("barangId");
-    const claimedBarangIds = new Set(claimedClaims.map((c) => c.barangId));
+    const claimedCount = await Barang.countDocuments({
+      status: "dipinjam",
+    });
 
-    const claimedCount = claimedBarangIds.size;
     const expiredCount = await Barang.countDocuments({
       status: { $in: ["hilang", "rusak"] },
     });
-    const pendingCount = totalBarang - claimedCount - expiredCount;
+
+    const pendingCount = await Barang.countDocuments({
+      status: "tersedia",
+    });
 
     // ── Aspirasi ──
     const totalAspirasi = await Aspirasi.countDocuments();
@@ -171,223 +159,35 @@ exports.getOverview = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────────
-// GET /api/dashboard/lostfound?status=Pending|Claimed|Expired
-// ─────────────────────────────────────────────
+// GET /api/dashboard/lostfound
 exports.getLostFound = async (req, res) => {
   try {
-    const { status } = req.query; // "Pending" | "Claimed" | "Expired" | undefined
+    const barangList = await Barang.find().sort({ tanggal: -1 });
 
-    // Ambil semua barang
-    let barangQuery = {};
-    if (status === "Expired") {
-      barangQuery = { status: { $in: ["hilang", "rusak"] } };
-    } else if (status === "Pending") {
-      barangQuery = { status: { $in: ["tersedia", "dipinjam"] } };
-    }
-    // "Claimed" dan "Semua" → ambil semua dulu, filter nanti
+    const mapped = barangList.map((b, index) => ({
+      id: index + 1,
+      barang: b.nama,
+      penemu: "Admin",
+      lokasi: b.lokasi,
+      tanggal: new Date(b.tanggal).toLocaleDateString("id-ID"),
+      status:
+        b.status === "dipinjam"
+          ? "Claimed"
+          : b.status === "hilang" || b.status === "rusak"
+          ? "Expired"
+          : "Pending",
+    }));
 
-    const barangs = await Barang.find(barangQuery).sort({ tanggal: -1 }).lean();
-
-    // Ambil semua claim yang disetujui/selesai untuk filter Claimed
-    const approvedClaims = await Claim.find({
-      status: { $in: ["disetujui", "selesai"] },
-    })
-      .select("barangId userId nama nim")
-      .lean();
-
-    const claimedMap = new Map(); // barangId → claim data
-    approvedClaims.forEach((c) => {
-      claimedMap.set(c.barangId, c);
+    res.json({
+      success: true,
+      data: mapped,
     });
-
-    const claimedBarangIds = new Set(claimedMap.keys());
-
-    // Map tiap barang ke format frontend
-    let mapped = barangs.map((b) => {
-      const lfStatus = mapLFStatus(b, claimedBarangIds);
-      const claim = claimedMap.get(b.barangId);
-
-      return {
-        id: b.barangId || b._id.toString(),
-        barang: b.nama,
-        penemu: b.deskripsi ?? "—", // Barang model tidak punya field penemu,
-        // pakai deskripsi sebagai fallback atau kosongkan
-        lokasi: b.lokasi,
-        tanggal: b.tanggal
-          ? new Date(b.tanggal).toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })
-          : "—",
-        status: lfStatus,
-        claimedBy: claim ? `${claim.nama} (${claim.nim})` : "",
-      };
-    });
-
-    // Filter status "Claimed" (tidak bisa dilakukan di query Barang)
-    if (status === "Claimed") {
-      mapped = mapped.filter((i) => i.status === "Claimed");
-    } else if (status === "Pending") {
-      mapped = mapped.filter((i) => i.status === "Pending");
-    }
-    // "Expired" sudah difilter di query, "Semua" tidak perlu filter
-
-    return res.json({ success: true, data: mapped });
   } catch (err) {
     console.error("getLostFound error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-// ─────────────────────────────────────────────
-// PATCH /api/dashboard/lostfound/:id
-// Body: { status: "Pending"|"Claimed"|"Expired", claimedBy?: string }
-// ─────────────────────────────────────────────
-exports.updateLostFound = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status, claimedBy } = req.body;
-
-    // Map frontend status → DB enum
-    const statusMap = {
-      Pending: "tersedia",
-      Claimed: "dipinjam", // tandai dipinjam saat diklaim
-      Expired: "hilang",
-    };
-
-    const dbStatus = statusMap[status];
-    if (!dbStatus) {
-      return res.status(400).json({ success: false, message: "Status tidak valid" });
-    }
-
-    const barang = await Barang.findOneAndUpdate(
-      { barangId: id },
-      { status: dbStatus },
-      { new: true }
-    );
-
-    if (!barang) {
-      return res.status(404).json({ success: false, message: "Barang tidak ditemukan" });
-    }
-
-    return res.json({
-      success: true,
-      message: "Status barang berhasil diupdate",
-      data: { id, status, claimedBy: claimedBy ?? "" },
+    res.status(500).json({
+      success: false,
+      message: "Gagal mengambil data lost found",
     });
-  } catch (err) {
-    console.error("updateLostFound error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-// ─────────────────────────────────────────────
-// GET /api/dashboard/aspirasi
-// Returns: { success, data: { "Mei 2025": [...], "April 2025": [...] } }
-// ─────────────────────────────────────────────
-exports.getAspirasi = async (req, res) => {
-  try {
-    const aspirasis = await Aspirasi.find()
-      .sort({ createdAt: -1 })
-      .lean();
-
-    // Kelompokkan per bulan (format "Mei 2025")
-    const grouped = {};
-
-    aspirasis.forEach((a) => {
-      const date = new Date(a.createdAt);
-      const monthKey = date.toLocaleDateString("id-ID", {
-        month: "long",
-        year: "numeric",
-      });
-
-      if (!grouped[monthKey]) grouped[monthKey] = [];
-
-      grouped[monthKey].push({
-        id: a.aspirasiId || a._id.toString(),
-        _id: a._id.toString(),
-        judul: a.judul,
-        isi: a.deskripsi,         // frontend pakai "isi", DB pakai "deskripsi"
-        kategori: a.kategori,
-        status: mapAspirasiStatus(a.status),
-        statusRaw: a.status,
-        tanggal: date.toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        response: a.responAdmin ?? null,
-        userId: a.userId,
-      });
-    });
-
-    return res.json({ success: true, data: grouped });
-  } catch (err) {
-    console.error("getAspirasi error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-// ─────────────────────────────────────────────
-// PATCH /api/dashboard/aspirasi/:id/respond
-// Body: { status: "diproses"|"disetujui"|"ditolak", responAdmin: string }
-// ─────────────────────────────────────────────
-exports.respondAspirasi = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status, responAdmin } = req.body;
-
-    const validStatuses = ["diproses", "disetujui", "ditolak"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ success: false, message: "Status tidak valid" });
-    }
-
-    if (!responAdmin || !responAdmin.trim()) {
-      return res.status(400).json({ success: false, message: "Respon tidak boleh kosong" });
-    }
-
-    // Cari berdasarkan aspirasiId (custom field) ATAU _id
-    const aspirasi = await Aspirasi.findOneAndUpdate(
-      { $or: [{ aspirasiId: id }, { _id: id }] },
-      { status, responAdmin: responAdmin.trim() },
-      { new: true }
-    );
-
-    if (!aspirasi) {
-      return res.status(404).json({ success: false, message: "Aspirasi tidak ditemukan" });
-    }
-
-    // Kirim notifikasi ke mahasiswa (jika notifikasi diperlukan)
-    try {
-      await Notifikasi.create({
-        userId: aspirasi.userId,
-        pesan: `Aspirasi "${aspirasi.judul}" telah diupdate: ${mapAspirasiStatus(status)}`,
-        isRead: false,
-        target: {
-          refId: aspirasi.aspirasiId || aspirasi._id.toString(),
-          refModel: "Aspirasi",
-        },
-      });
-    } catch (notifErr) {
-      // Jangan gagalkan request hanya karena notifikasi gagal
-      console.error("Gagal buat notifikasi aspirasi:", notifErr);
-    }
-
-    return res.json({
-      success: true,
-      message: "Respon aspirasi berhasil disimpan",
-      data: {
-        id,
-        status,
-        statusLabel: mapAspirasiStatus(status),
-        responAdmin: responAdmin.trim(),
-      },
-    });
-  } catch (err) {
-    console.error("respondAspirasi error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

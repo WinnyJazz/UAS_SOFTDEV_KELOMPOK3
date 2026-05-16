@@ -18,8 +18,7 @@ const BarangSchema = new mongoose.Schema(
     },
     kategori: {
       type: String,
-      required: true,
-      // contoh: "elektronik", "alat tulis", "olahraga", dll
+      default: "umum",
     },
     lokasi: {
       type: String,
