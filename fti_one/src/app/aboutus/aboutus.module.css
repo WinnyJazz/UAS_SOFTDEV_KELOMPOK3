@@ -4,7 +4,7 @@ ABOUT PAGE — CSS MODULE
 
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(160deg, #4a00e0 0%, #7b2fbe 45%, #8e2de2 100%);
+  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,7 +60,11 @@ ABOUT PAGE — CSS MODULE
   padding: 40px 44px 52px;
   box-shadow: 0 16px 60px rgba(74, 0, 224, 0.22);
 }
-
+.divisionCardWrapper {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
 /* ── SECTION wrapper ── */
 .section {
   display: flex;
@@ -199,6 +203,65 @@ ABOUT PAGE — CSS MODULE
   margin-top: 20px;
   text-align: center;
 }
+
+
+/* ── DIVISIONS WRAPPER ── */
+.divisionsWrapper {
+  width: 100%;
+  max-width: 760px;
+  padding: 0 8px;
+}
+ 
+.divisionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+ 
+/* ── DIVISION CARD ── */
+.divisionCard {
+  background: rgba(88, 28, 180, 0.55);
+  border-radius: 20px;
+  padding: 28px 22px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  backdrop-filter: blur(10px);
+  min-height: 220px;
+}
+ 
+.divisionCardTitle {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+}
+ 
+.divisionTaskList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+ 
+.divisionTaskItem {
+  font-size: 12px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+ 
+.divisionTaskIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 11px;
+}
+ 
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {

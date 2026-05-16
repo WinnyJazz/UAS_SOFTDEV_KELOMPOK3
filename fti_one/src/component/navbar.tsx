@@ -27,11 +27,10 @@ export default function Navbar() {
         if (user.role === "admin" || user.role === "superadmin") {
           setNavLinks([
             { label: "Home", href: "/" },
-            { label: "About Us", href: "/about" },
+            { label: "About Us", href: "/aboutus" },
             { label: "Aspirasi", href: "/aspirasi" },
             { label: "Info", href: "/info" },
             { label: "Lost & Found", href: "/admin/lost-found" },
-            { label: "Claims", href: "/admin/claims" },
           ]);
         }
       } else {
@@ -44,7 +43,7 @@ export default function Navbar() {
       setProfilePhoto(null);
       setNavLinks([
         { label: "Home", href: "/" },
-        { label: "About Us", href: "/about" },
+        { label: "About Us", href: "/aboutus" },
         { label: "Aspirasi", href: "/aspirasi" },
         { label: "Info", href: "/info" },
         { label: "Lost & Found", href: "/lost-found" },

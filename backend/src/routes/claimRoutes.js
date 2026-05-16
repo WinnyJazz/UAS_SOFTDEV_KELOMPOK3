@@ -6,6 +6,9 @@ const { verifyToken, verifyAdmin } = require("../middleware/authMiddleware");
 // POST /api/claim - Buat pengajuan klaim (Student)
 router.post("/", verifyToken, claimController.createClaim);
 
+// GET /api/claim/mine - Klaim milik user yang login
+router.get("/mine", verifyToken, claimController.getMyClaims);
+
 // GET /api/claim - Ambil semua pengajuan klaim (Admin)
 router.get("/", verifyToken, verifyAdmin, claimController.getAllClaims);
 

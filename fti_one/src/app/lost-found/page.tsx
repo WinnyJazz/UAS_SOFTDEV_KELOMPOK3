@@ -35,6 +35,7 @@ export default function LostFoundStudent() {
     fotoKTM: null as string | null,
   });
   const [submitting, setSaving] = useState(false);
+  const [hasUnreadChats, setHasUnreadChats] = useState(false);
   const ktmInputRef = useRef<HTMLInputElement>(null);
 
   // Auth check
@@ -48,6 +49,26 @@ export default function LostFoundStudent() {
     }
 
     fetchBarang();
+
+    // Check for unread chats
+    const checkChats = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/chat/mine', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          const unread = data.data.some((chat: any) => 
+            chat.pesan.length > 0 && chat.pesan[chat.pesan.length - 1].pengirim === 'admin'
+          );
+          setHasUnreadChats(unread);
+        }
+      } catch (err) {}
+    };
+
+    checkChats();
+    const interval = setInterval(checkChats, 5000);
+    return () => clearInterval(interval);
   }, [router]);
 
   const fetchBarang = async (searchQuery?: string) => {
@@ -163,6 +184,33 @@ export default function LostFoundStudent() {
       {/* ===== CONTENT ===== */}
       <div className={styles.content}>
         <p className={styles.pageTitle}>Lost n found</p>
+
+        {/* Quick Action Buttons */}
+        <div className={styles.quickActions}>
+          <button
+            className={styles.btnLaporan}
+            onClick={() => router.push('/lost-found/laporan')}
+          >
+            <span className={styles.btnIcon}>🔍</span>
+            <span>
+              <strong>Laporkan Barang Hilang</strong>
+              <small>Kirim laporan ke Tim DPM FTI</small>
+            </span>
+          </button>
+          <button
+            className={`${styles.btnStatus} ${hasUnreadChats ? styles.btnStatusUnread : ''}`}
+            onClick={() => router.push('/lost-found/status')}
+          >
+            <div className={styles.iconWrapper}>
+              <span className={styles.btnIcon}>🔔</span>
+              {hasUnreadChats && <span className={styles.unreadBadge}>New</span>}
+            </div>
+            <span>
+              <strong>Status &amp; Notifikasi</strong>
+              <small>Pantau klaim dan laporanmu</small>
+            </span>
+          </button>
+        </div>
 
         {/* Search & Filter */}
         <div className={styles.searchWrapper}>

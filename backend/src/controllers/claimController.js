@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
-const Claim = require("../models/Claim");
-const Barang = require("../models/Barang");
+const Claim    = require("../models/Claim");
+const Barang   = require("../models/Barang");
 const cloudinary = require("../config/cloudinary");
+const Chat     = require("../models/Chat");
 
 // POST /api/claim — Buat pengajuan claim baru
 const createClaim = async (req, res) => {
@@ -70,6 +71,7 @@ const getAllClaims = async (req, res) => {
       const user = await mongoose.model("Mahasiswa").findOne({ userId: claim.userId });
       return {
         ...claim,
+        claimUserId: claim.userId,   // preserve original string userId for chat
         barangId: barang || null,
         userId: user || null
       };
@@ -99,10 +101,12 @@ const updateClaimStatus = async (req, res) => {
 
     // Jika disetujui, update status barang menjadi 'dipinjam'
     if (status === "disetujui") {
-      await Barang.findOneAndUpdate(
-        { barangId: claim.barangId },
-        { status: "dipinjam" }
-      );
+      await Barang.findOneAndUpdate({ barangId: claim.barangId }, { status: "dipinjam" });
+    }
+
+    // Auto-hapus chat bila sudah final
+    if (status === "disetujui" || status === "ditolak") {
+      await Chat.deleteMany({ konteksType: "claim", konteksId: claim.claimId });
     }
 
     res.status(200).json({
@@ -116,8 +120,29 @@ const updateClaimStatus = async (req, res) => {
   }
 };
 
+// GET /api/claim/mine — Ambil semua claim milik user yang login
+const getMyClaims = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const claims = await Claim.find({ userId }).sort({ tanggal: -1 }).lean();
+
+    const populated = await Promise.all(
+      claims.map(async (claim) => {
+        const barang = await mongoose.model("Barang").findOne({ barangId: claim.barangId });
+        return { ...claim, barangId: barang || null };
+      })
+    );
+
+    res.status(200).json({ success: true, data: populated });
+  } catch (error) {
+    console.error("getMyClaims error:", error);
+    res.status(500).json({ success: false, message: "Gagal mengambil klaim." });
+  }
+};
+
 module.exports = {
   createClaim,
   getAllClaims,
+  getMyClaims,
   updateClaimStatus,
 };
