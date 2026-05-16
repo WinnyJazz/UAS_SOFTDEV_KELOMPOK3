@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const barangRoutes = require('./routes/barangRoutes');
 const claimRoutes = require('./routes/claimRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 connectDB();
 
@@ -29,3 +30,4 @@ app.use('/api/claim', claimRoutes);
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
 });
+app.use('/api/dashboard', dashboardRoutes);

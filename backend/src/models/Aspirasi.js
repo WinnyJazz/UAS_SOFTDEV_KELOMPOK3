@@ -41,6 +41,11 @@ const AspirasiSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    responAdmin: {
+      type: String,
+      default: null,
+    },
+
   },
   {
     versionKey: false,
@@ -58,5 +63,7 @@ AspirasiSchema.methods.getDetail = function () {
     createdAt: this.createdAt,
   };
 };
+
+
 
 module.exports = mongoose.model("Aspirasi", AspirasiSchema);
