@@ -1,0 +1,994 @@
+/* ═══════════════════════════════════════════
+   ASPIRASI ADMIN — CSS Module
+   Color system matches existing DPM purple theme
+═══════════════════════════════════════════ */
+
+/* ─── Page Layout ──────────────────────── */
+.pageWrapper {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% 0%, #7c3aed 0%, #4c1d95 40%, #2d0a6e 100%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.pageLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.5);
+  text-align: left;
+  margin: 1.2rem 0 0.2rem;
+  padding: 0 1.5rem;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+/* ─── Navbar ────────────────────────────── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 2rem;
+  background: rgba(30, 10, 80, 0.6);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navLogo {
+  display: flex;
+  align-items: center;
+}
+
+.logoImg {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  padding: 4px;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+}
+
+.navLinks a {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navLinks a:hover,
+.navLinks a.active {
+  color: #fff;
+}
+
+.profileBtn {
+  display: flex;
+}
+
+.profileIcon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profileIcon:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ─── Tab Bar ───────────────────────────── */
+.tabBar {
+  display: flex;
+  gap: 0;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 4px;
+  margin: 1.5rem 0;
+}
+
+.tabBtn {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+
+.tabBtn:hover {
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.08);
+}
+
+.tabActive {
+  background: rgba(255,255,255,0.22) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+/* ─── Tab Content ───────────────────────── */
+.tabContent {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Loading ───────────────────────────── */
+.loading {
+  text-align: center;
+  color: rgba(255,255,255,0.6);
+  padding: 3rem;
+  font-size: 0.95rem;
+}
+
+/* ─── Shared Card ───────────────────────── */
+.card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  padding: 1.4rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+
+/* ─── Buttons ───────────────────────────── */
+.addBtn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.addBtn:hover {
+  background: #6d28d9;
+  transform: translateY(-1px);
+}
+
+.saveBtn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.saveBtn:hover { background: #6d28d9; }
+
+.cancelBtn {
+  background: transparent;
+  color: #6b7280;
+  border: 1.5px solid #d1d5db;
+  padding: 0.5rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover { background: #f3f4f6; }
+
+.editIconBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.editIconBtn:hover { background: #ede9fe; }
+
+.deleteIconBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.deleteIconBtn:hover { background: #fee2e2; }
+
+/* ─── Edit Form Shared ──────────────────── */
+.editForm,
+.editInline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.editInput {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.editInput:focus { border-color: #7c3aed; }
+
+.editTextarea {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.editTextarea:focus { border-color: #7c3aed; }
+
+.editSelect {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+}
+
+.editSelect:focus { border-color: #7c3aed; }
+
+.editActions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+/* ─── Modal ─────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.8rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f1135;
+  margin: 0 0 0.2rem;
+}
+
+.modalSubtitle {
+  font-size: 0.82rem;
+  color: #7c3aed;
+  font-weight: 600;
+  margin: -0.4rem 0 0;
+}
+
+.modalLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #4b5563;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: -0.4rem;
+}
+
+/* ─── Empty State ───────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  gap: 0.8rem;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}
+
+.emptyState p {
+  font-size: 0.9rem;
+  max-width: 260px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════
+   TAB 1 — TIMELINE
+═══════════════════════════════════════ */
+.timelineWrapper {
+  padding-top: 0.5rem;
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.timelineTrack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 0;
+}
+
+.timelineLine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.timelineDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.3);
+  flex-shrink: 0;
+  margin-top: 1.4rem;
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.08);
+  transition: box-shadow 0.2s;
+}
+
+.timelineConnector {
+  width: 2px;
+  flex: 1;
+  background: rgba(255,255,255,0.2);
+  min-height: 24px;
+}
+
+.timelineCard {
+  flex: 1;
+  background: rgba(255,255,255,0.95);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  margin: 0.5rem 0 0.8rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.timelineCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.timelineStep {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #7c3aed;
+  text-transform: uppercase;
+}
+
+.timelineLabel {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f1135;
+  margin: 0 0 0.35rem;
+}
+
+.timelineDesc {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin: 0 0 0.6rem;
+  line-height: 1.5;
+}
+
+.timelineMeta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+}
+
+.tanggalBadge {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+}
+
+/* ═══════════════════════════════════════
+   TAB 2 — ISI FORM
+═══════════════════════════════════════ */
+.formWrapper {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.2rem;
+  min-height: 500px;
+}
+
+.sesiPanel,
+.pertanyaanPanel {
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 1.2rem;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.panelTitle {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.panelSubtitle {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.sesiList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sesiCard {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1.5px solid transparent;
+  transition: all 0.2s;
+}
+
+.sesiCard:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.sesiCardActive {
+  background: rgba(255,255,255,0.22) !important;
+  border-color: rgba(255,255,255,0.4) !important;
+}
+
+.sesiCardContent {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sesiIcon {
+  font-size: 1rem;
+}
+
+.sesiName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.sesiMeta {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+
+.pertanyaanList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.pertanyaanCard {
+  background: rgba(255,255,255,0.95);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.pertanyaanBody {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.pertanyaanNum {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+.pertanyaanTeks {
+  font-size: 0.87rem;
+  color: #1f1135;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════
+   TAB 3 — HASIL
+═══════════════════════════════════════ */
+.hasilWrapper {
+  padding-top: 0.3rem;
+}
+
+.hasilTopBar {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 180px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.searchIcon {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.searchInput::placeholder { color: rgba(255,255,255,0.45); }
+
+.filterBox {
+  background: rgba(30,10,80,0.7);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  min-width: 160px;
+}
+
+.filterLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.1em;
+}
+
+.filterInput {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  color: #fff;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.filterBtn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hasilList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hasilCard {
+  background: rgba(255,255,255,0.95);
+  border-radius: 14px;
+  padding: 1.3rem 1.4rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.hasilCardContent {
+  flex: 1;
+}
+
+.hasilTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin: 0 0 0.2rem;
+  text-align: center;
+}
+
+.hasilDate {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0 0 0.6rem;
+  text-align: center;
+}
+
+.hasilBody {
+  font-size: 0.85rem;
+  color: #374151;
+  margin: 0 0 0.6rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.hasilSesiBadge {
+  font-size: 0.75rem;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.hasilActions {
+  display: flex;
+  gap: 0.3rem;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* FAB */
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 56px;
+  height: 56px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  font-weight: 300;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(124,58,237,0.45);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 50;
+}
+
+.fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.6);
+}
+
+/* ═══════════════════════════════════════
+   TAB 4 — RESPONSE
+═══════════════════════════════════════ */
+.responseWrapper {
+  padding-top: 0.3rem;
+}
+
+.responseTopBar {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.filterWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filterToggleBtn {
+  background: rgba(30,10,80,0.7);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.filterToggleBtn:hover { background: rgba(50,20,100,0.7); }
+
+.filterDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #1e0a50;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 0.4rem;
+  min-width: 240px;
+  z-index: 20;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.filterOption {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.75);
+  padding: 0.55rem 0.9rem;
+  font-size: 0.83rem;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: background 0.15s;
+}
+
+.filterOption:hover { background: rgba(255,255,255,0.1); }
+
+.filterOptionActive {
+  background: rgba(255,255,255,0.15) !important;
+  color: #fff;
+  font-weight: 600;
+}
+
+.responseList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.responseSesiCard {
+  background: rgba(255,255,255,0.95);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.responseSesiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.3rem;
+}
+
+.responseSesiTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.seeDetailsBtn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 0.45rem 1.1rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.2s;
+}
+
+.seeDetailsBtn:hover { background: #6d28d9; }
+
+.responseDetails {
+  border-top: 1px solid #f3f4f6;
+  padding: 1rem 1.3rem;
+  background: #faf8ff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.emptyDetail {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-align: center;
+  padding: 1rem;
+}
+
+.responseDetailCard {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  border: 1px solid #ede9fe;
+}
+
+.detailTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #7c3aed;
+  margin: 0 0 0.2rem;
+  text-align: center;
+}
+
+.detailDate {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+.detailBody {
+  font-size: 0.85rem;
+  color: #374151;
+  margin: 0;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ─── Responsive ────────────────────────── */
+@media (max-width: 640px) {
+  .formWrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .tabBtn {
+    font-size: 0.62rem;
+    padding: 0.5rem 0.4rem;
+  }
+
+  .hasilTopBar {
+    flex-direction: column;
+  }
+}
+
+/* ─── Response tab: sesi name dark text (card is white bg) ─ */
+.responseSesiName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1f1135;
+}
+
+/* ─── Hasil tab: top bar inside right panel ─────────────── */
+.hasilPanelTopBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+/* Override: filterDropdown inside hasilPanelTopBar uses same dark bg */
+.hasilPanelTopBar .filterDropdown {
+  top: calc(100% + 6px);
+  left: 0;
+  background: #1e0a50;
+}
+
+/* hasilList inside right panel — scroll if many items */
+.pertanyaanPanel .hasilList {
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.pertanyaanPanel .hasilList::-webkit-scrollbar {
+  width: 5px;
+}
+.pertanyaanPanel .hasilList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.pertanyaanPanel .hasilList::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.3);
+  border-radius: 999px;
+}
+
+/* emptyState inside white panel — use dark text */
+.pertanyaanPanel .emptyState {
+  color: rgba(60, 20, 120, 0.5);
+}

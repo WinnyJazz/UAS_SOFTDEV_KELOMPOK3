@@ -9,32 +9,138 @@ interface InfoItem {
   _id?: string;
   judul: string;
   isi: string;
-  media: string;
+  media: string[];
   tanggal: string;
   kategori: string;
+  timeline?: string;
+  contactPerson?: string;
+  judulLinkTerkait?: string;
+  linkTerkait?: string;
 }
 
-export default function AdminInfo() {
+// ─── Kartu ─────────────────────────────────────────────────────────────────────
+function InfoCard({
+  info,
+  onDelete,
+}: {
+  info: InfoItem;
+  onDelete: (id: string) => void;
+}) {
+  const router = useRouter();
+  const [slide, setSlide] = useState(0);
+
+  const rawMedia = Array.isArray(info.media)
+    ? info.media
+    : typeof info.media === 'string' && info.media
+    ? [info.media]
+    : [];
+
+  const photos =
+    rawMedia.length > 0
+      ? rawMedia
+      : [
+          `https://via.placeholder.com/400x500/1e0050/ffffff?text=${encodeURIComponent(
+            info.judul
+          )}`,
+        ];
+
+  const prev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlide((s) => (s - 1 + photos.length) % photos.length);
+  };
+  const next = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlide((s) => (s + 1) % photos.length);
+  };
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
+  const id = info.informasiId || info._id!;
+
+  return (
+    <div className={styles.card}>
+      {/* Kategori badge */}
+      <span className={styles.kategori}>{info.kategori}</span>
+
+      {/* Slideshow foto */}
+      <div className={styles.imageWrapper}>
+        <img src={photos[slide]} alt={info.judul} />
+        {photos.length > 1 && (
+          <>
+            <button
+              className={`${styles.slideBtn} ${styles.slidePrev}`}
+              onClick={prev}
+            >
+              ‹
+            </button>
+            <button
+              className={`${styles.slideBtn} ${styles.slideNext}`}
+              onClick={next}
+            >
+              ›
+            </button>
+            <div className={styles.dots}>
+              {photos.map((_photo, i) => (
+                <span
+                  key={i}
+                  className={`${styles.dot} ${
+                    i === slide ? styles.dotActive : ''
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSlide(i);
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      <h3 className={styles.cardTitle}>{info.judul}</h3>
+      <p className={styles.cardDate}>{formatDate(info.tanggal)}</p>
+
+      {/* ── Action Buttons ── */}
+      <div className={styles.cardActions}>
+        <button
+          className={styles.btnDetail}
+          onClick={() => router.push(`/admin/info/${id}`)}
+        >
+          👁️ Detail
+        </button>
+        <button
+          className={styles.btnEdit}
+          onClick={() => router.push(`/admin/info/edit/${id}`)}
+        >
+          ✏️ Edit
+        </button>
+        <button
+          className={styles.btnDelete}
+          onClick={() => onDelete(id)}
+        >
+          🗑️ Hapus
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ──────────────────────────────────────────────────────────────────
+export default function AdminInfoPage() {
   const router = useRouter();
   const [infos, setInfos] = useState<InfoItem[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // State Modal Tambah Info
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    judul: '',
-    isi: '',
-    kategori: 'Pengumuman',
-    media: '' 
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Basic auth check
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!token || (user.role !== 'admin' && user.role !== 'superadmin')) {
-      router.push('/login'); // Arahkan kalau bukan admin
+      router.push('/login');
       return;
     }
     fetchInfos();
@@ -45,9 +151,7 @@ export default function AdminInfo() {
     try {
       const res = await fetch('http://localhost:5000/api/informasi');
       const data = await res.json();
-      if (data.success) {
-        setInfos(data.data);
-      }
+      if (data.success) setInfos(data.data);
     } catch (err) {
       console.error('Gagal fetch info:', err);
     } finally {
@@ -56,183 +160,90 @@ export default function AdminInfo() {
   };
 
   const handleDelete = async (id: string) => {
-    if(confirm('Apakah kamu yakin ingin menghapus informasi ini?')) {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:5000/api/informasi/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if(data.success) {
-          alert('Berhasil dihapus!');
-          fetchInfos(); 
-        } else {
-          alert(data.message || 'Gagal menghapus');
-        }
-      } catch (error) {
-        console.error("Error delete:", error);
-      }
-    }
-  };
-
-  // Convert File ke Base64 untuk image preview & upload simple
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, media: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-
+    if (!confirm('Apakah kamu yakin ingin menghapus informasi ini?')) return;
     try {
-      const res = await fetch('http://localhost:5000/api/informasi', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formData,
-          adminId: user.adminId || user.id || 'admin'
-        })
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:5000/api/informasi/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
       if (data.success) {
-        alert('Informasi berhasil ditambahkan!');
-        setShowModal(false);
-        setFormData({ judul: '', isi: '', kategori: 'Pengumuman', media: '' });
-        fetchInfos(); 
+        alert('Berhasil dihapus!');
+        fetchInfos();
       } else {
-        alert(data.message || 'Gagal menyimpan');
+        alert(data.message || 'Gagal menghapus');
       }
-    } catch (error) {
-      console.error('Submit error:', error);
-    } finally {
-      setIsSubmitting(false);
+    } catch (err) {
+      console.error(err);
     }
-  };
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-      day: 'numeric', month: 'long', year: 'numeric'
-    });
   };
 
   return (
     <div className={styles.pageWrapper}>
+      {/* ── HEADER ── */}
       <div className={styles.adminHeader}>
-        <button className={styles.btnBack} onClick={() => router.push('/admin/dashboard')}>
+        <button
+          className={styles.btnBack}
+          onClick={() => router.push('/admin/dashboard')}
+        >
           ← Dashboard
         </button>
-        <button className={styles.btnAdd} onClick={() => setShowModal(true)}>
+        <div className={styles.headerTitle}>
+          <span className={styles.headerBadge}>ADMIN</span>
+          <span>Manajemen Informasi</span>
+        </div>
+        <button
+          className={styles.btnAdd}
+          onClick={() => router.push('/admin/info/tambah')}
+        >
           + Tambah Info
         </button>
       </div>
 
+      {/* ── CONTENT ── */}
       <div className={styles.contentContainer}>
         <div className={styles.titleWrapper}>
           <h1 className={styles.mainTitle}>INFORMASI TERKINI</h1>
         </div>
 
         {loading ? (
-          <div className={styles.loading}>Memuat informasi...</div>
+          <div className={styles.loading}>
+            <div className={styles.spinner} />
+            <span>Memuat informasi...</span>
+          </div>
         ) : infos.length === 0 ? (
-          <div className={styles.empty}>Belum ada informasi yang diunggah.</div>
+          <div className={styles.empty}>
+            <div className={styles.emptyIcon}>📭</div>
+            <p>Belum ada informasi yang diunggah.</p>
+            <button
+              className={styles.btnEmptyAdd}
+              onClick={() => router.push('/admin/info/tambah')}
+            >
+              + Tambah Pertama
+            </button>
+          </div>
         ) : (
           <div className={styles.gridContainer}>
             {infos.map((info) => (
-              <div key={info.informasiId || info._id} className={styles.card}>
-                
-                <div className={styles.adminActions}>
-                  <button className={styles.btnEdit} title="Edit">✏️</button>
-                  <button 
-                    className={styles.btnDelete} 
-                    onClick={() => handleDelete(info.informasiId || info._id!)} 
-                    title="Hapus"
-                  >🗑️</button>
-                </div>
-
-                <div className={styles.imageWrapper}>
-                  <img 
-                    src={info.media || `https://via.placeholder.com/400x500/1e0050/ffffff?text=${encodeURIComponent(info.judul)}`} 
-                    alt={info.judul} 
-                  />
-                </div>
-                
-                <h3 className={styles.cardTitle}>{info.judul}</h3>
-                <p className={styles.cardDate}>{formatDate(info.tanggal)}</p>
-                
-                <button className={styles.btnMore}>MORE DETAILS</button>
-              </div>
+              <InfoCard
+                key={info.informasiId || info._id}
+                info={info}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
       </div>
 
-      {/* MODAL FORM TAMBAH INFO */}
-      {showModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h2>Tambah Info</h2>
-              <button className={styles.btnClose} onClick={() => setShowModal(false)}>✕</button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className={styles.modalForm}>
-              <div className={styles.formGroup}>
-                <label>Judul</label>
-                <input 
-                  type="text" required 
-                  value={formData.judul}
-                  onChange={(e) => setFormData({...formData, judul: e.target.value})}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Kategori</label>
-                <select 
-                  value={formData.kategori}
-                  onChange={(e) => setFormData({...formData, kategori: e.target.value})}
-                >
-                  <option value="Pengumuman">Pengumuman</option>
-                  <option value="Berita">Berita</option>
-                  <option value="Kegiatan">Kegiatan</option>
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Gambar</label>
-                <input type="file" accept="image/*" onChange={handleFileChange} />
-                {formData.media && <img src={formData.media} alt="Preview" className={styles.previewImage} />}
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Isi (Deskripsi)</label>
-                <textarea 
-                  required rows={4}
-                  value={formData.isi}
-                  onChange={(e) => setFormData({...formData, isi: e.target.value})}
-                ></textarea>
-              </div>
-
-              <button type="submit" className={styles.btnSubmit} disabled={isSubmitting}>
-                {isSubmitting ? 'Menyimpan...' : 'Simpan'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* ── FAB ── */}
+      <button
+        className={styles.fab}
+        onClick={() => router.push('/admin/info/tambah')}
+        title="Tambah Info"
+      >
+        +
+      </button>
     </div>
   );
 }

@@ -1,7 +1,7 @@
-/* ── Root ── */
+/* ── ROOT ── */
 .root {
     font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
-    background: #2d0a6e;
+    background: #0d0d4a;
     color: #1e1b4b;
     min-height: 100vh;
 }
@@ -72,6 +72,8 @@
     display: flex;
     margin-top: 62px;
     min-height: calc(100vh - 62px);
+    background: linear-gradient(160deg, #0d0d4a 0%, #1a1a6e 60%, #12125c 100%);
+    align-items: stretch;
 }
 
 /* ── SIDEBAR ── */
@@ -84,6 +86,8 @@
     align-items: center;
     padding: 36px 0 24px;
     border-right: 1px solid rgba(255,255,255,0.08);
+    min-height: calc(100vh - 62px);
+    align-self: stretch;
 }
 
 .sidebarAvatar {
@@ -181,15 +185,19 @@
     flex: 1;
     padding: 32px 36px;
     overflow-y: auto;
-    background: linear-gradient(160deg, #0d0d4a 0%, #1a1a6e 60%, #12125c 100%);
+    min-height: calc(100vh - 62px);
+    background: transparent;
 }
 
 /* ── PAGE TITLE ── */
 .pageTitle {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 800;
     color: #fff;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+}
+.pageTitleName {
+    color: #a5b4fc;
 }
 
 /* ── SECTION LABEL ── */
@@ -208,23 +216,28 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
 }
 
 .statCard {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 24px rgba(0,0,0,.3);
+    padding: 22px 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    transition: transform 0.2s;
+    gap: 6px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-height: 120px;
 }
-.statCard:hover { transform: translateY(-3px); }
-.statIcon  { font-size: 22px; margin-bottom: 2px; }
+.statCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.statIcon  { font-size: 24px; margin-bottom: 2px; }
 .statLabel { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
-.statValue { font-size: 28px; font-weight: 800; color: #1e1b4b; }
+.statValue { font-size: 32px; font-weight: 800; color: #1e1b4b; line-height: 1.1; }
 .statSub   { font-size: 12px; color: #9ca3af; }
 
 /* ── BIG CARD ── */
@@ -232,7 +245,7 @@
     background: rgba(255, 255, 255, 0.97);
     border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 4px 24px rgba(0,0,0,.3);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     margin-bottom: 20px;
 }
 .bigCard h3 {
@@ -283,12 +296,12 @@
     font-size: 13px;
     color: #1e1b4b;
     border-bottom: 1px solid #f3f4f6;
-    vertical-align: top;
+    vertical-align: middle;
 }
 .tbl tr:last-child td { border-bottom: none; }
 .tbl tbody tr:hover td { background: #faf9ff; }
 
-.rowSelected td    { background: rgba(99, 102, 241, 0.07) !important; }
+.rowSelected td       { background: rgba(99, 102, 241, 0.07) !important; }
 .rowSelectedDanger td { background: rgba(239, 68, 68, 0.06) !important; }
 
 /* ── CHECKBOX ── */
@@ -342,9 +355,6 @@
 .statusMahasiswa  { background: #f3f4f6; color: #374151; }
 .statusSuperAdmin { background: #fff8e1; color: #e65100; }
 
-/* ── MUTED ── */
-.mutedText { color: #9ca3af; font-size: 13px; }
-
 /* ── COLOR HELPERS ── */
 .textGreen  { color: #059669; }
 .textYellow { color: #d97706; }
@@ -388,7 +398,7 @@
 
 /* ── BUTTONS ── */
 .btnEdit {
-    padding: 5px 12px;
+    padding: 5px 14px;
     font-size: 12px; font-weight: 600;
     border: 1.5px solid #4338ca;
     border-radius: 20px;

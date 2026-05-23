@@ -1,19 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const { getAllInformasi, createInformasi, deleteInformasi } = require("../controllers/informasiController");
+const {
+  getAllInformasi,
+  getInformasiById,   // ← tambah
+  createInformasi,
+  updateInformasi,    // ← tambah
+  deleteInformasi,
+} = require("../controllers/informasiController");
 
-// Asumsi kamu punya middleware auth (kalau namanya beda, sesuaikan ya)
-// const { verifyAdmin } = require("../middleware/authMiddleware");
-
-// Route Publik
+// Publik
 router.get("/", getAllInformasi);
+router.get("/:id", getInformasiById);   // ← tambah, untuk detail page
 
-// Route Admin (Uncomment verifyAdmin jika middleware sudah siap)
-// router.post("/", verifyAdmin, createInformasi);
-// router.delete("/:id", verifyAdmin, deleteInformasi);
-
-// Sementara tanpa middleware agar kamu bisa test API-nya dulu:
+// Admin
 router.post("/", createInformasi);
+router.put("/:id", updateInformasi);    // ← tambah, untuk edit page
 router.delete("/:id", deleteInformasi);
 
 module.exports = router;

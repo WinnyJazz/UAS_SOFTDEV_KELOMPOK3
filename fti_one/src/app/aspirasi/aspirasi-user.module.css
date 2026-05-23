@@ -1,0 +1,573 @@
+/* ═══════════════════════════════════════════
+   ASPIRASI USER — CSS Module
+   Matches DPM purple theme (admin style)
+   Read-only version: no edit/delete controls
+═══════════════════════════════════════════ */
+
+/* ─── Page Layout ──────────────────────── */
+.pageWrapper {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% 0%, #7c3aed 0%, #4c1d95 40%, #2d0a6e 100%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.pageLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: left;
+  margin: 1.2rem 0 0.2rem;
+  padding: 0 1.5rem;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+/* ─── Tab Bar ───────────────────────────── */
+.tabBar {
+  display: flex;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 4px;
+  margin: 1.5rem 0;
+}
+
+.tabBtn {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+
+.tabBtn:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tabActive {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Tab Content ───────────────────────── */
+.tabContent {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Loading ───────────────────────────── */
+.loading {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 3rem;
+  font-size: 0.95rem;
+}
+
+/* ─── Error ────────────────────────────── */
+.errorMsg {
+  font-size: 0.82rem;
+  color: #ef4444;
+  background: #fee2e2;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  margin-top: 0.6rem;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════
+   TAB 1 — TIMELINE (read-only)
+═══════════════════════════════════════ */
+.timelineWrapper {
+  padding-top: 0.5rem;
+}
+
+.sectionTitle {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+}
+
+.timelineTrack {
+  display: flex;
+  flex-direction: column;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 0;
+}
+
+.timelineLine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.timelineDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+  margin-top: 1.4rem;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
+.timelineConnector {
+  width: 2px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.2);
+  min-height: 24px;
+}
+
+.timelineCard {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  margin: 0.5rem 0 0.8rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.timelineCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.timelineStep {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #7c3aed;
+  text-transform: uppercase;
+}
+
+.timelineLabel {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f1135;
+  margin: 0 0 0.35rem;
+}
+
+.timelineDesc {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin: 0 0 0.6rem;
+  line-height: 1.5;
+}
+
+.timelineMeta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+}
+
+.tanggalBadge {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+}
+
+/* ═══════════════════════════════════════
+   TAB 2 — ISI FORM
+═══════════════════════════════════════ */
+.formCard {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  padding: 1.6rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Sesi info bar */
+.sesiInfoBar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1.5px solid #ede9fe;
+}
+
+.sesiActiveBadge {
+  background: #7c3aed;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.sesiInfoName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #4c1d95;
+}
+
+/* Questions */
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.questionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.qLabel {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  font-size: 0.87rem;
+  font-weight: 700;
+  color: #7c3aed;
+  line-height: 1.45;
+}
+
+.qNum {
+  background: #ede9fe;
+  color: #7c3aed;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.qTextarea {
+  width: 100%;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  color: #1f1135;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.qTextarea:focus {
+  border-color: #7c3aed;
+}
+
+.qTextarea::placeholder {
+  color: #9ca3af;
+}
+
+.charCount {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  text-align: right;
+}
+
+/* Navigation */
+.formNav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.1rem;
+  margin-top: 1.4rem;
+}
+
+.navCircle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #1f1135;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  line-height: 1;
+}
+
+.navCircle:hover:not(:disabled) {
+  background: #7c3aed;
+}
+
+.navCircle:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+.pageIndicator {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  min-width: 52px;
+  text-align: center;
+}
+
+.submitBtn {
+  width: 100%;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 0.9rem;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1.2rem;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #6d28d9;
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Empty / No sesi */
+.emptyForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  gap: 0.7rem;
+  color: #6b7280;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}
+
+.emptySubtitle {
+  font-size: 0.82rem;
+  color: #9ca3af;
+}
+
+/* Success state */
+.successState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  gap: 0.8rem;
+}
+
+.successIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ede9fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto;
+}
+
+.successTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f1135;
+  margin: 0;
+}
+
+.successSub {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+/* ═══════════════════════════════════════
+   TAB 3 — HASIL (read-only accordion)
+═══════════════════════════════════════ */
+.hasilWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-top: 0.3rem;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  gap: 0.8rem;
+}
+
+.emptyState p {
+  font-size: 0.9rem;
+}
+
+.responseSesiCard {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.responseSesiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.3rem;
+}
+
+.responseSesiTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.responseSesiName {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1f1135;
+}
+
+.hasilCountBadge {
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.seeDetailsBtn {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  padding: 0.45rem 1.1rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.2s;
+}
+
+.seeDetailsBtn:hover {
+  background: #6d28d9;
+}
+
+.responseDetails {
+  border-top: 1px solid #f3f4f6;
+  padding: 1rem 1.3rem;
+  background: #faf8ff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.emptyDetail {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-align: center;
+  padding: 1rem;
+}
+
+.responseDetailCard {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  border: 1px solid #ede9fe;
+}
+
+.detailTitle {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #7c3aed;
+  text-align: center;
+  margin: 0 0 0.2rem;
+}
+
+.detailDate {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  text-align: center;
+  margin: 0 0 0.5rem;
+}
+
+.detailBody {
+  font-size: 0.85rem;
+  color: #374151;
+  line-height: 1.6;
+  text-align: center;
+  margin: 0;
+}
+
+/* ─── Responsive ─────────────────────── */
+@media (max-width: 640px) {
+  .tabBtn {
+    font-size: 0.62rem;
+    padding: 0.5rem 0.4rem;
+  }
+
+  .formCard {
+    padding: 1.2rem 1rem;
+  }
+
+  .responseSesiHeader {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

@@ -17,6 +17,10 @@ interface BarangItem {
 
 const API_URL = 'http://localhost:5000/api/barang';
 
+const getToken = () => {
+  return localStorage.getItem("token") || "";
+};
+
 export default function LostFoundStudent() {
   const router = useRouter();
 
@@ -38,17 +42,55 @@ export default function LostFoundStudent() {
   const [hasUnreadChats, setHasUnreadChats] = useState(false);
   const ktmInputRef = useRef<HTMLInputElement>(null);
 
+
+
+const fetchBarang = async (searchQuery?: string) => {
+    try {
+      setLoading(true);
+      const query = searchQuery !== undefined ? searchQuery : search;
+      
+      const params = new URLSearchParams();
+      if (query) params.append('search', query);
+      if (filterTanggal) params.append('tanggal', filterTanggal);
+      if (filterLokasi) params.append('lokasi', filterLokasi);
+      
+      const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
+      const token = getToken();
+
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        // Only show items that are 'tersedia' for students
+        setBarangList(data.data.filter((item: BarangItem) => item.status === 'tersedia'));
+      }
+    } catch (err) {
+      console.error('Fetch barang error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Auth check
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
 
-    if (!storedUser || !token) {
-      router.push('/login');
-      return;
-    }
+    const init = async () => {
+      const storedUser = localStorage.getItem('user');
 
-    fetchBarang();
+      if (!storedUser || !token) {
+        router.push('/login');
+        return;
+      }
+
+      await fetchBarang();
+    };
+
+    init();
 
     // Check for unread chats
     const checkChats = async () => {
@@ -58,7 +100,7 @@ export default function LostFoundStudent() {
         });
         const data = await res.json();
         if (data.success) {
-          const unread = data.data.some((chat: any) => 
+          const unread = data.data.some((chat: any) =>
             chat.pesan.length > 0 && chat.pesan[chat.pesan.length - 1].pengirim === 'admin'
           );
           setHasUnreadChats(unread);
@@ -71,29 +113,6 @@ export default function LostFoundStudent() {
     return () => clearInterval(interval);
   }, [router]);
 
-  const fetchBarang = async (searchQuery?: string) => {
-    try {
-      setLoading(true);
-      const query = searchQuery !== undefined ? searchQuery : search;
-      
-      const params = new URLSearchParams();
-      if (query) params.append('search', query);
-      if (filterTanggal) params.append('tanggal', filterTanggal);
-      if (filterLokasi) params.append('lokasi', filterLokasi);
-      
-      const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.success) {
-        // Only show items that are 'tersedia' for students
-        setBarangList(data.data.filter((item: BarangItem) => item.status === 'tersedia'));
-      }
-    } catch (err) {
-      console.error('Fetch barang error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Debounced search
   useEffect(() => {

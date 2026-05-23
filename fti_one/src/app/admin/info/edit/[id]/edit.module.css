@@ -1,0 +1,314 @@
+/* ═══════════════════════════════════════════════
+   edit.module.css  –  Admin Info Edit Page
+   ═══════════════════════════════════════════════ */
+
+.pageWrapper {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #2D0072 0%, #5A189A 45%, #7B2FBE 100%);
+  padding: 32px 20px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ── Header ── */
+.adminHeader {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 12px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.headerBadge {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #E9D5FF;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.btnBack {
+  padding: 10px 20px;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.2s;
+  backdrop-filter: blur(6px);
+}
+.btnBack:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-3px);
+}
+
+/* ── Content ── */
+.contentContainer {
+  width: 100%;
+  max-width: 680px;
+  background: #fff;
+  border-radius: 28px;
+  padding: 40px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 900;
+  color: #3B0764;
+  margin: 0 0 28px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Form ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Photo Section ── */
+.formSection {
+  background: #F5F3FF;
+  border: 1.5px dashed #C4B5FD;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #6D28D9;
+  text-transform: uppercase;
+}
+
+.photoPreview {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  background: #DDD6FE;
+  display: flex;
+  flex-direction: column;
+}
+.photoPreview img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.slideControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.9);
+}
+.slideControls button {
+  background: #7C3AED;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+.slideControls button:hover { background: #5B21B6; }
+.slideControls span { font-size: 12px; font-weight: 700; color: #374151; }
+
+.btnRemovePhoto {
+  align-self: center;
+  background: none;
+  border: 1px solid #EF4444;
+  color: #EF4444;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin: 6px 0;
+}
+.btnRemovePhoto:hover { background: #FEE2E2; }
+
+.thumbRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.thumb {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 0.2s;
+  opacity: 0.65;
+}
+.thumbActive {
+  border-color: #7C3AED;
+  opacity: 1;
+}
+.thumb:hover { opacity: 1; }
+
+.uploadLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: #EDE9FE;
+  color: #6D28D9;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.uploadLabel:hover { background: #DDD6FE; }
+.hiddenInput { display: none; }
+
+/* ── Form Fields ── */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.formGroup label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #6D28D9;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.formGroup input[type='text'],
+.formGroup input[type='url'],
+.formGroup select,
+.formGroup textarea {
+  padding: 11px 14px;
+  border: 1.5px solid #DDD6FE;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1F2937;
+  background: #FDFBFF;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+}
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+/* ── Form Actions ── */
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btnCancel {
+  flex: 1;
+  padding: 13px;
+  border-radius: 12px;
+  border: 1.5px solid #DDD6FE;
+  background: #fff;
+  color: #6B7280;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btnCancel:hover {
+  background: #F5F3FF;
+  border-color: #C4B5FD;
+  color: #6D28D9;
+}
+
+.btnSubmit {
+  flex: 2;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #7C3AED, #5B21B6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+.btnSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.45);
+}
+.btnSubmit:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Loading ── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px;
+  color: #fff;
+  font-weight: 600;
+}
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .contentContainer { padding: 24px 20px; }
+  .adminHeader { flex-wrap: wrap; }
+  .headerTitle { display: none; }
+  .formActions { flex-direction: column; }
+  .btnSubmit { flex: unset; }
+  .btnCancel { flex: unset; }
+}

@@ -1,69 +1,69 @@
+// models/Aspirasi.js  ← sudah ada, pastikan strukturnya seperti ini
+
 const mongoose = require("mongoose");
 
-const AspirasiSchema = new mongoose.Schema(
+/* ─── Sesi Aspirasi (folder per bulan) ─── */
+const SesiSchema = new mongoose.Schema(
   {
-    aspirasiId: {
-      type: String,
-      unique: true,
-      default: () => new mongoose.Types.ObjectId().toString(),
-    },
-    // Relasi ke Mahasiswa
-    userId: {
-      type: String,
-      required: true,
-      ref: "Mahasiswa",
-    },
-    judul: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    deskripsi: {
-      type: String,
-      required: true,
-    },
-    kategori: {
-      type: String,
-      required: true,
-      // contoh: "fasilitas", "akademik", "keamanan", dll
-    },
-    // lampiran = Firebase Storage URL (foto/dokumen pendukung)
-    lampiran: {
-      type: String,
-      default: null,
-    },
-    status: {
-      type: String,
-      enum: ["pending", "diproses", "ditolak", "disetujui"],
-      default: "pending",
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    responAdmin: {
-      type: String,
-      default: null,
-    },
-
+    nama: { type: String, required: true },       // "Aspirasi Januari 2026"
+    bulan: { type: Number, required: true },       // 1–12
+    tahun: { type: Number, required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
   },
-  {
-    versionKey: false,
-  }
+  { timestamps: true }
 );
 
-AspirasiSchema.methods.getDetail = function () {
-  return {
-    aspirasiId: this.aspirasiId,
-    judul: this.judul,
-    deskripsi: this.deskripsi,
-    kategori: this.kategori,
-    status: this.status,
-    lampiran: this.lampiran,
-    createdAt: this.createdAt,
-  };
+/* ─── Pertanyaan (milik satu sesi) ───────── */
+const PertanyaanSchema = new mongoose.Schema(
+  {
+    sesiId: { type: mongoose.Schema.Types.ObjectId, ref: "SesiAspirasi", required: true },
+    teks: { type: String, required: true },
+    urutan: { type: Number, default: 0 },
+  },
+  { timestamps: true }
+);
+
+/* ─── Jawaban Mahasiswa ──────────────────── */
+const JawabanSchema = new mongoose.Schema(
+  {
+    pertanyaanId: { type: mongoose.Schema.Types.ObjectId, ref: "Pertanyaan", required: true },
+    sesiId: { type: mongoose.Schema.Types.ObjectId, ref: "SesiAspirasi", required: true },
+    mahasiswaId: { type: mongoose.Schema.Types.ObjectId, ref: "Mahasiswa" },
+    nim: { type: String },
+    nama: { type: String },
+    jawaban: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
+/* ─── Hasil Respons DPM (per sesi) ───────── */
+const HasilResponsSchema = new mongoose.Schema(
+  {
+    sesiId: { type: mongoose.Schema.Types.ObjectId, ref: "SesiAspirasi", required: true },
+    namaSesi: { type: String },
+    namaAspirasi: { type: String, required: true },   // judul/topik aspirasi
+    hasilRespons: { type: String, required: true },   // isi respons DPM
+    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+  },
+  { timestamps: true }
+);
+
+/* ─── Timeline Step ───────────────────────── */
+const TimelineStepSchema = new mongoose.Schema(
+  {
+    label: { type: String, required: true },
+    deskripsi: { type: String },
+    status: { type: String, enum: ["pending", "active", "done"], default: "pending" },
+    tanggal: { type: String },   // ISO date string, bisa kosong
+    urutan: { type: Number, default: 0 },
+  },
+  { timestamps: true }
+);
+
+module.exports = {
+  SesiAspirasi: mongoose.model("SesiAspirasi", SesiSchema),
+  Pertanyaan: mongoose.model("Pertanyaan", PertanyaanSchema),
+  Jawaban: mongoose.model("Jawaban", JawabanSchema),
+  HasilRespons: mongoose.model("HasilRespons", HasilResponsSchema),
+  TimelineStep: mongoose.model("TimelineStep", TimelineStepSchema),
 };
-
-
-
-module.exports = mongoose.model("Aspirasi", AspirasiSchema);

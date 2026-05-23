@@ -29,11 +29,14 @@ const InformasiSchema = new mongoose.Schema(
     // media = Firebase Storage URL
     // Bisa foto atau video, simpan URL-nya aja
     media: {
-      type: String, // single URL
-      default: null,
-      // Kalau di masa depan mau support multiple media, bisa pakai:
-      // type: [String], default: []
+    type: [String],
+    default: [],
     },
+    timeline: { type: String, default: null },
+    contactPerson: { type: String, default: null },
+    judulLinkTerkait: { type: String, default: null },
+    linkTerkait: { type: String, default: null },
+
     kategori: {
       type: String,
       required: true,

@@ -115,31 +115,35 @@ export default function LostFoundAdmin() {
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  // ── Auth check ──
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    if (!storedUser || !token) { router.push('/login'); return; }
-    const parsed = JSON.parse(storedUser);
-    if (parsed.role !== 'admin' && parsed.role !== 'superadmin') { router.push('/dashboard'); return; }
-    fetchBarang();
-    fetchClaims();
-  }, [router]);
-
   const getToken = () => localStorage.getItem('token') || '';
 
   const fetchBarang = async (searchQuery?: string) => {
     try {
-      setLoading(true);
       const query = searchQuery !== undefined ? searchQuery : search;
+
       const params = new URLSearchParams();
       if (query) params.append('search', query);
       if (filterTanggal) params.append('tanggal', filterTanggal);
       if (filterLokasi) params.append('lokasi', filterLokasi);
-      const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
-      const res = await fetch(url);
+
+      const url = params.toString()
+        ? `${API_URL}?${params.toString()}`
+        : API_URL;
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       const data = await res.json();
-      if (data.success) setBarangList(data.data);
+
+      console.log("RAW BARANG RESPONSE:", data);
+      console.log("BARANG LIST:", data.data);
+
+      if (data.success) {
+        setBarangList(data.data);
+      } else {
+        console.log("FETCH BARANG FAILED:", data.message);
+      }
+
     } catch (err) {
       console.error('Fetch barang error:', err);
     } finally {
@@ -240,38 +244,58 @@ export default function LostFoundAdmin() {
   };
 
   // ── Fetch claims dari API ──
-  const fetchClaims = async () => {
-    try {
-      setClaimsLoading(true);
-      const token = getToken();
-      const res = await fetch(CLAIMS_API_URL, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (data.success) {
-        setClaims(data.data);
-        // Bangun notifikasi dari claims pending yang baru masuk
-        const pendingClaims = (data.data as ClaimItem[]).filter(c => c.status === 'pending');
-        const newNotifs: Notification[] = pendingClaims.map(c => ({
-          id: `notif-${c.claimId}`,
-          message: `Claim baru dari ${c.nama} untuk ${c.barangId?.nama ?? 'barang'}`,
-          type: 'claim' as const,
-          time: relativeTime(c.tanggal),
-          read: false,
-        }));
-        // Merge: jaga notif lama yang bukan dari pending claim
-        setNotifications(prev => {
-          const existingIds = new Set(prev.map(n => n.id));
-          const fresh = newNotifs.filter(n => !existingIds.has(n.id));
-          return [...fresh, ...prev];
-        });
-      }
-    } catch (err) {
-      console.error('fetchClaims error:', err);
-    } finally {
-      setClaimsLoading(false);
+const fetchClaims = async () => {
+  try {
+    setClaimsLoading(true);
+    const token = getToken();
+    
+    console.log("TOKEN SAAT FETCH CLAIMS:", token); // ← tambah ini
+    
+    const res = await fetch(CLAIMS_API_URL, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    console.log("RESPONSE CLAIMS:", data); // ← dan ini
+    
+    if (data.success) {
+      setClaims(data.data);
     }
-  };
+  } catch (err) {
+    console.error('fetchClaims error:', err);
+  } finally {
+    setClaimsLoading(false);
+  }
+};
+// auth check
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    const initialize = async () => {
+      const storedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+
+      if (!storedUser || !token) {
+        router.push('/login');
+        return;
+      }
+
+      const parsed = JSON.parse(storedUser);
+
+      if (parsed.role !== 'admin' && parsed.role !== 'superadmin') {
+        router.push('/dashboard');
+        return;
+      }
+
+      await fetchBarang();
+      await fetchClaims();
+
+    };
+
+    initialize();
+
+    return () => clearInterval(interval);
+  }, [router]);
 
   // ── Claims stats & filter ──
   const claimStats = {
@@ -368,10 +392,22 @@ export default function LostFoundAdmin() {
     }
   };
 
-  const addNotif = (message: string, type: Notification['type']) => {
-    const newNotif: Notification = { id: `n${Date.now()}`, message, type, time: 'Baru saja', read: false };
-    setNotifications(prev => [newNotif, ...prev]);
-  };
+  
+
+    const addNotif = (
+      message: string,
+      type: Notification['type']
+    ) => {
+      const newNotif: Notification = {
+        id: crypto.randomUUID(),
+        message,
+        type,
+        time: 'Baru saja',
+        read: false,
+      };
+
+      setNotifications(prev => [newNotif, ...prev]);
+    };
 
   const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
 
@@ -387,7 +423,7 @@ export default function LostFoundAdmin() {
     total: barangList.length,
     tersedia: barangList.filter(b => b.status !== 'dipinjam').length,
     claimed: barangList.filter(b => b.status === 'dipinjam').length,
-    pendingClaim: claimStats.menunggu,
+    pendingClaim: claimStats.pending,
   };
 
   return (
@@ -410,8 +446,8 @@ export default function LostFoundAdmin() {
             >
               <span className={styles.tabIcon}>🔍</span>
               Verifikasi Claim
-              {claimStats.menunggu > 0 && (
-                <span className={styles.tabBadge}>{claimStats.menunggu}</span>
+              {claimStats.pending > 0 && (
+                <span className={styles.tabBadge}>{claimStats.pending}</span>
               )}
             </button>
           </div>
