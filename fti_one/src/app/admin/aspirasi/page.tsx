@@ -735,103 +735,170 @@ function HasilTab() {
 }
 
 // ══════════════════════════════════════════════════════════
-// TAB 4 — RESPONSE (Lihat hasil per sesi)
+// TAB 4 — RESPONSE (jawaban mahasiswa, filter per pertanyaan)
 // ══════════════════════════════════════════════════════════
+interface Jawaban {
+  _id: string;
+  sesiId: string;
+  pertanyaanId: { _id: string; teks: string } | string;
+  jawaban: string;
+  nim?: string;
+  nama?: string;
+  createdAt: string;
+}
+
 function ResponseTab() {
   const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  const [sesiList, setSesiList] = useState<Sesi[]>([]);
-  const [hasilList, setHasilList] = useState<HasilRespons[]>([]);
-  const [selectedSesi, setSelectedSesi] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [filterMode, setFilterMode] = useState<"terbaru" | "terlama">("terbaru");
-  const [showFilter, setShowFilter] = useState(false);
+  const [sesiList, setSesiList]           = useState<Sesi[]>([]);
+  const [jawabanList, setJawabanList]     = useState<Jawaban[]>([]);
+  const [selectedSesi, setSelectedSesi]   = useState<Sesi | null>(null);
+  const [selectedPertanyaanId, setSelectedPertanyaanId] = useState<string>("all");
+  const [loading, setLoading]             = useState(true);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API}/api/aspirasi/sesi`).then((r) => r.json()),
+      fetch(`${API}/api/aspirasi/jawaban`).then((r) => r.json()),
+    ])
+      .then(([sesiData, jawabanData]) => {
+        setSesiList(sesiData);
+        setJawabanList(jawabanData);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
-  const fetchAll = async () => {
-    try {
-      const [sRes, hRes] = await Promise.all([
-        fetch(`${API}/api/aspirasi/sesi`),
-        fetch(`${API}/api/aspirasi/hasil`),
-      ]);
-      setSesiList(await sRes.json());
-      setHasilList(await hRes.json());
-    } catch {
-      setSesiList([
-        { _id: "s1", nama: "Aspirasi Januari 2026", bulan: 1, tahun: 2026, pertanyaan: [], createdAt: "" },
-        { _id: "s2", nama: "Aspirasi Februari 2026", bulan: 2, tahun: 2026, pertanyaan: [], createdAt: "" },
-        { _id: "s3", nama: "Aspirasi Maret 2026", bulan: 3, tahun: 2026, pertanyaan: [], createdAt: "" },
-        { _id: "s4", nama: "Aspirasi April 2026", bulan: 4, tahun: 2026, pertanyaan: [], createdAt: "" },
-      ]);
-      setHasilList([
-        { _id: "h1", sesiId: "s1", namaSesi: "Aspirasi Januari 2026", namaAspirasi: "Kendala terkait manajemen media sosial FTI Untar dan LINTAR", hasilRespons: "Meskipun media sosial FTI Untar dan Lintar sudah dikelola dengan baik, keterbatasan SDM tetap menjadi kendala utama.", uploadedAt: "2026-05-10" },
-        { _id: "h2", sesiId: "s1", namaSesi: "Aspirasi Januari 2026", namaAspirasi: "Kendala mahasiswa terkait kegiatan kemahasiswaan", hasilRespons: "Fakultas telah menyelenggarakan berbagai seminar dan webinar terkait hardskill.", uploadedAt: "2026-05-10" },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+  // Reset filter pertanyaan kalau ganti sesi
+  const handleSesiChange = (sesiId: string) => {
+    const sesi = sesiList.find((s) => s._id === sesiId) || null;
+    setSelectedSesi(sesi);
+    setSelectedPertanyaanId("all");
   };
 
-  const hasilForSesi = (sesiId: string) => {
-    const list = hasilList.filter(h => h.sesiId === sesiId);
-    return filterMode === "terbaru"
-      ? list.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
-      : list.sort((a, b) => new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime());
-  };
+  // Jawaban yang cocok dengan sesi & pertanyaan yang dipilih
+  const jawabanFiltered = jawabanList.filter((j) => {
+    if (!selectedSesi) return false;
+    if (j.sesiId !== selectedSesi._id) return false;
+    if (selectedPertanyaanId === "all") return true;
+    // Ganti bagian filter pertanyaanId
+    const pid = j.pertanyaanId && typeof j.pertanyaanId === "object" 
+      ? j.pertanyaanId._id 
+      : j.pertanyaanId;
+    return pid === selectedPertanyaanId;
+  });
+
+  // Teks pertanyaan yang sedang dipilih (untuk heading)
+  const pertanyaanTerpilih = selectedSesi?.pertanyaan.find(
+    (p) => p._id === selectedPertanyaanId
+  );
 
   if (loading) return <div className={styles.loading}>Memuat response...</div>;
 
   return (
     <div className={styles.responseWrapper}>
-      <div className={styles.responseTopBar}>
-        <div className={styles.filterWrapper}>
-          <button className={styles.filterToggleBtn} onClick={() => setShowFilter(!showFilter)}>FILTER ▾</button>
-          {showFilter && (
-            <div className={styles.filterDropdown}>
-              <button className={`${styles.filterOption} ${filterMode === "terbaru" ? styles.filterOptionActive : ""}`} onClick={() => { setFilterMode("terbaru"); setShowFilter(false); }}>
-                Dari yang terkini sampai terlama
-              </button>
-              <button className={`${styles.filterOption} ${filterMode === "terlama" ? styles.filterOptionActive : ""}`} onClick={() => { setFilterMode("terlama"); setShowFilter(false); }}>
-                Dari yang terlama
-              </button>
-            </div>
-          )}
+
+      {/* ── Filter Bar ── */}
+      <div className={styles.responseFilterBar}>
+
+        {/* Pilih Sesi */}
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>SESI</label>
+          <select
+            className={styles.filterSelect}
+            value={selectedSesi?._id || ""}
+            onChange={(e) => handleSesiChange(e.target.value)}
+          >
+            <option value="">-- Pilih Sesi --</option>
+            {sesiList.map((s) => (
+              <option key={s._id} value={s._id}>{s.nama}</option>
+            ))}
+          </select>
         </div>
+
+        {/* Pilih Pertanyaan */}
+        <div className={styles.filterGroup}>
+          <label className={styles.filterLabel}>PERTANYAAN</label>
+          <select
+            className={styles.filterSelect}
+            value={selectedPertanyaanId}
+            onChange={(e) => setSelectedPertanyaanId(e.target.value)}
+            disabled={!selectedSesi}
+          >
+            <option value="all">Semua Pertanyaan</option>
+            {selectedSesi?.pertanyaan.map((p, i) => (
+              <option key={p._id} value={p._id}>
+                {i + 1}. {p.teks.length > 60 ? p.teks.slice(0, 60) + "..." : p.teks}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Counter */}
+        {selectedSesi && (
+          <div className={styles.responseCounter}>
+            <span className={styles.responseCountNum}>{jawabanFiltered.length}</span>
+            <span className={styles.responseCountLabel}>jawaban</span>
+          </div>
+        )}
       </div>
 
-      <div className={styles.responseList}>
-        {sesiList.map(sesi => (
-          <div key={sesi._id} className={styles.responseSesiCard}>
-            <div className={styles.responseSesiHeader}>
-              <div className={styles.responseSesiTitle}>
-                <span className={styles.sesiIcon}>📋</span>
-                <span className={styles.responseSesiName}>{sesi.nama}</span>
-              </div>
-              <button
-                className={styles.seeDetailsBtn}
-                onClick={() => setSelectedSesi(selectedSesi === sesi._id ? null : sesi._id)}
-              >
-                {selectedSesi === sesi._id ? "CLOSE DETAILS" : "SEE DETAILS"}
-              </button>
-            </div>
+      {/* ── Heading pertanyaan terpilih ── */}
+      {selectedSesi && selectedPertanyaanId !== "all" && pertanyaanTerpilih && (
+        <div className={styles.pertanyaanHeading}>
+          <span className={styles.pertanyaanHeadingQ}>❓</span>
+          <p>{pertanyaanTerpilih.teks}</p>
+        </div>
+      )}
 
-            {selectedSesi === sesi._id && (
-              <div className={styles.responseDetails}>
-                {hasilForSesi(sesi._id).length === 0 ? (
-                  <p className={styles.emptyDetail}>Belum ada hasil aspirasi untuk sesi ini.</p>
-                ) : (
-                  hasilForSesi(sesi._id).map(h => (
-                    <div key={h._id} className={styles.responseDetailCard}>
-                      <h4 className={styles.detailTitle}>{h.namaAspirasi}</h4>
-                      <p className={styles.detailDate}>{new Date(h.uploadedAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</p>
-                      <p className={styles.detailBody}>{h.hasilRespons}</p>
-                    </div>
-                  ))
-                )}
+      {/* ── Empty states ── */}
+      {!selectedSesi && (
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon}>📋</span>
+          <p>Pilih sesi untuk melihat jawaban mahasiswa.</p>
+        </div>
+      )}
+
+      {selectedSesi && jawabanFiltered.length === 0 && (
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon}>📭</span>
+          <p>Belum ada jawaban masuk{selectedPertanyaanId !== "all" ? " untuk pertanyaan ini" : " untuk sesi ini"}.</p>
+        </div>
+      )}
+
+      {/* ── Daftar Jawaban ── */}
+      <div className={styles.jawabanGrid}>
+        {jawabanFiltered.map((j) => {
+        const pteks = j.pertanyaanId && typeof j.pertanyaanId === "object" 
+          ? j.pertanyaanId.teks 
+          : "";
+          return (
+            <div key={j._id} className={styles.jawabanCard}>
+              {/* Header: nama/nim mahasiswa */}
+              <div className={styles.jawabanCardHeader}>
+                <div className={styles.jawabanAvatar}>
+                  {(j.nama || "A")[0].toUpperCase()}
+                </div>
+                <div>
+                  <p className={styles.jawabanNama}>{j.nama || "Anonim"}</p>
+                  {j.nim && <p className={styles.jawabanNim}>{j.nim}</p>}
+                </div>
+                <span className={styles.jawabanDate}>
+                  {new Date(j.createdAt).toLocaleDateString("id-ID", {
+                    day: "numeric", month: "short", year: "numeric",
+                  })}
+                </span>
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* Pertanyaan (tampil kalau mode "semua pertanyaan") */}
+              {selectedPertanyaanId === "all" && pteks && (
+                <p className={styles.jawabanPertanyaan}>❓ {pteks}</p>
+              )}
+
+              {/* Isi jawaban */}
+              <p className={styles.jawabanIsi}>{j.jawaban || <em style={{color:"#9ca3af"}}>Tidak ada jawaban</em>}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

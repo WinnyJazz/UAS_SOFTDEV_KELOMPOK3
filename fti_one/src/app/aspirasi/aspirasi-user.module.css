@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════
    ASPIRASI USER — CSS Module
-   Matches DPM purple theme (admin style)
-   Read-only version: no edit/delete controls
+   DPM purple theme — no dummy data version
 ═══════════════════════════════════════════ */
 
 /* ─── Page Layout ──────────────────────── */
@@ -75,13 +74,54 @@
 
 /* ─── Loading ───────────────────────────── */
 .loading {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
   padding: 3rem;
   font-size: 0.95rem;
 }
 
-/* ─── Error ────────────────────────────── */
+/* CSS-only spinner */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Error State (full page) ───────────── */
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+  gap: 0.7rem;
+}
+
+.errorIcon {
+  font-size: 2rem;
+}
+
+.errorState p {
+  font-size: 0.9rem;
+  max-width: 280px;
+  line-height: 1.5;
+}
+
+/* ─── Error inline (inside card) ────────── */
 .errorMsg {
   font-size: 0.82rem;
   color: #ef4444;
@@ -92,8 +132,28 @@
   text-align: center;
 }
 
+/* ─── Empty State ───────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  gap: 0.8rem;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}
+
+.emptyState p {
+  font-size: 0.9rem;
+}
+
 /* ═══════════════════════════════════════
-   TAB 1 — TIMELINE (read-only)
+   TAB 1 — TIMELINE
 ═══════════════════════════════════════ */
 .timelineWrapper {
   padding-top: 0.5rem;
@@ -216,7 +276,7 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  margin-bottom: 1.4rem;
+  margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1.5px solid #ede9fe;
 }
@@ -236,6 +296,36 @@
   font-size: 0.88rem;
   font-weight: 600;
   color: #4c1d95;
+}
+
+/* Progress bar */
+.progressBarWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.4rem;
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background: #ede9fe;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.progressLabel {
+  font-size: 0.72rem;
+  color: #7c3aed;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Questions */
@@ -288,6 +378,7 @@
   color: #1f1135;
   transition: border-color 0.2s;
   box-sizing: border-box;
+  background: #ffffff; 
 }
 
 .qTextarea:focus {
@@ -369,7 +460,7 @@
   cursor: not-allowed;
 }
 
-/* Empty / No sesi */
+/* Empty form — no active sesi */
 .emptyForm {
   display: flex;
   flex-direction: column;
@@ -379,10 +470,6 @@
   text-align: center;
   gap: 0.7rem;
   color: #6b7280;
-}
-
-.emptyIcon {
-  font-size: 2.5rem;
 }
 
 .emptySubtitle {
@@ -427,28 +514,13 @@
 }
 
 /* ═══════════════════════════════════════
-   TAB 3 — HASIL (read-only accordion)
+   TAB 3 — HASIL (accordion)
 ═══════════════════════════════════════ */
 .hasilWrapper {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
   padding-top: 0.3rem;
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 1rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-align: center;
-  gap: 0.8rem;
-}
-
-.emptyState p {
-  font-size: 0.9rem;
 }
 
 .responseSesiCard {
@@ -569,5 +641,10 @@
   .responseSesiHeader {
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+
+  .seeDetailsBtn {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
   }
 }

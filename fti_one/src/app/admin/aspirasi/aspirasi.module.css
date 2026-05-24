@@ -992,3 +992,182 @@
 .pertanyaanPanel .emptyState {
   color: rgba(60, 20, 120, 0.5);
 }
+
+/* ═══════════════════════════════════════
+   TAB 4 — RESPONSE (jawaban mahasiswa)
+═══════════════════════════════════════ */
+.responseFilterBar {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.filterLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.55);
+}
+
+.filterSelect {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filterSelect:focus {
+  border-color: rgba(255,255,255,0.5);
+}
+
+.filterSelect:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.filterSelect option {
+  background: #2d0a6e;
+  color: #fff;
+}
+
+.responseCounter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(124,58,237,0.3);
+  border-radius: 10px;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid rgba(124,58,237,0.4);
+  flex-shrink: 0;
+}
+
+.responseCountNum {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+
+.responseCountLabel {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.pertanyaanHeading {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  border-left: 3px solid #a855f7;
+}
+
+.pertanyaanHeadingQ {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.pertanyaanHeading p {
+  font-size: 0.88rem;
+  color: #fff;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.jawabanGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.jawabanCard {
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.jawabanCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.jawabanAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.jawabanNama {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1f1135;
+  margin: 0;
+}
+
+.jawabanNim {
+  font-size: 0.75rem;
+  color: #7c3aed;
+  margin: 0;
+}
+
+.jawabanDate {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.jawabanPertanyaan {
+  font-size: 0.78rem;
+  color: #7c3aed;
+  font-weight: 600;
+  background: #ede9fe;
+  padding: 0.4rem 0.7rem;
+  border-radius: 7px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.jawabanIsi {
+  font-size: 0.87rem;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+}
