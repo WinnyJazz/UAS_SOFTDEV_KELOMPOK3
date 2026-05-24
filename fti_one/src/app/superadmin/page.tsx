@@ -155,7 +155,7 @@ export default function SuperAdminDashboard() {
             return;
         }
         const parsedUser = JSON.parse(storedUser);
-        if (parsedUser.role !== 'superadmin') { router.push('/dashboard'); return; }
+        if (parsedUser.role !== 'superadmin' && parsedUser.role !== 'admin') { router.push('/dashboard'); return; }
         setUser(parsedUser);
         fetchUsers(token);
         fetchDashboardData(token);
@@ -186,8 +186,10 @@ export default function SuperAdminDashboard() {
             const lfRes = await fetch('http://localhost:5000/api/dashboard/lostfound', {
                 headers: { Authorization: `Bearer ${token}` },
             });
+            console.log('LF status:', lfRes.status);
             if (lfRes.ok) {
                 const lfData = await lfRes.json();
+                console.log('LF data:', lfData.data);
                 setLfItems(lfData.data);
             }
 
@@ -382,12 +384,14 @@ export default function SuperAdminDashboard() {
                         </svg>
                     </div>
                     <div className={styles.sidebarName}>{user.nama}</div>
-                    <div className={styles.sidebarRole}>Super Admin</div>
+                    <div className={styles.sidebarRole}>{user.role === 'superadmin' ? 'Super Admin' : 'Admin'}</div>
                     <ul className={styles.sidebarMenu}>
                         {([
                             ['overview', '📊 Overview'],
-                            ['userdata', '👥 User Data'],
-                            ['notif',    '🔔 Notifications'],
+                            ...(user.role === 'superadmin' ? [
+                                ['userdata', '👥 User Data'],
+                                ['notif', '🔔 Notifications'],
+                            ] : []),
                         ] as [Section, string][]).map(([id, label]) => (
                             <li key={id}>
                                 <a

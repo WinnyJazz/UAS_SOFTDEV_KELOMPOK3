@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { verifySuperAdmin } = require("../middleware/authMiddleware");
+const { verifyAdminOrSuperAdmin } = require("../middleware/authMiddleware");
+
 const {
   getOverview,
   getNotifikasi,
@@ -10,7 +12,7 @@ const {
 } = require("../controllers/dashboardController");
 
 // Semua route dashboard hanya bisa diakses superadmin
-router.use(verifySuperAdmin);
+router.use(verifyAdminOrSuperAdmin);
 
 // ── Overview ──────────────────────────────────
 router.get("/overview", getOverview);

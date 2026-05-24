@@ -539,6 +539,9 @@ const downgradeAdmin = async (req, res) => {
 
       if (adminDoc) {
         const existing = await Mahasiswa.findOne({ email: adminDoc.email });
+        if (!existing && adminDoc.nim) {
+          existing = await Mahasiswa.findOne({ nim: adminDoc.nim }); 
+        }
         if (existing) {
           existing.role = "mahasiswa";  // restore role, NIM tetap sama
           await existing.save();

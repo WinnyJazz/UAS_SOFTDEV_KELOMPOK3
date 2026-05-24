@@ -61,7 +61,7 @@ export default function Login() {
           if (role === 'superadmin') {
             router.push('/superadmin');
           } else if (role === 'admin') {
-            router.push('/admin/lost-found');
+            router.push('/dashboard');
           } else {
             router.push('/dashboard');
           }
