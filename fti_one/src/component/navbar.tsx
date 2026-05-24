@@ -28,8 +28,8 @@ export default function Navbar() {
           setNavLinks([
             { label: "Home", href: "/dashboard" },
             { label: "About Us", href: "/aboutus" },
-            { label: "Aspirasi", href: "/aspirasi" },
-            { label: "Info", href: "/info" },
+            { label: "Aspirasi", href: "/admin/aspirasi" },
+            { label: "Info", href: "/admin/info" },
             { label: "Lost & Found", href: "/admin/lost-found" },
           ]);
         }
