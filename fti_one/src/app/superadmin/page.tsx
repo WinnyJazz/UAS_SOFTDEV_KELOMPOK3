@@ -18,6 +18,7 @@ interface User {
     nim?: string;
     role: string;
     isVerified?: boolean;
+    profilePhoto?: string | null; 
 }
 
 interface AdminUser {
@@ -160,6 +161,15 @@ export default function SuperAdminDashboard() {
         fetchUsers(token);
         fetchDashboardData(token);
         setLoading(false);
+        const handleProfileUpdate = () => {
+        const stored = localStorage.getItem('user');
+        if (stored) {
+            const updated = JSON.parse(stored);
+            setUser(prev => prev ? { ...prev, profilePhoto: updated.profilePhoto } : prev);
+        }
+    };
+      window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
     }, [router]);
 
     const fetchUsers = async (token: string) => {
@@ -383,9 +393,17 @@ export default function SuperAdminDashboard() {
                 {/* ── SIDEBAR ── */}
                 <aside className={styles.sidebar}>
                     <div className={styles.sidebarAvatar}>
-                        <svg viewBox="0 0 24 24" fill="rgba(255,255,255,.85)" width="48" height="48">
-                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                        </svg>
+                        {user.profilePhoto ? (
+                            <img 
+                                src={user.profilePhoto} 
+                                alt="Profile"
+                                style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                        ) : (
+                            <svg viewBox="0 0 24 24" fill="rgba(255,255,255,.85)" width="48" height="48">
+                                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                            </svg>
+                        )}
                     </div>
                     <div className={styles.sidebarName}>{user.nama}</div>
                     <div className={styles.sidebarRole}>{user.role === 'superadmin' ? 'Super Admin' : 'Admin'}</div>
