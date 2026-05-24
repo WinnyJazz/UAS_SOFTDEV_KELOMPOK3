@@ -47,42 +47,6 @@ interface SesiWithHasil {
 // ─── API Base ───────────────────────────────────────────────
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-// ─── Dummy fallbacks ────────────────────────────────────────
-const DUMMY_TIMELINE: TimelineStep[] = [
-  { _id: "1", label: "Pembukaan Aspirasi", deskripsi: "Form aspirasi dibuka untuk mahasiswa", status: "done", tanggal: "2026-01-01", urutan: 1 },
-  { _id: "2", label: "Pengumpulan Data", deskripsi: "Rekap data aspirasi dari seluruh mahasiswa", status: "done", tanggal: "2026-02-15", urutan: 2 },
-  { _id: "3", label: "Analisis & Rekap", deskripsi: "DPM menganalisis dan merekap seluruh aspirasi", status: "active", tanggal: "2026-05-01", urutan: 3 },
-  { _id: "4", label: "Disampaikan ke Pihak Atas", deskripsi: "Hasil aspirasi disampaikan ke dekan/wakil dekan", status: "pending", tanggal: "", urutan: 4 },
-  { _id: "5", label: "Tindak Lanjut", deskripsi: "Menunggu tindak lanjut dari pihak fakultas", status: "pending", tanggal: "", urutan: 5 },
-];
-
-const DUMMY_SESI_AKTIF: SesiAktif = {
-  _id: "s1",
-  nama: "Aspirasi Mei 2026",
-  bulan: 5,
-  tahun: 2026,
-  pertanyaan: [
-    { _id: "p1", teks: "Apa kendala yang Anda alami selama perkuliahan?", sesiId: "s1", urutan: 1 },
-    { _id: "p2", teks: "Apa saran Anda untuk meningkatkan kualitas pembelajaran di fakultas?", sesiId: "s1", urutan: 2 },
-    { _id: "p3", teks: "Apakah Anda merasa fasilitas kampus sudah memadai? Jelaskan.", sesiId: "s1", urutan: 3 },
-    { _id: "p4", teks: "Bagaimana kondisi fasilitas di kampus?", sesiId: "s1", urutan: 4 },
-    { _id: "p5", teks: "Adakah aspirasi lain yang ingin Anda sampaikan kepada DPM?", sesiId: "s1", urutan: 5 },
-  ],
-};
-
-const DUMMY_SESI_HASIL: SesiWithHasil[] = [
-  {
-    _id: "s_jan", nama: "Aspirasi Januari 2026", bulan: 1, tahun: 2026,
-    hasil: [
-      { _id: "h1", sesiId: "s_jan", namaSesi: "Aspirasi Januari 2026", namaAspirasi: "Kendala terkait manajemen media sosial FTI Untar dan LINTAR", hasilRespons: "Meskipun media sosial FTI Untar dan Lintar sudah dikelola dengan baik, keterbatasan SDM tetap menjadi kendala utama dalam menghasilkan konten yang konsisten.", createdAt: "2026-05-10" },
-      { _id: "h2", sesiId: "s_jan", namaSesi: "Aspirasi Januari 2026", namaAspirasi: "Kendala mahasiswa terkait kegiatan kemahasiswaan", hasilRespons: "Fakultas telah menyelenggarakan berbagai seminar dan webinar terkait hardskill untuk mendukung pengembangan kompetensi mahasiswa.", createdAt: "2026-05-10" },
-    ],
-  },
-  { _id: "s_feb", nama: "Aspirasi Februari 2026", bulan: 2, tahun: 2026, hasil: [] },
-  { _id: "s_mar", nama: "Aspirasi Maret 2026", bulan: 3, tahun: 2026, hasil: [] },
-  { _id: "s_apr", nama: "Aspirasi April 2026", bulan: 4, tahun: 2026, hasil: [] },
-];
-
 // ─── Main Component ─────────────────────────────────────────
 export default function UserAspirasiPage() {
   const [activeTab, setActiveTab] = useState<"timeline" | "form" | "hasil">("timeline");
@@ -90,13 +54,13 @@ export default function UserAspirasiPage() {
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.container}>
-        <p className={styles.pageLabel}>ASPIRASI USER</p>
+        <p className={styles.pageLabel}>ASPIRASI MAHASISWA</p>
 
         <div className={styles.tabBar}>
           {[
             { key: "timeline", label: "TIMELINE & STATUS" },
-            { key: "form", label: "ISI FORM" },
-            { key: "hasil", label: "HASIL" },
+            { key: "form",     label: "ISI FORM" },
+            { key: "hasil",    label: "HASIL" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -110,8 +74,8 @@ export default function UserAspirasiPage() {
 
         <div className={styles.tabContent}>
           {activeTab === "timeline" && <TimelineTab />}
-          {activeTab === "form" && <IsiFormTab />}
-          {activeTab === "hasil" && <HasilTab />}
+          {activeTab === "form"     && <IsiFormTab />}
+          {activeTab === "hasil"    && <HasilTab />}
         </div>
       </div>
     </div>
@@ -122,14 +86,20 @@ export default function UserAspirasiPage() {
 // TAB 1 — TIMELINE (read-only)
 // ══════════════════════════════════════════════════════════
 function TimelineTab() {
-  const [steps, setSteps] = useState<TimelineStep[]>([]);
+  const [steps, setSteps]   = useState<TimelineStep[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError]   = useState("");
 
   useEffect(() => {
     fetch(`${API}/api/aspirasi/timeline`)
-      .then((r) => r.json())
-      .then((data) => setSteps(data.sort((a: TimelineStep, b: TimelineStep) => a.urutan - b.urutan)))
-      .catch(() => setSteps(DUMMY_TIMELINE))
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data: TimelineStep[]) =>
+        setSteps(data.sort((a, b) => a.urutan - b.urutan))
+      )
+      .catch(() => setError("Gagal memuat timeline. Coba lagi nanti."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -139,7 +109,21 @@ function TimelineTab() {
   const statusLabel = (s: string) =>
     s === "done" ? "✅ Selesai" : s === "active" ? "🔄 Sedang Berjalan" : "⏳ Menunggu";
 
-  if (loading) return <div className={styles.loading}>Memuat timeline...</div>;
+  if (loading) return <div className={styles.loading}><span className={styles.spinner} />Memuat timeline...</div>;
+
+  if (error) return (
+    <div className={styles.errorState}>
+      <span className={styles.errorIcon}>⚠️</span>
+      <p>{error}</p>
+    </div>
+  );
+
+  if (steps.length === 0) return (
+    <div className={styles.emptyState}>
+      <span className={styles.emptyIcon}>📋</span>
+      <p>Belum ada data timeline.</p>
+    </div>
+  );
 
   return (
     <div className={styles.timelineWrapper}>
@@ -191,44 +175,61 @@ function TimelineTab() {
 }
 
 // ══════════════════════════════════════════════════════════
-// TAB 2 — ISI FORM (sesi aktif = bulan & tahun sekarang)
+// TAB 2 — ISI FORM (fetch /sesi/aktif)
 // ══════════════════════════════════════════════════════════
 function IsiFormTab() {
-  const [sesiAktif, setSesiAktif] = useState<SesiAktif | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [sesiAktif, setSesiAktif]   = useState<SesiAktif | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState("");
+  const [answers, setAnswers]       = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const QS_PER_PAGE = 2;
 
   useEffect(() => {
-    // Ambil semua sesi, cari yang bulan & tahun sesuai sekarang
-    fetch(`${API}/api/aspirasi/sesi`)
-      .then((r) => r.json())
-      .then((data: SesiAktif[]) => {
-        const now = new Date();
-        const bulan = now.getMonth() + 1;
-        const tahun = now.getFullYear();
-        // Cari sesi dengan bulan & tahun yang sama; fallback ke sesi terakhir
-        const aktif =
-          data.find((s) => s.bulan === bulan && s.tahun === tahun) ||
-          data[data.length - 1] ||
-          null;
-        setSesiAktif(aktif);
+    fetch(`${API}/api/aspirasi/sesi/aktif`)
+      .then((r) => {
+        if (r.status === 404) {
+          setSesiAktif(null);
+          return null;
+        }
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
       })
-      .catch(() => setSesiAktif(DUMMY_SESI_AKTIF))
+      .then((data) => {
+        if (data) setSesiAktif(data);
+      })
+      .catch(() => setError("Gagal memuat form aspirasi. Coba lagi nanti."))
       .finally(() => setLoading(false));
   }, []);
 
   const handleSubmit = async () => {
     if (!sesiAktif) return;
-    setSubmitting(true);
-    setError("");
 
-    // Submit satu jawaban per pertanyaan
+    // ── Validasi: semua pertanyaan harus diisi ──
+    const kosong = sesiAktif.pertanyaan.filter(
+      (p) => !answers[p._id] || answers[p._id].trim().length === 0
+    );
+
+    if (kosong.length > 0) {
+      setSubmitError(
+        `Harap isi semua pertanyaan terlebih dahulu. (${kosong.length} belum diisi)`
+      );
+      // Lompat ke halaman yang berisi pertanyaan kosong pertama
+      const indexKosong = sesiAktif.pertanyaan.findIndex(
+        (p) => !answers[p._id] || answers[p._id].trim().length === 0
+      );
+      setCurrentPage(Math.floor(indexKosong / QS_PER_PAGE));
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError("");
+
+
     try {
       const submissions = sesiAktif.pertanyaan.map((p) =>
         fetch(`${API}/api/aspirasi/jawaban`, {
@@ -238,55 +239,67 @@ function IsiFormTab() {
             pertanyaanId: p._id,
             sesiId: sesiAktif._id,
             jawaban: answers[p._id] || "",
-            // nim & nama bisa diambil dari auth/context jika tersedia
           }),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`Gagal submit pertanyaan ${p._id}`);
+          return r.json();
         })
       );
+
       await Promise.all(submissions);
       setSubmitted(true);
     } catch {
-      setError("Gagal mengirim aspirasi. Silakan coba lagi.");
+      setSubmitError("Gagal mengirim aspirasi. Periksa koneksi dan coba lagi.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div className={styles.loading}>Memuat form...</div>;
+  if (loading) return <div className={styles.loading}><span className={styles.spinner} />Memuat form...</div>;
 
-  if (!sesiAktif) {
-    return (
-      <div className={styles.formCard}>
-        <div className={styles.emptyForm}>
-          <span className={styles.emptyIcon}>📭</span>
-          <p>Belum ada sesi aspirasi yang aktif saat ini.</p>
-          <p className={styles.emptySubtitle}>Pantau terus untuk informasi sesi berikutnya.</p>
-        </div>
+  if (error) return (
+    <div className={styles.formCard}>
+      <div className={styles.errorState}>
+        <span className={styles.errorIcon}>⚠️</span>
+        <p>{error}</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (submitted) {
-    return (
-      <div className={styles.formCard}>
-        <div className={styles.successState}>
-          <div className={styles.successIcon}>✅</div>
-          <h3 className={styles.successTitle}>Aspirasi Terkirim!</h3>
-          <p className={styles.successSub}>
-            Terima kasih telah menyampaikan aspirasi Anda untuk{" "}
-            <strong>{sesiAktif.nama}</strong>.<br />
-            DPM akan menindaklanjuti dengan sebaik mungkin.
-          </p>
-        </div>
+  if (!sesiAktif) return (
+    <div className={styles.formCard}>
+      <div className={styles.emptyForm}>
+        <span className={styles.emptyIcon}>📭</span>
+        <p>Belum ada sesi aspirasi yang aktif saat ini.</p>
+        <p className={styles.emptySubtitle}>Pantau terus untuk informasi sesi berikutnya.</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  const total = sesiAktif.pertanyaan.length;
+  if (submitted) return (
+    <div className={styles.formCard}>
+      <div className={styles.successState}>
+        <div className={styles.successIcon}>✅</div>
+        <h3 className={styles.successTitle}>Aspirasi Terkirim!</h3>
+        <p className={styles.successSub}>
+          Terima kasih telah menyampaikan aspirasi Anda untuk{" "}
+          <strong>{sesiAktif.nama}</strong>.<br />
+          DPM akan menindaklanjuti dengan sebaik mungkin.
+        </p>
+      </div>
+    </div>
+  );
+
+  const total      = sesiAktif.pertanyaan.length;
   const totalPages = Math.ceil(total / QS_PER_PAGE);
-  const start = currentPage * QS_PER_PAGE;
-  const end = Math.min(start + QS_PER_PAGE, total);
-  const currentQs = sesiAktif.pertanyaan.slice(start, end);
-  const isLast = currentPage === totalPages - 1;
+  const start      = currentPage * QS_PER_PAGE;
+  const end        = Math.min(start + QS_PER_PAGE, total);
+  const currentQs  = sesiAktif.pertanyaan.slice(start, end);
+  const isLast     = currentPage === totalPages - 1;
+
+  // progress bar fill
+  const filledCount = Object.values(answers).filter((v) => v.trim().length > 0).length;
+  const progress = total > 0 ? Math.round((filledCount / total) * 100) : 0;
 
   return (
     <div className={styles.formCard}>
@@ -294,6 +307,14 @@ function IsiFormTab() {
       <div className={styles.sesiInfoBar}>
         <span className={styles.sesiActiveBadge}>AKTIF</span>
         <span className={styles.sesiInfoName}>📋 {sesiAktif.nama}</span>
+      </div>
+
+      {/* Progress bar */}
+      <div className={styles.progressBarWrap}>
+        <div className={styles.progressBar}>
+          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+        </div>
+        <span className={styles.progressLabel}>{filledCount}/{total} dijawab</span>
       </div>
 
       {/* Pertanyaan */}
@@ -306,20 +327,26 @@ function IsiFormTab() {
             </div>
             <textarea
               className={styles.qTextarea}
+              style={
+                submitError && (!answers[p._id] || answers[p._id].trim().length === 0)
+                  ? { borderColor: "#ef4444" }
+                  : {}
+              }
               placeholder="Tulis jawaban Anda di sini..."
               rows={3}
               value={answers[p._id] || ""}
-              onChange={(e) =>
-                setAnswers((prev) => ({ ...prev, [p._id]: e.target.value }))
-              }
+              onChange={(e) => {
+                setAnswers((prev) => ({ ...prev, [p._id]: e.target.value }));
+                if (submitError) setSubmitError(""); // hapus error kalau mulai diisi
+              }}
             />
             <p className={styles.charCount}>{(answers[p._id] || "").length} karakter</p>
           </div>
         ))}
       </div>
 
-      {/* Error */}
-      {error && <p className={styles.errorMsg}>{error}</p>}
+      {/* Submit error */}
+      {submitError && <p className={styles.errorMsg}>{submitError}</p>}
 
       {/* Navigation */}
       <div className={styles.formNav}>
@@ -356,47 +383,60 @@ function IsiFormTab() {
 }
 
 // ══════════════════════════════════════════════════════════
-// TAB 3 — HASIL (read-only, per sesi accordion)
+// TAB 3 — HASIL (read-only accordion)
 // ══════════════════════════════════════════════════════════
 function HasilTab() {
   const [sesiList, setSesiList] = useState<SesiWithHasil[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
   const [openSesi, setOpenSesi] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch semua sesi, lalu fetch hasil per sesi
     Promise.all([
-      fetch(`${API}/api/aspirasi/sesi`).then((r) => r.json()),
-      fetch(`${API}/api/aspirasi/hasil`).then((r) => r.json()),
+      fetch(`${API}/api/aspirasi/sesi`).then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      }),
+      fetch(`${API}/api/aspirasi/hasil`).then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      }),
     ])
       .then(([sesiData, hasilData]: [SesiAktif[], HasilRespons[]]) => {
         const merged: SesiWithHasil[] = sesiData.map((sesi) => ({
-          _id: sesi._id,
-          nama: sesi.nama,
+          _id:   sesi._id,
+          nama:  sesi.nama,
           bulan: sesi.bulan,
           tahun: sesi.tahun,
           hasil: hasilData.filter((h) => h.sesiId === sesi._id),
         }));
         setSesiList(merged);
       })
-      .catch(() => setSesiList(DUMMY_SESI_HASIL))
+      .catch(() => setError("Gagal memuat hasil aspirasi. Coba lagi nanti."))
       .finally(() => setLoading(false));
   }, []);
 
   const toggleSesi = (id: string) =>
     setOpenSesi((prev) => (prev === id ? null : id));
 
-  if (loading) return <div className={styles.loading}>Memuat hasil...</div>;
+  if (loading) return <div className={styles.loading}><span className={styles.spinner} />Memuat hasil...</div>;
+
+  if (error) return (
+    <div className={styles.errorState}>
+      <span className={styles.errorIcon}>⚠️</span>
+      <p>{error}</p>
+    </div>
+  );
+
+  if (sesiList.length === 0) return (
+    <div className={styles.emptyState}>
+      <span className={styles.emptyIcon}>📭</span>
+      <p>Belum ada data sesi aspirasi.</p>
+    </div>
+  );
 
   return (
     <div className={styles.hasilWrapper}>
-      {sesiList.length === 0 && (
-        <div className={styles.emptyState}>
-          <span className={styles.emptyIcon}>📭</span>
-          <p>Belum ada hasil aspirasi.</p>
-        </div>
-      )}
-
       {sesiList.map((sesi) => (
         <div key={sesi._id} className={styles.responseSesiCard}>
           <div className={styles.responseSesiHeader}>

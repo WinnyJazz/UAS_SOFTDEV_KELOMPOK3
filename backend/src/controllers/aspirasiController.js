@@ -6,7 +6,7 @@ const {
   Jawaban,
   HasilRespons,
   TimelineStep,
-} = require("../models/AspirasiModels");
+} = require("../models/Aspirasi");
 
 /* ══════════════════════════════════════════
    TIMELINE

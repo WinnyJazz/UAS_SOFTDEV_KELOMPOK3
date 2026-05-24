@@ -38,6 +38,10 @@ router.post("/sesi/:sesiId/pertanyaan", /* protect, isAdmin, */ ctrl.addPertanya
 router.put("/pertanyaan/:id", /* protect, isAdmin, */ ctrl.updatePertanyaan);
 router.delete("/pertanyaan/:id", /* protect, isAdmin, */ ctrl.deletePertanyaan);
 
+
+router.get("/sesi/aktif", ctrl.getSesiAktif);
+router.get("/sesi", ctrl.getAllSesi);
+
 /* ══════════════════════════════════════════
    JAWABAN MAHASISWA  (user: POST | admin: GET)
 ══════════════════════════════════════════ */
