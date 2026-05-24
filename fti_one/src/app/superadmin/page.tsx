@@ -257,6 +257,10 @@ export default function SuperAdminDashboard() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        
+        const logoutEvent = new CustomEvent('userLoggedOut');
+        window.dispatchEvent(logoutEvent);
+        
         router.push('/');
     };
 
