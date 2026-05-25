@@ -44,16 +44,16 @@ export default function LostFoundStudent() {
 
 
 
-const fetchBarang = async (searchQuery?: string) => {
+  const fetchBarang = async (searchQuery?: string) => {
     try {
       setLoading(true);
       const query = searchQuery !== undefined ? searchQuery : search;
-      
+
       const params = new URLSearchParams();
       if (query) params.append('search', query);
       if (filterTanggal) params.append('tanggal', filterTanggal);
       if (filterLokasi) params.append('lokasi', filterLokasi);
-      
+
       const url = params.toString() ? `${API_URL}?${params.toString()}` : API_URL;
       const token = getToken();
 
@@ -62,7 +62,7 @@ const fetchBarang = async (searchQuery?: string) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const data = await res.json();
       if (data.success) {
         // Only show items that are 'tersedia' for students
@@ -75,25 +75,14 @@ const fetchBarang = async (searchQuery?: string) => {
     }
   };
 
-  // Auth check
+  // Fetch barang on mount (no auth required to view)
   useEffect(() => {
     const token = localStorage.getItem('token');
+    fetchBarang();
 
-    const init = async () => {
-      const storedUser = localStorage.getItem('user');
-
-      if (!storedUser || !token) {
-        router.push('/login');
-        return;
-      }
-
-      await fetchBarang();
-    };
-
-    init();
-
-    // Check for unread chats
+    // Check for unread chats (only if logged in)
     const checkChats = async () => {
+      if (!token) return; // Skip if not logged in
       try {
         const res = await fetch('http://localhost:5000/api/chat/mine', {
           headers: { Authorization: `Bearer ${token}` }
@@ -105,7 +94,7 @@ const fetchBarang = async (searchQuery?: string) => {
           );
           setHasUnreadChats(unread);
         }
-      } catch (err) {}
+      } catch (err) { }
     };
 
     checkChats();
@@ -134,10 +123,19 @@ const fetchBarang = async (searchQuery?: string) => {
   };
 
   const handleClaimClick = (item: BarangItem) => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+
+    if (!token || !storedUser) {
+      // Redirect to login if not authenticated
+      router.push('/login');
+      return;
+    }
+
     setSelectedBarang(item);
     setShowClaimForm(true);
     // Autofill nama & nim from stored user if available
-    const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setClaimData((prev) => ({
@@ -208,7 +206,14 @@ const fetchBarang = async (searchQuery?: string) => {
         <div className={styles.quickActions}>
           <button
             className={`${styles.btnStatus} ${hasUnreadChats ? styles.btnStatusUnread : ''}`}
-            onClick={() => router.push('/lost-found/status')}
+            onClick={() => {
+              const token = localStorage.getItem('token');
+              if (!token) {
+                router.push('/login');
+                return;
+              }
+              router.push('/lost-found/status');
+            }}
           >
             <div className={styles.iconWrapper}>
               <span className={styles.btnIcon}>🔔</span>
@@ -224,25 +229,25 @@ const fetchBarang = async (searchQuery?: string) => {
         {/* Search & Filter */}
         <div className={styles.searchWrapper}>
           <div className={styles.filterContainer}>
-            <button 
-              className={styles.btnFilter} 
+            <button
+              className={styles.btnFilter}
               onClick={() => setIsFilterOpen(!isFilterOpen)}
             >
               FILTER
             </button>
-            
+
             {isFilterOpen && (
               <div className={styles.filterDropdown}>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className={styles.filterInput}
                   value={filterTanggal}
                   onChange={(e) => setFilterTanggal(e.target.value)}
                   placeholder="Tanggal"
                 />
                 <div className={styles.lokasiWrapper}>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className={styles.filterInput}
                     value={filterLokasi}
                     onChange={(e) => setFilterLokasi(e.target.value)}
@@ -250,7 +255,7 @@ const fetchBarang = async (searchQuery?: string) => {
                   />
                   <span className={styles.selectArrow}>⌵</span>
                 </div>
-                <button 
+                <button
                   className={styles.btnApplyFilter}
                   onClick={() => {
                     fetchBarang();
@@ -339,7 +344,7 @@ const fetchBarang = async (searchQuery?: string) => {
           <div className={styles.claimModal}>
             <button className={styles.modalClose} onClick={() => setShowClaimForm(false)}>✕</button>
             <h2 className={styles.claimTitle}>FORM VERIFIKASI</h2>
-            
+
             <div className={styles.claimBody}>
               {/* Left Side: Item Info */}
               <div className={styles.claimInfo}>
@@ -366,38 +371,38 @@ const fetchBarang = async (searchQuery?: string) => {
 
                 <div className={styles.claimFormGroup}>
                   <label>NAMA</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Masukkan nama anda"
                     value={claimData.nama}
-                    onChange={(e) => setClaimData({...claimData, nama: e.target.value})}
+                    onChange={(e) => setClaimData({ ...claimData, nama: e.target.value })}
                   />
                 </div>
                 <div className={styles.claimFormGroup}>
                   <label>NIM</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Masukkan NIM anda"
                     value={claimData.nim}
-                    onChange={(e) => setClaimData({...claimData, nim: e.target.value})}
+                    onChange={(e) => setClaimData({ ...claimData, nim: e.target.value })}
                   />
                 </div>
                 <div className={styles.claimFormGroup}>
                   <label>NOMOR TELEPON</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Masukkan nomor telepon anda"
                     value={claimData.nomorTelepon}
-                    onChange={(e) => setClaimData({...claimData, nomorTelepon: e.target.value})}
+                    onChange={(e) => setClaimData({ ...claimData, nomorTelepon: e.target.value })}
                   />
                 </div>
                 <div className={styles.claimFormGroup}>
                   <label>FOTO KTM</label>
                   <div className={styles.ktmUploadWrapper} onClick={() => ktmInputRef.current?.click()}>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      ref={ktmInputRef} 
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={ktmInputRef}
                       style={{ display: 'none' }}
                       onChange={handleKtmSelect}
                     />
@@ -405,8 +410,8 @@ const fetchBarang = async (searchQuery?: string) => {
                   </div>
                 </div>
 
-                <button 
-                  className={styles.btnSubmitClaim} 
+                <button
+                  className={styles.btnSubmitClaim}
                   onClick={handleSubmitClaim}
                   disabled={submitting}
                 >
