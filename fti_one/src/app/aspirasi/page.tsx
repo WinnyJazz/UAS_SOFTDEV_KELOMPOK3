@@ -1,6 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./aspirasi-user.module.css";
+
+interface UserData {
+  userId: string;
+  nama: string;
+  email: string;
+  nim: string;
+  role: string;
+}
 
 // ─── Types ─────────────────────────────────────────────────
 interface TimelineStep {
@@ -49,7 +58,39 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // ─── Main Component ─────────────────────────────────────────
 export default function UserAspirasiPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"timeline" | "form" | "hasil">("timeline");
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    if (!token || !userData) {
+      // Redirect to login if not authenticated
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      router.push("/login");
+    }
+  }, [router]);
+
+  if (loading) {
+    return <div className={styles.loading}><span className={styles.spinner} />Loading...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className={styles.pageWrapper}>
@@ -59,8 +100,8 @@ export default function UserAspirasiPage() {
         <div className={styles.tabBar}>
           {[
             { key: "timeline", label: "TIMELINE & STATUS" },
-            { key: "form",     label: "ISI FORM" },
-            { key: "hasil",    label: "HASIL" },
+            { key: "form", label: "ISI FORM" },
+            { key: "hasil", label: "HASIL" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -74,8 +115,8 @@ export default function UserAspirasiPage() {
 
         <div className={styles.tabContent}>
           {activeTab === "timeline" && <TimelineTab />}
-          {activeTab === "form"     && <IsiFormTab />}
-          {activeTab === "hasil"    && <HasilTab />}
+          {activeTab === "form" && <IsiFormTab />}
+          {activeTab === "hasil" && <HasilTab />}
         </div>
       </div>
     </div>
@@ -86,9 +127,9 @@ export default function UserAspirasiPage() {
 // TAB 1 — TIMELINE (read-only)
 // ══════════════════════════════════════════════════════════
 function TimelineTab() {
-  const [steps, setSteps]   = useState<TimelineStep[]>([]);
+  const [steps, setSteps] = useState<TimelineStep[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch(`${API}/api/aspirasi/timeline`)
@@ -178,12 +219,12 @@ function TimelineTab() {
 // TAB 2 — ISI FORM (fetch /sesi/aktif)
 // ══════════════════════════════════════════════════════════
 function IsiFormTab() {
-  const [sesiAktif, setSesiAktif]   = useState<SesiAktif | null>(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
-  const [answers, setAnswers]       = useState<Record<string, string>>({});
+  const [sesiAktif, setSesiAktif] = useState<SesiAktif | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentPage, setCurrentPage] = useState(0);
-  const [submitted, setSubmitted]   = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -290,12 +331,12 @@ function IsiFormTab() {
     </div>
   );
 
-  const total      = sesiAktif.pertanyaan.length;
+  const total = sesiAktif.pertanyaan.length;
   const totalPages = Math.ceil(total / QS_PER_PAGE);
-  const start      = currentPage * QS_PER_PAGE;
-  const end        = Math.min(start + QS_PER_PAGE, total);
-  const currentQs  = sesiAktif.pertanyaan.slice(start, end);
-  const isLast     = currentPage === totalPages - 1;
+  const start = currentPage * QS_PER_PAGE;
+  const end = Math.min(start + QS_PER_PAGE, total);
+  const currentQs = sesiAktif.pertanyaan.slice(start, end);
+  const isLast = currentPage === totalPages - 1;
 
   // progress bar fill
   const filledCount = Object.values(answers).filter((v) => v.trim().length > 0).length;
@@ -387,8 +428,8 @@ function IsiFormTab() {
 // ══════════════════════════════════════════════════════════
 function HasilTab() {
   const [sesiList, setSesiList] = useState<SesiWithHasil[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [openSesi, setOpenSesi] = useState<string | null>(null);
 
   useEffect(() => {
@@ -404,8 +445,8 @@ function HasilTab() {
     ])
       .then(([sesiData, hasilData]: [SesiAktif[], HasilRespons[]]) => {
         const merged: SesiWithHasil[] = sesiData.map((sesi) => ({
-          _id:   sesi._id,
-          nama:  sesi.nama,
+          _id: sesi._id,
+          nama: sesi.nama,
           bulan: sesi.bulan,
           tahun: sesi.tahun,
           hasil: hasilData.filter((h) => h.sesiId === sesi._id),
