@@ -1,15 +1,17 @@
 /* ═══════════════════════════════════════════════
    detail.module.css  –  Public Info Detail Page
+   (Sync with About Page UI)
    ═══════════════════════════════════════════════ */
 
 .pageWrapper {
   min-height: calc(100vh - 70px);
-  background: linear-gradient(180deg, #4A00E0 0%, #7B2FBE 40%, #8E2DE2 100%);
+  /* Background radial dari About Page */
+  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
   padding: 32px 20px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* ── Top Bar ── */
@@ -19,60 +21,70 @@
   margin-bottom: 20px;
 }
 
+/* Tombol Back mirip tabBtn di About */
 .btnBack {
-  padding: 10px 20px;
+  padding: 10px 24px;
   border-radius: 30px;
-  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.1);
-  transition: all 0.2s;
-  backdrop-filter: blur(6px);
+  transition: background 0.22s ease, color 0.22s ease;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.2px;
 }
+
 .btnBack:hover {
   background: rgba(255, 255, 255, 0.2);
+  color: #fff;
   transform: translateX(-3px);
 }
 
-/* ── Content ── */
+/* ── Content Container (Card dari About) ── */
 .contentContainer {
   width: 100%;
   max-width: 760px;
-  background: #F8F9FA;
+  background: #ffffff; /* Card About pakai putih bersih */
   border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  padding: 40px 44px 52px;
+  box-shadow: 0 16px 60px rgba(74, 0, 224, 0.22);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
+/* ── Header Detail ── */
 .kategori {
   align-self: flex-start;
-  background: #EDE9FE;
-  color: #6D28D9;
-  font-size: 10px;
+  background: #f5f3ff;
+  border: 1px solid #e9d5ff;
+  color: #7c3aed;
+  font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  padding: 4px 14px;
+  padding: 6px 16px;
   border-radius: 20px;
   text-transform: uppercase;
+  margin-bottom: 4px;
+  display: inline-block;
 }
 
 .judul {
   font-size: 26px;
-  font-weight: 900;
-  color: #3B0764;
+  font-weight: 800;
+  color: #3b0764;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
 }
 
 .tanggal {
   font-size: 13px;
-  color: #9CA3AF;
+  color: #9ca3af;
   margin: 0;
+  font-weight: 500;
 }
 
 /* ── Slideshow ── */
@@ -81,8 +93,9 @@
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  background: #DDD6FE;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: #f5f3ff;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  box-shadow: 0 8px 24px rgba(74, 0, 224, 0.08);
 }
 
 .mainPhoto {
@@ -106,8 +119,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3B0764;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #3b0764;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: background 0.2s;
   z-index: 5;
 }
@@ -129,7 +142,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -137,6 +150,7 @@
   background: #fff;
   width: 20px;
   border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
 
 /* Thumbnails */
@@ -150,25 +164,26 @@
   height: 64px;
   object-fit: cover;
   border-radius: 10px;
-  border: 2.5px solid transparent;
+  border: 2px solid transparent;
   cursor: pointer;
   transition: 0.2s;
   opacity: 0.65;
 }
 .thumbActive {
-  border-color: #7C3AED;
+  border-color: #7c3aed;
   opacity: 1;
 }
 .thumb:hover { opacity: 1; }
 
-/* ── Info Grid ── */
+/* ── Info Grid (Mengambil gaya About text block) ── */
 .infoGrid {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #EDE9FE;
-  border-radius: 14px;
-  padding: 20px;
+  background: #f5f3ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 16px;
+  padding: 20px 24px;
 }
 
 .infoRow {
@@ -180,47 +195,54 @@
 .infoLabel {
   font-size: 12px;
   font-weight: 800;
-  color: #6D28D9;
+  color: #7c3aed;
   letter-spacing: 0.5px;
   min-width: 140px;
   text-transform: uppercase;
 }
 
 .infoValue {
-  font-size: 14px;
-  color: #1F2937;
+  font-size: 13.5px;
+  color: #374151; /* Warna text About */
+  line-height: 1.6;
   flex: 1;
+  font-weight: 500;
 }
-
-.infoLink {
-  font-size: 14px;
-  color: #7C3AED;
-  text-decoration: underline;
-  word-break: break-all;
-}
-.infoLink:hover { color: #5B21B6; }
 
 /* ── Deskripsi ── */
 .deskripsiSection {
   background: #fff;
-  border-radius: 14px;
-  padding: 24px;
-  border: 1.5px solid #EDE9FE;
+  border-radius: 16px;
+  padding: 8px 0 0 0;
 }
 
 .deskripsiTitle {
-  font-size: 13px;
-  font-weight: 800;
-  color: #6D28D9;
-  letter-spacing: 1.5px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #3b0764;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deskripsiTitle::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 16px;
+  background: #7c3aed;
+  border-radius: 4px;
 }
 
 .deskripsi {
-  font-size: 15px;
-  color: #374151;
+  /* Sama persis dengan .aboutText di halaman About */
+  font-size: 13.5px;
   line-height: 1.75;
+  color: #374151;
+  text-align: justify;
   margin: 0;
   white-space: pre-wrap;
 }
@@ -232,16 +254,19 @@
   align-items: center;
   gap: 16px;
   padding: 60px;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 600;
+  font-size: 14px;
 }
+
+/* Spinner disamakan dengan teamSpin dari About */
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #a78bfa;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.75s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -250,17 +275,18 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 600;
   padding: 60px;
 }
 .notFoundIcon { font-size: 48px; }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
-  .contentContainer { padding: 24px 20px; }
+@media (max-width: 600px) {
+  .contentContainer { padding: 28px 20px 40px; }
   .judul { font-size: 20px; }
   .mainPhoto { max-height: 260px; }
   .infoRow { flex-direction: column; gap: 4px; }
   .infoLabel { min-width: unset; }
+  .deskripsi { text-align: left; }
 }

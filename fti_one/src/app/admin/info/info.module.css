@@ -1,16 +1,18 @@
 /* ═══════════════════════════════════════════════
    info.module.css  –  Admin Informasi List Page
+   (Synced with About Page UI)
    ═══════════════════════════════════════════════ */
 
 /* ── Page ── */
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(160deg, #2D0072 0%, #5A189A 45%, #7B2FBE 100%);
+  /* Background radial dari About Page */
+  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
   padding: 32px 20px 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* ── Header ── */
@@ -45,19 +47,22 @@
 }
 
 .btnBack {
-  padding: 10px 20px;
+  padding: 10px 24px;
   border-radius: 30px;
-  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.1);
-  transition: all 0.2s;
-  backdrop-filter: blur(6px);
+  transition: background 0.22s ease, color 0.22s ease;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.2px;
 }
+
 .btnBack:hover {
   background: rgba(255, 255, 255, 0.2);
+  color: #fff;
   transform: translateX(-3px);
 }
 
@@ -83,10 +88,10 @@
 .contentContainer {
   width: 100%;
   max-width: 960px;
-  background: #F5F3FF;
-  border-radius: 28px;
+  background: #ffffff; /* Menggunakan putih bersih seperti About Page */
+  border-radius: 24px;
   padding: 50px 40px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 60px rgba(74, 0, 224, 0.22);
 }
 
 /* ── Title ── */
@@ -103,7 +108,7 @@
 .mainTitle {
   font-size: 26px;
   font-weight: 900;
-  color: #3B0764;
+  color: #3b0764;
   text-transform: uppercase;
   letter-spacing: 3px;
   position: relative;
@@ -144,12 +149,13 @@
 .kategori {
   align-self: flex-start;
   margin-bottom: 8px;
-  background: #EDE9FE;
-  color: #6D28D9;
+  background: #f5f3ff;
+  border: 1px solid #e9d5ff;
+  color: #7c3aed;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  padding: 3px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
   text-transform: uppercase;
 }
@@ -158,10 +164,11 @@
 .imageWrapper {
   width: 100%;
   aspect-ratio: 4 / 5;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #ddd6fe;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: #f5f3ff;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  box-shadow: 0 8px 24px rgba(74, 0, 224, 0.08);
   margin-bottom: 14px;
   position: relative;
 }
@@ -170,14 +177,15 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
+.card:hover .imageWrapper img { transform: scale(1.03); }
 
 .slideBtn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -188,8 +196,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3B0764;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #3b0764;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: background 0.2s;
   z-index: 5;
   padding: 0;
@@ -212,7 +220,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -220,21 +228,26 @@
   background: #fff;
   width: 18px;
   border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
 
 /* ── Card Text ── */
 .cardTitle {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
-  color: #7C3AED;
+  color: #3b0764;
   text-transform: uppercase;
   text-align: center;
   margin: 0 0 4px;
   letter-spacing: 0.5px;
 }
-.cardDate { font-size: 12px; color: #9CA3AF; margin-bottom: 12px; }
+.cardDate { 
+  font-size: 12.5px; 
+  color: #9ca3af; 
+  margin-bottom: 12px; 
+}
 
-/* ── Card Action Buttons ── */
+/* ── Card Action Buttons (Admin Only) ── */
 .cardActions {
   display: flex;
   gap: 8px;
@@ -309,12 +322,12 @@
   font-weight: 600;
 }
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #EDE9FE;
-  border-top-color: #7C3AED;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(124, 58, 237, 0.15);
+  border-top-color: #7c3aed;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.75s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -328,6 +341,7 @@
   font-weight: 600;
 }
 .emptyIcon { font-size: 48px; }
+
 .btnEmptyAdd {
   margin-top: 8px;
   padding: 10px 24px;
