@@ -1,41 +1,116 @@
 /* ═══════════════════════════════════════════════
-   info.module.css  –  Public Info Page
+   info.module.css  –  Admin & Public Info List Page
+   (Synced with About Page UI)
    ═══════════════════════════════════════════════ */
 
+/* ── Page ── */
 .pageWrapper {
-  min-height: calc(100vh - 70px);
-  background: linear-gradient(180deg, #4A00E0 0%, #7B2FBE 40%, #8E2DE2 100%);
-  padding: 40px 20px 80px;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
+  padding: 32px 20px 100px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* ── Header ── */
+.adminHeader {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 12px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.headerBadge {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #E9D5FF;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.btnBack {
+  padding: 10px 24px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.22s ease, color 0.22s ease;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.2px;
+}
+
+.btnBack:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateX(-3px);
+}
+
+.btnAdd {
+  padding: 10px 22px;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.btnAdd:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5);
+}
+
+/* ── Content Container (Style from About Page) ── */
 .contentContainer {
   width: 100%;
-  max-width: 900px;
-  background: #F8F9FA;
+  max-width: 960px;
+  background: #ffffff;
   border-radius: 24px;
   padding: 50px 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 60px rgba(74, 0, 224, 0.22);
 }
 
 /* ── Title ── */
 .titleWrapper {
   position: relative;
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 48px;
+  padding: 20px 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px 0;
 }
 
 .mainTitle {
   font-size: 26px;
   font-weight: 900;
-  color: #3B0764;
+  color: #3b0764;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   position: relative;
   z-index: 2;
   margin: 0;
@@ -45,9 +120,9 @@
 .titleWrapper::after {
   content: '';
   position: absolute;
-  width: 380px;
-  height: 60px;
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  width: 400px;
+  height: 64px;
+  border: 1.5px solid rgba(124, 58, 237, 0.2);
   border-radius: 50%;
   z-index: 1;
 }
@@ -66,33 +141,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
   transition: transform 0.3s ease;
 }
-.card:hover { transform: translateY(-5px); }
+.card:hover { transform: translateY(-6px); }
 
-/* ── Kategori Badge ── */
 .kategori {
   align-self: flex-start;
-  margin-bottom: 8px;
-  background: #EDE9FE;
-  color: #6D28D9;
+  background: #f5f3ff;
+  border: 1px solid #e9d5ff;
+  color: #7c3aed;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  padding: 3px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
   text-transform: uppercase;
+  margin-bottom: 10px;
 }
 
 /* ── Slideshow ── */
 .imageWrapper {
   width: 100%;
   aspect-ratio: 4 / 5;
-  border-radius: 8px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #e2e8f0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 16px;
+  background: #f5f3ff;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  box-shadow: 0 8px 24px rgba(74, 0, 224, 0.08);
+  margin-bottom: 14px;
   position: relative;
 }
 
@@ -101,15 +178,16 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
-.card:hover .imageWrapper img { transform: scale(1.05); }
+
+.card:hover .imageWrapper img { transform: scale(1.03); }
 
 .slideBtn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -120,8 +198,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3B0764;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  color: #3b0764;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: background 0.2s;
   z-index: 5;
   padding: 0;
@@ -144,7 +222,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -152,41 +230,88 @@
   background: #fff;
   width: 18px;
   border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
 
 /* ── Card Text ── */
 .cardTitle {
   font-size: 16px;
   font-weight: 800;
-  color: #8B5CF6;
+  color: #3b0764;
   text-transform: uppercase;
-  margin-bottom: 4px;
   text-align: center;
+  margin: 0 0 4px;
+  letter-spacing: 0.5px;
 }
 
-.cardDate {
+.cardDate { 
+  font-size: 12.5px; 
+  color: #9ca3af; 
+  margin-bottom: 12px; 
+}
+
+/* ── Card Action Buttons (Admin) ── */
+.cardActions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.btnDetail {
+  flex: 1;
+  background: #EDE9FE;
+  color: #6D28D9;
+  border: none;
+  border-radius: 20px;
+  padding: 9px 0;
+  font-weight: 700;
   font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btnDetail:hover {
+  background: #DDD6FE;
+  transform: translateY(-1px);
 }
 
-.btnMore {
+.btnEdit {
+  flex: 1;
   background: #7C3AED;
   color: #fff;
   border: none;
   border-radius: 20px;
-  padding: 10px 0;
-  width: 80%;
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 1px;
+  padding: 9px 0;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
-.btnMore:hover {
+.btnEdit:hover {
   background: #6D28D9;
-  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.45);
+}
+
+.btnDelete {
+  flex: 1;
+  background: #FEE2E2;
+  color: #EF4444;
+  border: none;
+  border-radius: 20px;
+  padding: 9px 0;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btnDelete:hover {
+  background: #FECACA;
+  transform: translateY(-1px);
 }
 
 /* ── Loading / Empty ── */
@@ -196,30 +321,102 @@
   align-items: center;
   gap: 16px;
   padding: 60px;
-  color: #6b7280;
+  color: #6B7280;
   font-weight: 600;
 }
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #EDE9FE;
-  border-top-color: #7C3AED;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(124, 58, 237, 0.15);
+  border-top-color: #7c3aed;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.75s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .empty {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   padding: 60px;
-  color: #6b7280;
+  color: #9CA3AF;
   font-weight: 600;
+}
+.emptyIcon { font-size: 48px; }
+
+.btnEmptyAdd {
+  margin-top: 8px;
+  padding: 10px 24px;
+  background: #7C3AED;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btnEmptyAdd:hover { background: #6D28D9; }
+
+/* ── FAB (Floating Action Button) ── */
+.fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7C3AED, #5B21B6);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 200;
+}
+.fab:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.55);
+}
+
+/* ── Card Action Buttons (Public) ── */
+.btnMore {
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 24px;
+  width: 80%;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  margin-top: 8px;
+}
+
+.btnMore:hover {
+  background: #6d28d9;
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.45);
+  transform: translateY(-2px);
 }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .gridContainer { grid-template-columns: 1fr; gap: 30px; }
+  .gridContainer {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
   .contentContainer { padding: 30px 20px; }
   .titleWrapper::before,
-  .titleWrapper::after { width: 250px; }
+  .titleWrapper::after { width: 260px; }
+  .adminHeader { flex-wrap: wrap; }
+  .headerTitle { display: none; }
+  .fab { bottom: 20px; right: 20px; }
 }
