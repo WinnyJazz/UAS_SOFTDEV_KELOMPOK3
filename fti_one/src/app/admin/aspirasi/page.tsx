@@ -1,7 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./aspirasi.module.css";
 import navbar from "../../../component/navbar";
+
+interface UserData {
+  userId: string;
+  nama: string;
+  email: string;
+  nim: string;
+  role: string;
+}
 
 // ─── Types ────────────────────────────────────────────────
 interface Sesi {
@@ -42,7 +51,47 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // ─── Main Component ───────────────────────────────────────
 export default function AdminAspirasiPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"timeline" | "form" | "hasil" | "response">("timeline");
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is logged in and has admin/superadmin role
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    if (!token || !userData) {
+      // Redirect to login if not authenticated
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(userData);
+
+      // Check if user has admin or superadmin role
+      if (parsedUser.role !== "admin" && parsedUser.role !== "superadmin") {
+        // Redirect to dashboard if not authorized
+        router.push("/dashboard");
+        return;
+      }
+
+      setUser(parsedUser);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      router.push("/login");
+    }
+  }, [router]);
+
+  if (loading) {
+    return <div className={styles.loading}>Loading...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className={styles.pageWrapper}>
@@ -123,7 +172,7 @@ function TimelineTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editData),
       });
-    } catch {}
+    } catch { }
     setSteps(steps.map(s => s._id === id ? { ...s, ...editData } : s));
     setEditingId(null);
     setEditData({});
@@ -154,7 +203,7 @@ function TimelineTab() {
     if (!confirm("Hapus langkah ini?")) return;
     try {
       await fetch(`${API}/api/aspirasi/timeline/${id}`, { method: "DELETE" });
-    } catch {}
+    } catch { }
     setSteps(steps.filter(s => s._id !== id));
   };
 
@@ -282,7 +331,7 @@ function IsiFormTab() {
   const [editPertanyaanId, setEditPertanyaanId] = useState<string | null>(null);
   const [editPertanyaanTeks, setEditPertanyaanTeks] = useState("");
 
-  const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
   useEffect(() => { fetchSesi(); }, []);
 
@@ -293,10 +342,12 @@ function IsiFormTab() {
       setSesiList(data);
     } catch {
       setSesiList([
-        { _id: "s1", nama: "Aspirasi Januari 2026", bulan: 1, tahun: 2026, pertanyaan: [
-          { _id: "p1", teks: "Apa kendala yang Anda alami selama perkuliahan?", sesiId: "s1" },
-          { _id: "p2", teks: "Apa saran Anda untuk meningkatkan kualitas pembelajaran di fakultas?", sesiId: "s1" },
-        ], createdAt: "2026-01-01" },
+        {
+          _id: "s1", nama: "Aspirasi Januari 2026", bulan: 1, tahun: 2026, pertanyaan: [
+            { _id: "p1", teks: "Apa kendala yang Anda alami selama perkuliahan?", sesiId: "s1" },
+            { _id: "p2", teks: "Apa saran Anda untuk meningkatkan kualitas pembelajaran di fakultas?", sesiId: "s1" },
+          ], createdAt: "2026-01-01"
+        },
         { _id: "s2", nama: "Aspirasi Februari 2026", bulan: 2, tahun: 2026, pertanyaan: [], createdAt: "2026-02-01" },
         { _id: "s3", nama: "Aspirasi Maret 2026", bulan: 3, tahun: 2026, pertanyaan: [], createdAt: "2026-03-01" },
         { _id: "s4", nama: "Aspirasi April 2026", bulan: 4, tahun: 2026, pertanyaan: [], createdAt: "2026-04-01" },
@@ -325,7 +376,7 @@ function IsiFormTab() {
 
   const deleteSesi = async (id: string) => {
     if (!confirm("Hapus sesi ini beserta semua pertanyaannya?")) return;
-    try { await fetch(`${API}/api/aspirasi/sesi/${id}`, { method: "DELETE" }); } catch {}
+    try { await fetch(`${API}/api/aspirasi/sesi/${id}`, { method: "DELETE" }); } catch { }
     setSesiList(sesiList.filter(s => s._id !== id));
     if (selectedSesi?._id === id) setSelectedSesi(null);
   };
@@ -354,7 +405,7 @@ function IsiFormTab() {
 
   const deletePertanyaan = async (pid: string) => {
     if (!selectedSesi) return;
-    try { await fetch(`${API}/api/aspirasi/pertanyaan/${pid}`, { method: "DELETE" }); } catch {}
+    try { await fetch(`${API}/api/aspirasi/pertanyaan/${pid}`, { method: "DELETE" }); } catch { }
     const updated = { ...selectedSesi, pertanyaan: selectedSesi.pertanyaan.filter(p => p._id !== pid) };
     setSelectedSesi(updated);
     setSesiList(sesiList.map(s => s._id === selectedSesi._id ? updated : s));
@@ -368,7 +419,7 @@ function IsiFormTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ teks: editPertanyaanTeks }),
       });
-    } catch {}
+    } catch { }
     const updated = {
       ...selectedSesi,
       pertanyaan: selectedSesi.pertanyaan.map(p => p._id === editPertanyaanId ? { ...p, teks: editPertanyaanTeks } : p),
@@ -557,7 +608,7 @@ function HasilTab() {
     if (editId) {
       try {
         await fetch(`${API}/api/aspirasi/hasil/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      } catch {}
+      } catch { }
       setHasilList(hasilList.map(h => h._id === editId ? { ...h, ...payload } : h));
       setEditId(null);
     } else {
@@ -576,7 +627,7 @@ function HasilTab() {
 
   const deleteHasil = async (id: string) => {
     if (!confirm("Hapus hasil ini?")) return;
-    try { await fetch(`${API}/api/aspirasi/hasil/${id}`, { method: "DELETE" }); } catch {}
+    try { await fetch(`${API}/api/aspirasi/hasil/${id}`, { method: "DELETE" }); } catch { }
     setHasilList(hasilList.filter(h => h._id !== id));
   };
 
@@ -749,11 +800,11 @@ interface Jawaban {
 
 function ResponseTab() {
   const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  const [sesiList, setSesiList]           = useState<Sesi[]>([]);
-  const [jawabanList, setJawabanList]     = useState<Jawaban[]>([]);
-  const [selectedSesi, setSelectedSesi]   = useState<Sesi | null>(null);
+  const [sesiList, setSesiList] = useState<Sesi[]>([]);
+  const [jawabanList, setJawabanList] = useState<Jawaban[]>([]);
+  const [selectedSesi, setSelectedSesi] = useState<Sesi | null>(null);
   const [selectedPertanyaanId, setSelectedPertanyaanId] = useState<string>("all");
-  const [loading, setLoading]             = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -781,8 +832,8 @@ function ResponseTab() {
     if (j.sesiId !== selectedSesi._id) return false;
     if (selectedPertanyaanId === "all") return true;
     // Ganti bagian filter pertanyaanId
-    const pid = j.pertanyaanId && typeof j.pertanyaanId === "object" 
-      ? j.pertanyaanId._id 
+    const pid = j.pertanyaanId && typeof j.pertanyaanId === "object"
+      ? j.pertanyaanId._id
       : j.pertanyaanId;
     return pid === selectedPertanyaanId;
   });
@@ -868,9 +919,9 @@ function ResponseTab() {
       {/* ── Daftar Jawaban ── */}
       <div className={styles.jawabanGrid}>
         {jawabanFiltered.map((j) => {
-        const pteks = j.pertanyaanId && typeof j.pertanyaanId === "object" 
-          ? j.pertanyaanId.teks 
-          : "";
+          const pteks = j.pertanyaanId && typeof j.pertanyaanId === "object"
+            ? j.pertanyaanId.teks
+            : "";
           return (
             <div key={j._id} className={styles.jawabanCard}>
               {/* Header: nama/nim mahasiswa */}
@@ -895,7 +946,7 @@ function ResponseTab() {
               )}
 
               {/* Isi jawaban */}
-              <p className={styles.jawabanIsi}>{j.jawaban || <em style={{color:"#9ca3af"}}>Tidak ada jawaban</em>}</p>
+              <p className={styles.jawabanIsi}>{j.jawaban || <em style={{ color: "#9ca3af" }}>Tidak ada jawaban</em>}</p>
             </div>
           );
         })}
