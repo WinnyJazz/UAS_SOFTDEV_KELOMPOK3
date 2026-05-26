@@ -7,12 +7,14 @@ const {
   updateBarang,
   deleteBarang,
   markDone,
+  getAvailableLocations,
 } = require("../controllers/barangController");
 
 const { verifyAdminOrSuperAdmin } = require("../middleware/authMiddleware");
 
 // Public (atau bisa ditambah verifyToken kalau mau)
 router.get("/", getAllBarang);
+router.get("/locations/available", getAvailableLocations);
 router.get("/:id", getBarangById);
 
 // Admin only

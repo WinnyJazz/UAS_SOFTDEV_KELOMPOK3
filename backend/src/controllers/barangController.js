@@ -136,7 +136,7 @@ const updateBarang = async (req, res) => {
       // Hapus foto lama dari Cloudinary
       const oldPublicId = getPublicIdFromUrl(barang.foto);
       if (oldPublicId) {
-        await cloudinary.uploader.destroy(oldPublicId).catch(() => {});
+        await cloudinary.uploader.destroy(oldPublicId).catch(() => { });
       }
 
       const uploadResult = await cloudinary.uploader.upload(foto, {
@@ -177,7 +177,7 @@ const deleteBarang = async (req, res) => {
     // Hapus foto dari Cloudinary
     const publicId = getPublicIdFromUrl(barang.foto);
     if (publicId) {
-      await cloudinary.uploader.destroy(publicId).catch(() => {});
+      await cloudinary.uploader.destroy(publicId).catch(() => { });
     }
 
     await Barang.deleteOne({ barangId: req.params.id });
@@ -215,6 +215,25 @@ const markDone = async (req, res) => {
   }
 };
 
+// GET /api/barang/locations/available — Ambil daftar lokasi dari barang yang tersedia
+const getAvailableLocations = async (req, res) => {
+  try {
+    // Ambil lokasi unik dari barang dengan status 'tersedia'
+    const locations = await Barang.distinct("lokasi", { status: "tersedia" });
+
+    // Sort lokasi secara alfabetik
+    const sortedLocations = locations.sort();
+
+    res.status(200).json({
+      success: true,
+      data: sortedLocations,
+    });
+  } catch (error) {
+    console.error("getAvailableLocations error:", error);
+    res.status(500).json({ success: false, message: "Gagal mengambil daftar lokasi." });
+  }
+};
+
 module.exports = {
   getAllBarang,
   getBarangById,
@@ -222,4 +241,5 @@ module.exports = {
   updateBarang,
   deleteBarang,
   markDone,
+  getAvailableLocations,
 };
