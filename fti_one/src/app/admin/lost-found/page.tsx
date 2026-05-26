@@ -262,13 +262,13 @@ export default function LostFoundAdmin() {
       setClaimsLoading(true);
       const token = getToken();
 
-      console.log("TOKEN SAAT FETCH CLAIMS:", token); 
+      console.log("TOKEN SAAT FETCH CLAIMS:", token);
 
       const res = await fetch(CLAIMS_API_URL, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      console.log("RESPONSE CLAIMS:", data); 
+      console.log("RESPONSE CLAIMS:", data);
 
       if (data.success) {
         setClaims(data.data);
@@ -719,7 +719,7 @@ export default function LostFoundAdmin() {
                         <td>
                           <div className={styles.claimActions}>
                             <button className={styles.btnDetail} onClick={() => setSelectedClaim(claim)}>
-                              Detail
+                              ⓘ
                             </button>
                             {claim.status === 'pending' && (
                               <>
