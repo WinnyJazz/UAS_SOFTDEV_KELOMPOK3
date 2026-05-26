@@ -42,8 +42,6 @@ export default function LostFoundStudent() {
   const [hasUnreadChats, setHasUnreadChats] = useState(false);
   const ktmInputRef = useRef<HTMLInputElement>(null);
 
-
-
   const fetchBarang = async (searchQuery?: string) => {
     try {
       setLoading(true);
@@ -101,7 +99,6 @@ export default function LostFoundStudent() {
     const interval = setInterval(checkChats, 5000);
     return () => clearInterval(interval);
   }, [router]);
-
 
   // Debounced search
   useEffect(() => {
@@ -198,142 +195,142 @@ export default function LostFoundStudent() {
 
   return (
     <div className={styles.pageWrapper}>
-      {/* ===== CONTENT ===== */}
-      <div className={styles.content}>
-        <p className={styles.pageTitle}>Lost n found</p>
 
-        {/* Quick Action Buttons */}
-        <div className={styles.quickActions}>
+      {/* ===== QUICK ACTION BUTTONS (di atas background ungu) ===== */}
+      <div className={styles.quickActions}>
+        <button
+          className={`${styles.btnStatus} ${hasUnreadChats ? styles.btnStatusUnread : ''}`}
+          onClick={() => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+              router.push('/login');
+              return;
+            }
+            router.push('/lost-found/status');
+          }}
+        >
+          <div className={styles.iconWrapper}>
+            <span className={styles.btnIcon}>🔔</span>
+            {hasUnreadChats && <span className={styles.unreadBadge}>New</span>}
+          </div>
+          <span>
+            <strong>Status &amp; Notifikasi</strong>
+            <small>Pantau klaim dan laporanmu</small>
+          </span>
+        </button>
+      </div>
+
+      {/* ===== SEARCH & FILTER (di atas background ungu) ===== */}
+      <div className={styles.searchWrapper}>
+        <div className={styles.filterContainer}>
           <button
-            className={`${styles.btnStatus} ${hasUnreadChats ? styles.btnStatusUnread : ''}`}
-            onClick={() => {
-              const token = localStorage.getItem('token');
-              if (!token) {
-                router.push('/login');
-                return;
-              }
-              router.push('/lost-found/status');
-            }}
+            className={styles.btnFilter}
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
           >
-            <div className={styles.iconWrapper}>
-              <span className={styles.btnIcon}>🔔</span>
-              {hasUnreadChats && <span className={styles.unreadBadge}>New</span>}
-            </div>
-            <span>
-              <strong>Status &amp; Notifikasi</strong>
-              <small>Pantau klaim dan laporanmu</small>
-            </span>
+            FILTER
           </button>
-        </div>
 
-        {/* Search & Filter */}
-        <div className={styles.searchWrapper}>
-          <div className={styles.filterContainer}>
-            <button
-              className={styles.btnFilter}
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-            >
-              FILTER
-            </button>
-
-            {isFilterOpen && (
-              <div className={styles.filterDropdown}>
+          {isFilterOpen && (
+            <div className={styles.filterDropdown}>
+              <input
+                type="date"
+                className={styles.filterInput}
+                value={filterTanggal}
+                onChange={(e) => setFilterTanggal(e.target.value)}
+                placeholder="Tanggal"
+              />
+              <div className={styles.lokasiWrapper}>
                 <input
-                  type="date"
+                  type="text"
                   className={styles.filterInput}
-                  value={filterTanggal}
-                  onChange={(e) => setFilterTanggal(e.target.value)}
-                  placeholder="Tanggal"
+                  value={filterLokasi}
+                  onChange={(e) => setFilterLokasi(e.target.value)}
+                  placeholder="Lokasi"
                 />
-                <div className={styles.lokasiWrapper}>
-                  <input
-                    type="text"
-                    className={styles.filterInput}
-                    value={filterLokasi}
-                    onChange={(e) => setFilterLokasi(e.target.value)}
-                    placeholder="Lokasi"
-                  />
-                  <span className={styles.selectArrow}>⌵</span>
-                </div>
-                <button
-                  className={styles.btnApplyFilter}
-                  onClick={() => {
-                    fetchBarang();
-                    setIsFilterOpen(false);
-                  }}
-                >
-                  Cari
-                </button>
+                <span className={styles.selectArrow}>⌵</span>
               </div>
-            )}
-          </div>
-
-          <div className={styles.searchBar}>
-            <span className={styles.searchIcon}>🔍</span>
-            <input
-              type="text"
-              placeholder="SEARCH"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              id="search-input"
-            />
-          </div>
+              <button
+                className={styles.btnApplyFilter}
+                onClick={() => {
+                  fetchBarang();
+                  setIsFilterOpen(false);
+                }}
+              >
+                Cari
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Grid */}
-        {loading ? (
-          <div className={styles.loadingWrapper}>
-            <div className={styles.spinner} />
-            Loading...
-          </div>
-        ) : barangList.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div style={{ fontSize: 64 }}>📦</div>
-            <p>Belum ada barang ditemukan.</p>
-          </div>
-        ) : (
-          <div className={styles.cardGrid}>
-            {barangList.map((item) => (
-              <div
-                key={item.barangId}
-                className={styles.card}
-                id={`card-${item.barangId}`}
-              >
-                <div className={styles.cardImageWrapper}>
-                  {item.foto ? (
-                    <img
-                      src={item.foto}
-                      alt={item.nama}
-                      className={styles.cardImage}
-                    />
-                  ) : (
-                    <div className={styles.cardImagePlaceholder}>📷</div>
-                  )}
-                </div>
-                <div className={styles.cardBody}>
-                  <div className={styles.cardTitle}>{item.nama}</div>
-                  <div className={styles.cardMeta}>
-                    <span>
-                      <span className={styles.metaIcon}>📍</span>
-                      Lokasi: {item.lokasi}
-                    </span>
-                    <span>
-                      <span className={styles.metaIcon}>📅</span>
-                      Waktu: {formatDate(item.tanggal)}
-                    </span>
+        <div className={styles.searchBar}>
+          <span className={styles.searchIcon}>🔍</span>
+          <input
+            type="text"
+            placeholder="SEARCH"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            id="search-input"
+          />
+        </div>
+      </div>
+
+      {/* ===== WHITE CARD CONTAINER — hanya mencakup daftar barang ===== */}
+      <div className={styles.content}>
+        <div className={styles.cardContainer}>
+          {loading ? (
+            <div className={styles.loadingWrapper}>
+              <div className={styles.spinner} />
+              Loading...
+            </div>
+          ) : barangList.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div style={{ fontSize: 64 }}>📦</div>
+              <p>Belum ada barang ditemukan.</p>
+            </div>
+          ) : (
+            <div className={styles.cardGrid}>
+              {barangList.map((item) => (
+                <div
+                  key={item.barangId}
+                  className={styles.card}
+                  id={`card-${item.barangId}`}
+                >
+                  <div className={styles.cardImageWrapper}>
+                    {item.foto ? (
+                      <img
+                        src={item.foto}
+                        alt={item.nama}
+                        className={styles.cardImage}
+                      />
+                    ) : (
+                      <div className={styles.cardImagePlaceholder}>📷</div>
+                    )}
                   </div>
-                  <button
-                    className={styles.btnClaim}
-                    onClick={() => handleClaimClick(item)}
-                    id={`claim-${item.barangId}`}
-                  >
-                    CLAIM
-                  </button>
+                  <div className={styles.cardBody}>
+                    <div className={styles.cardTitle}>{item.nama}</div>
+                    <div className={styles.cardMeta}>
+                      <span>
+                        <span className={styles.metaIcon}>📍</span>
+                        Lokasi: {item.lokasi}
+                      </span>
+                      <span>
+                        <span className={styles.metaIcon}>📅</span>
+                        Waktu: {formatDate(item.tanggal)}
+                      </span>
+                    </div>
+                    <button
+                      className={styles.btnClaim}
+                      onClick={() => handleClaimClick(item)}
+                      id={`claim-${item.barangId}`}
+                    >
+                      CLAIM
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ===== CLAIM FORM MODAL ===== */}
