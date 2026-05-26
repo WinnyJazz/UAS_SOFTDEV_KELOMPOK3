@@ -5,13 +5,13 @@
 ══════════════════════════════════════════ */
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(160deg, #6B21C8 0%, #7C3AED 35%, #9333EA 65%, #a855f7 100%);
+  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
   font-family: 'Nunito', Arial, sans-serif;
   color: #fff;
 }
 
 .content {
-  max-width: 1080px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 28px 24px 100px;
 }
@@ -421,7 +421,7 @@
    CARD GRID (barang)
 ══════════════════════════════════════════ */
 .cardGrid {
-  background: #e5e7eb;
+  background: #ffffff;
   border-radius: 20px;
   padding: 24px;
   display: grid;
@@ -739,14 +739,21 @@
 .claimsTableWrapper {
   background: #fff;
   border-radius: 20px;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
-
 .claimsTable {
-  width: 100%;
+  width: max-content; /* tabel melebar sesuai konten */
+  min-width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
   font-size: 13px;
+}
+
+.claimsTable th,
+.claimsTable td {
+  white-space: nowrap;
+  padding: 12px 20px; 
 }
 
 .claimsTable thead {
@@ -755,13 +762,12 @@
 }
 
 .claimsTable th {
-  padding: 14px 16px;
-  text-align: left;
+  padding: 12px 10px; 
+  text-align: center;
   font-weight: 800;
-  font-size: 12px;
-  letter-spacing: 0.5px;
+  font-size: 11px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
 .claimRow {
@@ -774,11 +780,16 @@
 }
 
 .claimsTable td {
-  padding: 14px 16px;
+  padding: 12px 10px; 
   color: #374151;
   font-weight: 600;
   vertical-align: middle;
+
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
+
+/* custom text */
 
 .tdNim {
   font-weight: 800;
@@ -792,7 +803,6 @@
 
 .tdBarang {
   font-weight: 700;
-  max-width: 120px;
 }
 
 .tdJam {

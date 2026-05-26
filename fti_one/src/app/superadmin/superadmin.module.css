@@ -70,7 +70,7 @@
 /* ── LAYOUT ── */
 .layout {
     display: flex;
-    margin-top: 62px;
+    /* margin-top: 62px; */
     min-height: calc(100vh - 62px);
     background: linear-gradient(160deg, #0d0d4a 0%, #1a1a6e 60%, #12125c 100%);
     align-items: stretch;
