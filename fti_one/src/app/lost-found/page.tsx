@@ -237,7 +237,7 @@ export default function LostFoundStudent() {
           </div>
           <span>
             <strong>Status &amp; Notifikasi</strong>
-            <small>Pantau klaim dan laporanmu</small>
+            <small>Pantau klaimmu</small>
           </span>
         </button>
       </div>

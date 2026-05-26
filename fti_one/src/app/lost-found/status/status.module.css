@@ -1,7 +1,7 @@
 /* ========== PAGE ========== */
 .pageWrapper {
   min-height: 100vh;
-  background: linear-gradient(180deg, #4A00E0 0%, #7B2FBE 40%, #8E2DE2 100%);
+  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
   padding: 40px 20px 100px;
   color: #fff;
   font-family: Arial, Helvetica, sans-serif;
@@ -74,6 +74,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
+  margin-bottom: 28px;
 }
 
 .tabActive {
