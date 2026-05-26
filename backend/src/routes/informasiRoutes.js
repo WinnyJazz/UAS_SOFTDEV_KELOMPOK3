@@ -2,19 +2,19 @@ const express = require("express");
 const router = express.Router();
 const {
   getAllInformasi,
-  getInformasiById,   // ← tambah
+  getInformasiById,   
   createInformasi,
-  updateInformasi,    // ← tambah
+  updateInformasi,    
   deleteInformasi,
 } = require("../controllers/informasiController");
 
 // Publik
 router.get("/", getAllInformasi);
-router.get("/:id", getInformasiById);   // ← tambah, untuk detail page
+router.get("/:id", getInformasiById);   
 
 // Admin
 router.post("/", createInformasi);
-router.put("/:id", updateInformasi);    // ← tambah, untuk edit page
+router.put("/:id", updateInformasi);    
 router.delete("/:id", deleteInformasi);
 
 module.exports = router;

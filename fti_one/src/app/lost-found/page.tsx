@@ -30,6 +30,7 @@ export default function LostFoundStudent() {
   const [filterTanggal, setFilterTanggal] = useState('');
   const [filterLokasi, setFilterLokasi] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
   const [selectedBarang, setSelectedBarang] = useState<BarangItem | null>(null);
   const [showClaimForm, setShowClaimForm] = useState(false);
   const [claimData, setClaimData] = useState({
@@ -41,6 +42,18 @@ export default function LostFoundStudent() {
   const [submitting, setSaving] = useState(false);
   const [hasUnreadChats, setHasUnreadChats] = useState(false);
   const ktmInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchAvailableLocations = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/barang/locations/available');
+      const data = await res.json();
+      if (data.success) {
+        setAvailableLocations(data.data);
+      }
+    } catch (err) {
+      console.error('Fetch available locations error:', err);
+    }
+  };
 
   const fetchBarang = async (searchQuery?: string) => {
     try {
@@ -77,6 +90,7 @@ export default function LostFoundStudent() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     fetchBarang();
+    fetchAvailableLocations();
 
     // Check for unread chats (only if logged in)
     const checkChats = async () => {
@@ -108,6 +122,13 @@ export default function LostFoundStudent() {
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
+
+  // Refresh available locations periodically
+  useEffect(() => {
+    fetchAvailableLocations();
+    const interval = setInterval(fetchAvailableLocations, 10000); // Refresh setiap 10 detik
+    return () => clearInterval(interval);
+  }, []);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -182,6 +203,7 @@ export default function LostFoundStudent() {
         setSelectedBarang(null);
         setClaimData({ nama: '', nim: '', nomorTelepon: '', fotoKTM: null });
         fetchBarang();
+        fetchAvailableLocations();
       } else {
         alert(data.message || 'Gagal mengajukan klaim.');
       }
@@ -240,13 +262,18 @@ export default function LostFoundStudent() {
                 placeholder="Tanggal"
               />
               <div className={styles.lokasiWrapper}>
-                <input
-                  type="text"
+                <select
                   className={styles.filterInput}
                   value={filterLokasi}
                   onChange={(e) => setFilterLokasi(e.target.value)}
-                  placeholder="Lokasi"
-                />
+                >
+                  <option value="">-- Pilih Lokasi --</option>
+                  {availableLocations.map((lokasi) => (
+                    <option key={lokasi} value={lokasi}>
+                      {lokasi}
+                    </option>
+                  ))}
+                </select>
                 <span className={styles.selectArrow}>⌵</span>
               </div>
               <button

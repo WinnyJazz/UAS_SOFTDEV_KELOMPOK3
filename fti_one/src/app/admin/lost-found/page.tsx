@@ -57,13 +57,13 @@ interface FormData {
   foto: string | null;
 }
 
-const API_URL       = 'http://localhost:5000/api/barang';
+const API_URL = 'http://localhost:5000/api/barang';
 const CLAIMS_API_URL = 'http://localhost:5000/api/claim';
 
 // Helper: ubah status backend → label display
 const statusLabel = (status: ClaimItem['status']) => {
-  if (status === 'pending')    return 'Menunggu';
-  if (status === 'disetujui')  return 'Disetujui';
+  if (status === 'pending') return 'Menunggu';
+  if (status === 'disetujui') return 'Disetujui';
   return 'Ditolak';
 };
 
@@ -71,10 +71,10 @@ const statusLabel = (status: ClaimItem['status']) => {
 const relativeTime = (dateStr: string) => {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1)   return 'Baru saja';
-  if (mins < 60)  return `${mins} menit lalu`;
+  if (mins < 1) return 'Baru saja';
+  if (mins < 60) return `${mins} menit lalu`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24)   return `${hrs} jam lalu`;
+  if (hrs < 24) return `${hrs} jam lalu`;
   return `${Math.floor(hrs / 24)} hari lalu`;
 };
 
@@ -98,6 +98,7 @@ export default function LostFoundAdmin() {
   const [filterTanggal, setFilterTanggal] = useState('');
   const [filterLokasi, setFilterLokasi] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
 
   // ── Claims state ──
   const [claims, setClaims] = useState<ClaimItem[]>([]);
@@ -116,6 +117,18 @@ export default function LostFoundAdmin() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const getToken = () => localStorage.getItem('token') || '';
+
+  const fetchAvailableLocations = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/barang/locations/available');
+      const data = await res.json();
+      if (data.success) {
+        setAvailableLocations(data.data);
+      }
+    } catch (err) {
+      console.error('Fetch available locations error:', err);
+    }
+  };
 
   const fetchBarang = async (searchQuery?: string) => {
     try {
@@ -159,8 +172,8 @@ export default function LostFoundAdmin() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
@@ -213,7 +226,7 @@ export default function LostFoundAdmin() {
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (data.success) { closeModal(); fetchBarang(); }
+      if (data.success) { closeModal(); fetchBarang(); fetchAvailableLocations(); }
       else alert(data.message || 'Gagal menyimpan barang.');
     } catch (err) {
       console.error('Submit error:', err);
@@ -229,7 +242,7 @@ export default function LostFoundAdmin() {
       const token = getToken();
       const res = await fetch(`${API_URL}/${barangId}/done`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (data.success) fetchBarang();
+      if (data.success) { fetchBarang(); fetchAvailableLocations(); }
     } catch (err) { console.error('Mark done error:', err); }
   };
 
@@ -238,35 +251,35 @@ export default function LostFoundAdmin() {
       const token = getToken();
       const res = await fetch(`${API_URL}/${barangId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (data.success) fetchBarang();
+      if (data.success) { fetchBarang(); fetchAvailableLocations(); }
       else alert(data.message || 'Gagal menghapus barang.');
     } catch (err) { console.error('Delete error:', err); alert('Terjadi kesalahan saat menghapus.'); }
   };
 
   // ── Fetch claims dari API ──
-const fetchClaims = async () => {
-  try {
-    setClaimsLoading(true);
-    const token = getToken();
-    
-    console.log("TOKEN SAAT FETCH CLAIMS:", token); // ← tambah ini
-    
-    const res = await fetch(CLAIMS_API_URL, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    console.log("RESPONSE CLAIMS:", data); // ← dan ini
-    
-    if (data.success) {
-      setClaims(data.data);
+  const fetchClaims = async () => {
+    try {
+      setClaimsLoading(true);
+      const token = getToken();
+
+      console.log("TOKEN SAAT FETCH CLAIMS:", token); 
+
+      const res = await fetch(CLAIMS_API_URL, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      console.log("RESPONSE CLAIMS:", data); 
+
+      if (data.success) {
+        setClaims(data.data);
+      }
+    } catch (err) {
+      console.error('fetchClaims error:', err);
+    } finally {
+      setClaimsLoading(false);
     }
-  } catch (err) {
-    console.error('fetchClaims error:', err);
-  } finally {
-    setClaimsLoading(false);
-  }
-};
-// auth check
+  };
+  // auth check
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -289,6 +302,7 @@ const fetchClaims = async () => {
 
       await fetchBarang();
       await fetchClaims();
+      await fetchAvailableLocations();
 
     };
 
@@ -297,12 +311,28 @@ const fetchClaims = async () => {
     return () => clearInterval(interval);
   }, [router]);
 
+  // Refresh available locations periodically
+  useEffect(() => {
+    fetchAvailableLocations();
+    const interval = setInterval(fetchAvailableLocations, 10000); // Refresh setiap 10 detik
+    return () => clearInterval(interval);
+  }, []);
+
+  // Debounced search for barang
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchBarang(search);
+    }, 400);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
   // ── Claims stats & filter ──
   const claimStats = {
-    semua:     claims.length,
-    pending:   claims.filter(c => c.status === 'pending').length,
+    semua: claims.length,
+    pending: claims.filter(c => c.status === 'pending').length,
     disetujui: claims.filter(c => c.status === 'disetujui').length,
-    ditolak:   claims.filter(c => c.status === 'ditolak').length,
+    ditolak: claims.filter(c => c.status === 'ditolak').length,
   };
 
   const filteredClaims = claims.filter(c => {
@@ -339,6 +369,7 @@ const fetchClaims = async () => {
         );
         // Refresh barang supaya status ikut update
         fetchBarang();
+        fetchAvailableLocations();
       } else {
         alert(data.message || 'Gagal menyetujui claim.');
       }
@@ -392,22 +423,22 @@ const fetchClaims = async () => {
     }
   };
 
-  
 
-    const addNotif = (
-      message: string,
-      type: Notification['type']
-    ) => {
-      const newNotif: Notification = {
-        id: crypto.randomUUID(),
-        message,
-        type,
-        time: 'Baru saja',
-        read: false,
-      };
 
-      setNotifications(prev => [newNotif, ...prev]);
+  const addNotif = (
+    message: string,
+    type: Notification['type']
+  ) => {
+    const newNotif: Notification = {
+      id: crypto.randomUUID(),
+      message,
+      type,
+      time: 'Baru saja',
+      read: false,
     };
+
+    setNotifications(prev => [newNotif, ...prev]);
+  };
 
   const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
 
@@ -527,8 +558,15 @@ const fetchClaims = async () => {
                     <input type="date" className={styles.filterInput} value={filterTanggal}
                       onChange={e => setFilterTanggal(e.target.value)} />
                     <div className={styles.lokasiWrapper}>
-                      <input type="text" className={styles.filterInput} value={filterLokasi}
-                        onChange={e => setFilterLokasi(e.target.value)} placeholder="Lokasi" />
+                      <select className={styles.filterInput} value={filterLokasi}
+                        onChange={e => setFilterLokasi(e.target.value)}>
+                        <option value="">-- Pilih Lokasi --</option>
+                        {availableLocations.map((lokasi) => (
+                          <option key={lokasi} value={lokasi}>
+                            {lokasi}
+                          </option>
+                        ))}
+                      </select>
                       <span className={styles.selectArrow}>⌵</span>
                     </div>
                     <button className={styles.btnApplyFilter} onClick={() => { fetchBarang(); setIsFilterOpen(false); }}>
