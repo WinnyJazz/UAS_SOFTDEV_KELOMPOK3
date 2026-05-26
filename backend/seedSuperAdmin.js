@@ -5,30 +5,45 @@ require("dotenv").config();
 
 async function seedSuperAdmin() {
     try {
-        // Connect to MongoDB
+        // Connect MongoDB
         await mongoose.connect(process.env.MONGO_URI);
         console.log("Connected to MongoDB");
 
-        // Check if superadmin already exists
-        const existingSuperAdmin = await Admin.findOne({ role: "superadmin" });
-        if (existingSuperAdmin) {
-            console.log("Superadmin already exists");
-            return;
+        // Validasi env
+        if (
+            !process.env.SUPERADMIN_EMAIL ||
+            !process.env.SUPERADMIN_PASSWORD
+        ) {
+            throw new Error(
+                "SUPERADMIN_EMAIL atau SUPERADMIN_PASSWORD belum diisi di .env"
+            );
         }
 
         // Hash password
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash("superadmin123", salt);
 
-        // Create superadmin
-        const superAdmin = await Admin.create({
-            nama: "Super Admin",
-            email: "superadmin@fti.com",
-            password: hashedPassword,
-            role: "superadmin",
-        });
+        const hashedPassword = await bcrypt.hash(
+            process.env.SUPERADMIN_PASSWORD,
+            salt
+        );
 
-        console.log("Superadmin created successfully:", {
+        // Update kalau sudah ada, create kalau belum ada
+        const superAdmin = await Admin.findOneAndUpdate(
+            { role: "superadmin" },
+            {
+                nama: "Super Admin",
+                email: process.env.SUPERADMIN_EMAIL,
+                password: hashedPassword,
+                role: "superadmin",
+            },
+            {
+                upsert: true,
+                new: true,
+            }
+        );
+
+        console.log("Superadmin berhasil dibuat / diupdate:");
+        console.log({
             adminId: superAdmin.adminId,
             nama: superAdmin.nama,
             email: superAdmin.email,
@@ -36,7 +51,8 @@ async function seedSuperAdmin() {
         });
 
     } catch (error) {
-        console.error("Error seeding superadmin:", error);
+        console.error("Error seeding superadmin:", error.message);
+
     } finally {
         await mongoose.disconnect();
         console.log("Disconnected from MongoDB");
