@@ -8,7 +8,6 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const barangRoutes = require('./routes/barangRoutes');
 const claimRoutes = require('./routes/claimRoutes');
-const chatRoutes = require('./routes/chatRoutes');
 const teamPhotoRoutes = require('./routes/teamPhotoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const informasiRoutes = require('./routes/informasiRoutes');
@@ -31,7 +30,6 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/barang', barangRoutes);
 app.use('/api/claim', claimRoutes);
-app.use('/api/chat', chatRoutes);
 app.use('/api/team-photos', teamPhotoRoutes);
 app.use('/api/informasi', informasiRoutes);
 app.use('/api/aspirasi', aspirasiRoutes);

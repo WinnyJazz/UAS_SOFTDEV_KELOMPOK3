@@ -1,7 +1,7 @@
 const Barang = require("../models/Barang");
 const Claim = require("../models/Claim");
 const Aspirasi = require("../models/Aspirasi");
-const Notifikasi = require("../models/notifikasi");
+const Notifikasi = require("../models/Notifikasi");
 const Mahasiswa = require("../models/Mahasiswa");
 const Admin = require("../models/Admin");
 
@@ -198,24 +198,15 @@ exports.getNotifikasi = async (req, res) => {
   try {
     const { read, category } = req.query;
 
-    const query = {};
+    const query = { target: "admin" }; // ✅ filter target admin
 
-    // Filter read
-    if (read === "Belum Dibaca") query.isRead = false;
-    else if (read === "Sudah Dibaca") query.isRead = true;
+    // ✅ pakai field "read" sesuai schema
+    if (read === "Belum Dibaca") query.read = false;
+    else if (read === "Sudah Dibaca") query.read = true;
 
-    // Filter category (pakai target.refModel)
+    // ✅ pakai field "category" langsung sesuai schema
     if (category && category !== "Semua") {
-      const refModelMap = {
-        "Lost & Found": "Barang",
-        Aspirasi: "Aspirasi",
-        User: null,    // notif user tidak punya refModel spesifik
-        Sistem: null,
-      };
-      const refModel = refModelMap[category];
-      if (refModel) {
-        query["target.refModel"] = refModel;
-      }
+      query.category = category;
     }
 
     const notifs = await Notifikasi.find(query)
@@ -223,35 +214,25 @@ exports.getNotifikasi = async (req, res) => {
       .limit(50)
       .lean();
 
-    const unreadCount = await Notifikasi.countDocuments({ read: false });
-
-    // Map ke format frontend
-    const mapped = notifs.map((n) => {
-      // Tentukan icon & category berdasarkan refModel
-      const refModel = n.target?.refModel;
-      let icon = "🔔";
-      let iconBg = "#f3f4f6";
-      let cat = "Sistem";
-
-      if (refModel === "Aspirasi") { icon = "💬"; iconBg = "#d1fae5"; cat = "Aspirasi"; }
-      else if (refModel === "Claim" || refModel === "Barang") { icon = "📦"; iconBg = "#ede9fe"; cat = "Lost & Found"; }
-      else if (refModel === "Informasi") { icon = "ℹ️"; iconBg = "#dbeafe"; cat = "Sistem"; }
-
-      return {
-        id: n.notifId || n._id.toString(),
-        _id: n._id.toString(),
-        icon,
-        iconBg,
-        title: (n.title || "").length > 50
-          ? n.title.substring(0, 47) + "..."
-          : n.title,
-
-        desc: n.desc || "",
-        time: formatRelativeTime(n.createdAt),
-        read: n.read,
-        category: cat,
-      };
+    const unreadCount = await Notifikasi.countDocuments({
+      target: "admin",
+      read: false, // ✅ konsisten
     });
+
+    // ✅ langsung pakai data dari DB, tidak perlu derive ulang
+    const mapped = notifs.map((n) => ({
+      id: n.notifId || n._id.toString(),
+      _id: n._id.toString(),
+      icon: n.icon,
+      iconBg: n.iconBg,
+      title: n.title?.length > 50 ? n.title.substring(0, 47) + "..." : n.title,
+      desc: n.desc || "",
+      time: formatRelativeTime(n.createdAt),
+      read: n.read,
+      category: n.category,
+      refType: n.refType,
+      refId: n.refId,
+    }));
 
     return res.json({ success: true, data: mapped, unreadCount });
   } catch (err) {
@@ -267,10 +248,16 @@ exports.markNotifRead = async (req, res) => {
   try {
     const { id } = req.params;
 
-    await Notifikasi.findOneAndUpdate(
-      { $or: [{ notifikasiId: id }, { _id: id }] },
-      { read: true }
+    // ✅ coba match notifId dulu, fallback ke _id
+    const notif = await Notifikasi.findOneAndUpdate(
+      { $or: [{ notifId: id }, { _id: id }] }, // ✅ "notifId" bukan "notifikasiId"
+      { read: true },
+      { new: true }
     );
+
+    if (!notif) {
+      return res.status(404).json({ success: false, message: "Notifikasi tidak ditemukan" });
+    }
 
     return res.json({ success: true, message: "Notifikasi ditandai sudah dibaca" });
   } catch (err) {
@@ -284,11 +271,33 @@ exports.markNotifRead = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.markAllNotifsRead = async (req, res) => {
   try {
-    await Notifikasi.updateMany({ read: false }, { read: true });
+    await Notifikasi.updateMany(
+      { target: "admin", read: false }, // ✅ tambah filter target
+      { read: true }
+    );
 
     return res.json({ success: true, message: "Semua notifikasi ditandai sudah dibaca" });
   } catch (err) {
     console.error("markAllNotifsRead error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+exports.deleteNotif = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const notif = await Notifikasi.findOneAndDelete({
+      $or: [{ notifId: id }, { _id: id }],
+    });
+
+    if (!notif) {
+      return res.status(404).json({ success: false, message: "Notifikasi tidak ditemukan" });
+    }
+
+    return res.json({ success: true, message: "Notifikasi dihapus" });
+  } catch (err) {
+    console.error("deleteNotif error:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };

@@ -106,3 +106,6 @@ DashboardSchema.methods.refreshDashboard = async function () {
 };
 
 module.exports = mongoose.model("Dashboard", DashboardSchema);
+
+// DELETE /api/dashboard/notifikasi/:id
+router.delete("/notifikasi/:id", deleteNotif);

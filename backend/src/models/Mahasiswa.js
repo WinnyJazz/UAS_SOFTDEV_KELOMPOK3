@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const NotifiablePlugin = require("./Notifiable");
 
 const MahasiswaSchema = new mongoose.Schema(
   {
@@ -75,8 +74,6 @@ const MahasiswaSchema = new mongoose.Schema(
     versionKey: false,
   }
 );
-
-MahasiswaSchema.plugin(NotifiablePlugin);
 
 MahasiswaSchema.methods.getPesanNotifikasi = function () {
   return `Notifikasi untuk mahasiswa: ${this.nama}`;

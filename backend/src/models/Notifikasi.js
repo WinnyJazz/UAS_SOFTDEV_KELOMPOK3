@@ -1,61 +1,57 @@
 const mongoose = require("mongoose");
-const { v4: uuidv4 } = require("uuid");
 
-const NotifikasiSchema = new mongoose.Schema(
+const notifikasiSchema = new mongoose.Schema(
   {
     notifId: {
       type: String,
-      default: () => uuidv4(),
       unique: true,
     },
 
-    // Judul singkat notifikasi
     title: {
       type: String,
       required: true,
     },
 
-    // Deskripsi detail
     desc: {
       type: String,
       default: "",
     },
 
-    // Kategori: "Lost & Found" | "Aspirasi" | "User" | "Sistem"
     category: {
       type: String,
       enum: ["Lost & Found", "Aspirasi", "User", "Sistem"],
       default: "Sistem",
     },
 
-    // Emoji icon dan warna background
     icon: {
       type: String,
       default: "🔔",
     },
+
     iconBg: {
       type: String,
       default: "#e0e7ff",
     },
 
-    // Sudah dibaca atau belum
+    // siapa target notif (admin / user)
+    target: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "admin",
+    },
+
+    // status read
     read: {
       type: Boolean,
       default: false,
     },
 
-    // Target penerima: "admin" | userId spesifik
-    target: {
-      type: String,
-      default: "admin",
-    },
-
-    // Referensi ke entitas terkait (opsional)
+    // optional reference (biar bisa klik ke data asal notif)
     refType: {
-      type: String,
-      enum: ["claim", "barang", "aspirasi", "jawaban", null],
+      type: String, // contoh: "barang", "aspirasi", "claim"
       default: null,
     },
+
     refId: {
       type: String,
       default: null,
@@ -66,4 +62,16 @@ const NotifikasiSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Notifikasi", NotifikasiSchema);
+/**
+ * Auto generate notifId biar gampang tracking
+ */
+notifikasiSchema.pre("save", function (next) {
+  if (!this.notifId) {
+    this.notifId = `NTF-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  }
+  next();
+});
+
+module.exports =
+  mongoose.models.Notifikasi ||
+  mongoose.model("Notifikasi", notifikasiSchema);

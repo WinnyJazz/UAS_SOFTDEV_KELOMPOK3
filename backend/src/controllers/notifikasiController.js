@@ -6,7 +6,7 @@ const Notifikasi = require("../models/notifikasi");
 const createNotif = async ({
   title,
   desc = "",
-  category, // ❗ HAPUS DEFAULT "Sistem" biar wajib diisi
+  category,
   icon = "🔔",
   iconBg = "#e0e7ff",
   refType = null,
@@ -14,8 +14,11 @@ const createNotif = async ({
   target = "admin",
 }) => {
   try {
-    if (!category) {
-      category = "Sistem"; // fallback aman tapi tetap keliatan kalau lupa isi
+    // 🔥 VALIDASI CATEGORY BIAR NGGAK NGACO
+    const allowedCategory = ["Lost & Found", "Aspirasi", "User", "Sistem"];
+
+    if (!allowedCategory.includes(category)) {
+      category = "Sistem";
     }
 
     const notif = new Notifikasi({
@@ -69,6 +72,13 @@ exports.getNotifikasi = async (req, res) => {
     const { read, category, limit = 50 } = req.query;
 
     const filter = { target: "admin" };
+
+    if (read === "Belum Dibaca") filter.read = false;
+    else if (read === "Sudah Dibaca") filter.read = true;
+
+    if (category && category !== "Semua") {
+      filter.category = category;
+    }
 
     if (read === "Belum Dibaca") filter.read = false;
     else if (read === "Sudah Dibaca") filter.read = true;

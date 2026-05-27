@@ -9,6 +9,7 @@ const {
   markNotifRead,
   markAllNotifsRead,
   getLostFound,
+  deleteNotif,
 } = require("../controllers/dashboardController");
 
 // Semua route dashboard hanya bisa diakses superadmin
@@ -28,5 +29,7 @@ router.get("/notifikasi", getNotifikasi);
 router.patch("/notifikasi/read-all", markAllNotifsRead);
 // PATCH /api/dashboard/notifikasi/:id/read
 router.patch("/notifikasi/:id/read", markNotifRead);
+// buat delete
+router.delete("/notifikasi/:id", deleteNotif);
 
 module.exports = router;

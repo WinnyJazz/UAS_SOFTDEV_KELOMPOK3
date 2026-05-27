@@ -10,7 +10,7 @@ const {
 } = require("../models/Aspirasi");
 
 // 🔔 Import helper notifikasi
-const { createNotif } = require("./notifikasiController");
+const { createNotif } = require("../utils/notifHelper");
 
 /* ══════════════════════════════════════════
    TIMELINE
@@ -182,53 +182,65 @@ exports.getJawaban = async (req, res) => {
   }
 };
 
-// POST /api/aspirasi/jawaban  (mahasiswa submit)
+// controllers/aspirasController.js
+
+exports.submitSesiAspirasi = async (req, res) => {
+  try {
+    console.log("🔥 [submitSesiAspirasi] dipanggil");
+    console.log("🔥 [submitSesiAspirasi] body:", req.body);
+    const { sesiId, userId, jawabanList } = req.body;
+
+    if (!jawabanList || jawabanList.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Jawaban kosong",
+      });
+    }
+
+    const saved = await Promise.all(
+      jawabanList.map((j) =>
+        Jawaban.create({
+          sesiId,
+          pertanyaanId: j.pertanyaanId,
+          teks: j.teks,
+          userId,
+        })
+      )
+    );
+
+    const sesi = await SesiAspirasi.findById(sesiId);
+
+    // 🔔 NOTIF FIXED
+    const notif = await createNotif({
+      title: "Aspirasi Sesi Selesai",
+      desc: `Mahasiswa menyelesaikan sesi "${
+        sesi?.nama || "Aspirasi"
+      }" (${saved.length} jawaban)`,
+      category: "Aspirasi",
+      icon: "📋",
+      iconBg: "#dbeafe",
+      refType: "sesi-aspirasi",
+      refId: sesiId,
+      target: "admin",
+    });
+
+    console.log("📩 notif result:", notif);
+
+    return res.status(201).json({
+      success: true,
+      message: "Aspirasi berhasil dikirim",
+      data: saved,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.submitJawaban = async (req, res) => {
   try {
     const jawaban = new Jawaban(req.body);
     await jawaban.save();
-
-    // ─────────────────────────────────────────
-    // 🔔 TRIGGER NOTIFIKASI ADMIN
-    // Kirim notif setiap ada jawaban/aspirasi masuk
-    // ─────────────────────────────────────────
-
-    // Ambil info sesi buat konteks notif (opsional, tidak crash jika gagal)
-    let sesiNama = "–";
-    try {
-      if (req.body.sesiId) {
-        const sesi = await SesiAspirasi.findById(req.body.sesiId);
-        if (sesi) sesiNama = sesi.nama;
-      }
-    } catch (_) {}
-
-    // Ambil teks pertanyaan (opsional)
-    let teksPertanyaan = "";
-    try {
-      if (req.body.pertanyaanId) {
-        const p = await Pertanyaan.findById(req.body.pertanyaanId);
-        if (p) teksPertanyaan = p.teks;
-      }
-    } catch (_) {}
-
-    // Cuplikan jawaban (maks 80 karakter)
-    const cuplikanJawaban = req.body.teks
-      ? req.body.teks.length > 80
-        ? req.body.teks.substring(0, 80) + "..."
-        : req.body.teks
-      : "(tidak ada teks)";
-
-    await createNotif({
-      title: "Aspirasi Baru Masuk",
-      desc: `Sesi: ${sesiNama}${teksPertanyaan ? ` — Pertanyaan: "${teksPertanyaan}"` : ""}. Jawaban: "${cuplikanJawaban}"`,
-      category: "Aspirasi",
-      icon: "💬",
-      iconBg: "#ede9fe",
-      refType: "jawaban",
-      refId: jawaban._id?.toString() ?? null,
-      target: "admin",
-    });
-
     res.status(201).json(jawaban);
   } catch (err) {
     res.status(400).json({ message: err.message });

@@ -49,6 +49,11 @@ router.get("/jawaban", /* protect, isAdmin, */ ctrl.getJawaban);    // admin onl
 router.post("/jawaban", /* protect, */ ctrl.submitJawaban);         // user submit (bisa tambah protect jika login)
 
 /* ══════════════════════════════════════════
+   SUBMIT SESI ASPIRASI  (user: POST)
+══════════════════════════════════════════ */
+router.post("/sesi/submit", /* protect, */ ctrl.submitSesiAspirasi); // ✅ tambah ini
+
+/* ══════════════════════════════════════════
    HASIL RESPONS DPM  (admin: CRUD | user: GET)
 ══════════════════════════════════════════ */
 router.get("/hasil", ctrl.getAllHasil);                             // PUBLIC  — user & admin
