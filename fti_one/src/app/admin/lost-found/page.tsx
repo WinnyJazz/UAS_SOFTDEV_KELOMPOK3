@@ -268,6 +268,8 @@ export default function LostFoundAdmin() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
+        // console.log("CLAIMS DATA:", data); 
+        // console.log("CLAIMS ARRAY:", data.data); 
       console.log("RESPONSE CLAIMS:", data);
 
       if (data.success) {
@@ -279,6 +281,22 @@ export default function LostFoundAdmin() {
       setClaimsLoading(false);
     }
   };
+
+  // Refresh claims saat tab aktif berubah ke 'claims'
+  useEffect(() => {
+    if (activeTab === 'claims') {
+      fetchClaims();
+    }
+  }, [activeTab]);
+
+  // Polling otomatis setiap 10 detik (seperti barang & lokasi)
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     fetchClaims();
+  //   }, 10000);
+  //   return () => clearInterval(interval);
+  // }, []);
+
   // auth check
 
   useEffect(() => {

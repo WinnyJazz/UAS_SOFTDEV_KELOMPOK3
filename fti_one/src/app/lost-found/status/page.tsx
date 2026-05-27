@@ -7,7 +7,9 @@ import ChatPanel from '@/component/ChatPanel';
 
 interface ClaimItem {
   claimId: string;
-  barangId: { nama: string; lokasi: string; foto: string } | null;
+  barangId: { nama: string; lokasi: string; foto: string | null } | null; 
+  namaBarang?: string;
+  lokasiBarang?: string;
   status: string;
   tanggal: string;
   catatan?: string;
@@ -38,10 +40,12 @@ export default function StatusPage() {
 
   const fetchChats = useCallback(async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/chat/mine', { headers: { Authorization: `Bearer ${token()}` } });
+      const res = await fetch('http://localhost:5000/api/chat/mine', {
+        headers: { Authorization: `Bearer ${token()}` },
+      });
       const data = await res.json();
       if (data.success) setMyChats(data.data);
-    } catch (_) { }
+    } catch (_) {}
   }, [token]);
 
   useEffect(() => {
@@ -51,7 +55,8 @@ export default function StatusPage() {
       const t = token();
       await Promise.all([
         fetch('http://localhost:5000/api/claim/mine', { headers: { Authorization: `Bearer ${t}` } })
-          .then((r) => r.json()).then((d) => { if (d.success) setClaims(d.data); }),
+          .then((r) => r.json())
+          .then((d) => { if (d.success) setClaims(d.data); }),
         fetchChats(),
       ]);
       setLoading(false);
@@ -68,12 +73,17 @@ export default function StatusPage() {
   };
 
   const fmt = (d: string) =>
-    new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    new Date(d).toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
 
   return (
     <div className={styles.pageWrapper}>
       <div className={styles.content}>
-        <button className={styles.btnBack} onClick={() => router.push('/lost-found')}>← Lost &amp; Found</button>
+        <button className={styles.btnBack} onClick={() => router.push('/lost-found')}>
+          ← Lost &amp; Found
+        </button>
 
         <div className={styles.pageHeader}>
           <div className={styles.headerIcon}>🔔</div>
@@ -81,21 +91,24 @@ export default function StatusPage() {
           <p className={styles.pageSubtitle}>Pantau status klaimmu</p>
         </div>
 
-        {/* <div className={styles.tabBar}> */}
-          <button className={`${styles.tab} ${styles.tabActive}`}>
-            🏷️ Klaim Barang ({claims.length})
-          </button>
-        {/* </div> */}
+        <button className={`${styles.tab} ${styles.tabActive}`}>
+          🏷️ Klaim Barang ({claims.length})
+        </button>
 
         {loading ? (
-          <div className={styles.loading}><div className={styles.spinner} /><span>Memuat data...</span></div>
+          <div className={styles.loading}>
+            <div className={styles.spinner} />
+            <span>Memuat data...</span>
+          </div>
         ) : (
           <div className={styles.cardList}>
             {claims.length === 0 ? (
               <div className={styles.empty}>
                 <div className={styles.emptyIcon}>🏷️</div>
                 <p>Kamu belum pernah mengajukan klaim.</p>
-                <button className={styles.btnPrimary} onClick={() => router.push('/lost-found')}>Lihat Barang Temuan</button>
+                <button className={styles.btnPrimary} onClick={() => router.push('/lost-found')}>
+                  Lihat Barang Temuan
+                </button>
               </div>
             ) : (
               claims.map((claim) => {
@@ -103,23 +116,41 @@ export default function StatusPage() {
                 const chatOn = !!getChatFor(claim.claimId);
                 const unread = hasUnread(claim.claimId);
                 const isOpen = openChatId === claim.claimId;
+
+                // Nama & lokasi: pakai field barang (dari populate), fallback ke snapshot
+                const namaBarang = claim.barangId?.nama || claim.namaBarang || 'Barang tidak diketahui';
+                const lokasiBarang = claim.barangId?.lokasi || claim.lokasiBarang || null;
+                const fotoBarang = claim.barangId?.foto || null;
+
                 return (
                   <div key={claim.claimId}>
-                    <div className={styles.notifCard} style={{ '--accent': cfg.color } as React.CSSProperties}>
+                    <div
+                      className={styles.notifCard}
+                      style={{ '--accent': cfg.color } as React.CSSProperties}
+                    >
                       <div className={styles.cardImage}>
-                        {claim.barangId?.foto
-                          ? <img src={claim.barangId.foto} alt={claim.barangId?.nama} />
+                        {fotoBarang
+                          ? <img src={fotoBarang} alt={namaBarang} />
                           : <div className={styles.cardImagePlaceholder}>📦</div>}
                       </div>
+
                       <div className={styles.cardInfo}>
-                        <div className={styles.cardItemName}>{claim.barangId?.nama || 'Barang Terhapus'}</div>
-                        {claim.barangId?.lokasi && <div className={styles.cardMeta}>📍 {claim.barangId.lokasi}</div>}
+                        <div className={styles.cardItemName}>{namaBarang}</div>
+                        {lokasiBarang && (
+                          <div className={styles.cardMeta}>📍 {lokasiBarang}</div>
+                        )}
                         <div className={styles.cardMeta}>🕐 {fmt(claim.tanggal)}</div>
                         <div className={styles.cardDesc}>{cfg.desc}</div>
+                        {claim.catatan && (
+                          <div className={styles.cardCatatan}>📝 {claim.catatan}</div>
+                        )}
                       </div>
+
                       <div className={styles.cardStatus}>
                         <div className={styles.statusIcon}>{cfg.icon}</div>
-                        <div className={styles.statusLabel} style={{ color: cfg.color }}>{cfg.label}</div>
+                        <div className={styles.statusLabel} style={{ color: cfg.color }}>
+                          {cfg.label}
+                        </div>
                         <button
                           className={`${styles.btnChat} ${unread ? styles.btnChatUnread : ''}`}
                           onClick={() => setOpenChatId(isOpen ? null : claim.claimId)}
@@ -128,6 +159,7 @@ export default function StatusPage() {
                         </button>
                       </div>
                     </div>
+
                     {isOpen && (
                       <div style={{ marginTop: 8 }}>
                         <ChatPanel
@@ -135,7 +167,7 @@ export default function StatusPage() {
                           konteksId={claim.claimId}
                           userId=""
                           role="mahasiswa"
-                          itemName={claim.barangId?.nama}
+                          itemName={namaBarang}
                           onClose={() => setOpenChatId(null)}
                         />
                       </div>
@@ -146,7 +178,6 @@ export default function StatusPage() {
             )}
           </div>
         )}
-
       </div>
     </div>
   );

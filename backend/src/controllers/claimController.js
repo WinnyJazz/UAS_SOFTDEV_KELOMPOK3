@@ -1,16 +1,14 @@
 // controllers/claimController.js
-// ✅ Clean version + Notifikasi terstruktur
 
 const mongoose = require("mongoose");
 const Claim = require("../models/Claim");
 const Barang = require("../models/Barang");
 const cloudinary = require("../config/cloudinary");
 
-// 🔔 Notifikasi helper
 const { createNotif } = require("../utils/notifHelper");
 
 /* ═════════════════════════════════════════════
-   CREATE CLAIM (USER SUBMIT KLAIM)
+   CREATE CLAIM
 ═════════════════════════════════════════════ */
 const createClaim = async (req, res) => {
   try {
@@ -18,39 +16,22 @@ const createClaim = async (req, res) => {
     const userId = req.user.userId;
 
     if (!barangId || !nama || !nim || !nomorTelepon || !fotoKTM) {
-      return res.status(400).json({
-        success: false,
-        message: "Semua field wajib diisi.",
-      });
+      return res.status(400).json({ success: false, message: "Semua field wajib diisi." });
     }
 
-    // cari barang
     const barang = await Barang.findOne({ barangId });
-
     if (!barang) {
-      return res.status(404).json({
-        success: false,
-        message: "Barang tidak ditemukan.",
-      });
+      return res.status(404).json({ success: false, message: "Barang tidak ditemukan." });
     }
-
     if (barang.status !== "tersedia") {
-      return res.status(400).json({
-        success: false,
-        message: "Barang sudah tidak tersedia untuk diklaim.",
-      });
+      return res.status(400).json({ success: false, message: "Barang sudah tidak tersedia untuk diklaim." });
     }
 
-    // cek duplikasi claim
     const existingClaim = await Claim.findOne({ userId, barangId });
     if (existingClaim) {
-      return res.status(400).json({
-        success: false,
-        message: "Kamu sudah pernah mengajukan klaim untuk barang ini.",
-      });
+      return res.status(400).json({ success: false, message: "Kamu sudah pernah mengajukan klaim untuk barang ini." });
     }
 
-    // upload KTM
     let fotoKtmUrl = null;
     if (fotoKTM) {
       const uploadResult = await cloudinary.uploader.upload(fotoKTM, {
@@ -60,7 +41,6 @@ const createClaim = async (req, res) => {
       fotoKtmUrl = uploadResult.secure_url;
     }
 
-    // create claim
     const claim = await Claim.create({
       userId,
       barangId,
@@ -69,33 +49,25 @@ const createClaim = async (req, res) => {
       nomorTelepon,
       fotoKTM: fotoKtmUrl,
       status: "pending",
+      namaBarang: barang.nama,
+      lokasiBarang: barang.lokasi,
     });
 
-    /* ─────────────────────────────────────────
-       🔔 NOTIF: CLAIM MASUK (INI YANG PENTING)
-    ───────────────────────────────────────── */
-      await createNotif({
-        title: "Pengajuan Klaim Baru",
-        desc: `${nama} (NIM: ${nim}) mengajukan klaim untuk barang "${barang.nama}".`,
-        category: "Lost & Found", // 🔥 HARUS PERSIS SAMA DENGAN ENUM
-        icon: "📦",
-        iconBg: "#fef3c7",
-        refType: "claim",
-        refId: claim.claimId,
-        target: "admin",
-      });
-
-    return res.status(201).json({
-      success: true,
-      message: "Pengajuan klaim berhasil dikirim.",
-      data: claim,
+    await createNotif({
+      title: "Pengajuan Klaim Baru",
+      desc: `${nama} (NIM: ${nim}) mengajukan klaim untuk barang "${barang.nama}".`,
+      category: "Lost & Found",
+      icon: "📦",
+      iconBg: "#fef3c7",
+      refType: "claim",
+      refId: claim.claimId,
+      target: "admin",
     });
+
+    return res.status(201).json({ success: true, message: "Pengajuan klaim berhasil dikirim.", data: claim });
   } catch (error) {
     console.error("createClaim error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal membuat pengajuan klaim.",
-    });
+    return res.status(500).json({ success: false, message: "Gagal membuat pengajuan klaim." });
   }
 };
 
@@ -104,35 +76,37 @@ const createClaim = async (req, res) => {
 ═════════════════════════════════════════════ */
 const getAllClaims = async (req, res) => {
   try {
-    const claims = await Claim.find()
-      .sort({ createdAt: -1 })
-      .lean();
+    const claims = await Claim.find().sort({ createdAt: -1 }).lean();
 
     const enriched = await Promise.all(
       claims.map(async (claim) => {
         const barang = await Barang.findOne({ barangId: claim.barangId });
-        const user = await mongoose.model("Mahasiswa").findOne({
-          userId: claim.userId,
-        });
+        const user = await mongoose.model("Mahasiswa").findOne({ userId: claim.userId });
 
         return {
           ...claim,
-          barang,
-          user,
+          barangId: barang
+            ? {
+                barangId: barang.barangId,
+                nama: barang.nama,
+                lokasi: barang.lokasi,
+                foto: barang.foto ?? null,
+              }
+            : {
+                barangId: claim.barangId,
+                nama: claim.namaBarang ?? "—",
+                lokasi: claim.lokasiBarang ?? "—",
+                foto: null,
+              },
+          userId: user ?? null,
         };
       })
     );
 
-    return res.status(200).json({
-      success: true,
-      data: enriched,
-    });
+    return res.status(200).json({ success: true, data: enriched });
   } catch (error) {
     console.error("getAllClaims error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil data klaim.",
-    });
+    return res.status(500).json({ success: false, message: "Gagal mengambil data klaim." });
   }
 };
 
@@ -144,12 +118,8 @@ const updateClaimStatus = async (req, res) => {
     const { status, catatan } = req.body;
 
     const claim = await Claim.findOne({ claimId: req.params.id });
-
     if (!claim) {
-      return res.status(404).json({
-        success: false,
-        message: "Klaim tidak ditemukan.",
-      });
+      return res.status(404).json({ success: false, message: "Klaim tidak ditemukan." });
     }
 
     claim.status = status;
@@ -157,38 +127,25 @@ const updateClaimStatus = async (req, res) => {
     await claim.save();
 
     if (status === "disetujui") {
-      await Barang.findOneAndUpdate(
-        { barangId: claim.barangId },
-        { status: "dipinjam" }
-      );
+      await Barang.findOneAndUpdate({ barangId: claim.barangId }, { status: "dipinjam" });
     }
 
     const isApproved = status === "disetujui";
-
     await createNotif({
       title: isApproved ? "Klaim Disetujui" : "Klaim Ditolak",
-      desc: `Klaim barang "${claim.barangId}" telah ${status}${
-        catatan ? ` - ${catatan}` : ""
-      }`,
+      desc: `Klaim barang "${claim.namaBarang || claim.barangId}" telah ${status}${catatan ? ` - ${catatan}` : ""}`,
       category: "Lost & Found",
       icon: isApproved ? "✅" : "❌",
       iconBg: isApproved ? "#dcfce7" : "#fee2e2",
       refType: "claim",
-      refId: claim.claimId, // ✅ konsisten pakai claimId
+      refId: claim.claimId,
       target: "admin",
     });
 
-    return res.json({
-      success: true,
-      message: `Klaim berhasil ${status}`,
-      data: claim,
-    });
+    return res.json({ success: true, message: `Klaim berhasil ${status}`, data: claim });
   } catch (error) {
     console.error("updateClaimStatus error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal update status klaim.",
-    });
+    return res.status(500).json({ success: false, message: "Gagal update status klaim." });
   }
 };
 
@@ -199,33 +156,35 @@ const getMyClaims = async (req, res) => {
   try {
     const userId = req.user.userId;
 
-    const claims = await Claim.find({ userId })
-      .sort({ createdAt: -1 })
-      .lean();
+    const claims = await Claim.find({ userId }).sort({ createdAt: -1 }).lean();
 
     const enriched = await Promise.all(
       claims.map(async (claim) => {
-        const barang = await Barang.findOne({
-          barangId: claim.barangId,
-        });
-
+        const barang = await Barang.findOne({ barangId: claim.barangId });
+    
         return {
           ...claim,
-          barang,
+          barangId: barang
+            ? {
+                barangId: barang.barangId,
+                nama: barang.nama,
+                lokasi: barang.lokasi,
+                foto: barang.foto ?? null,
+              }
+            : {
+                barangId: claim.barangId,
+                nama: claim.namaBarang ?? "Barang tidak diketahui",
+                lokasi: claim.lokasiBarang ?? "-",
+                foto: null,
+              },
         };
       })
     );
 
-    return res.json({
-      success: true,
-      data: enriched,
-    });
+    return res.json({ success: true, data: enriched });
   } catch (error) {
     console.error("getMyClaims error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil klaim user.",
-    });
+    return res.status(500).json({ success: false, message: "Gagal mengambil klaim user." });
   }
 };
 

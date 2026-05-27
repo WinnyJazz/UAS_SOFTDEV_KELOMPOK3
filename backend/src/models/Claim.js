@@ -48,6 +48,14 @@ const ClaimSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    namaBarang: {
+      type: String,
+      default: null,
+    },
+    lokasiBarang: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
