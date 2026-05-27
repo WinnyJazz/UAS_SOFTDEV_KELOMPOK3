@@ -115,7 +115,7 @@ export default function LostFoundAdmin() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
-
+  const [zoomKtm, setZoomKtm] = useState<string | null>(null);
   const getToken = () => localStorage.getItem('token') || '';
 
   const fetchAvailableLocations = async () => {
@@ -268,8 +268,8 @@ export default function LostFoundAdmin() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-        // console.log("CLAIMS DATA:", data); 
-        // console.log("CLAIMS ARRAY:", data.data); 
+      // console.log("CLAIMS DATA:", data); 
+      // console.log("CLAIMS ARRAY:", data.data); 
       console.log("RESPONSE CLAIMS:", data);
 
       if (data.success) {
@@ -712,7 +712,8 @@ export default function LostFoundAdmin() {
                     filteredClaims.map(claim => (
                       <tr key={claim.claimId} className={styles.claimRow}>
                         <td>
-                          <div className={styles.ktmThumb}>
+                          <div className={styles.ktmThumb} onClick={() => claim.fotoKTM && setZoomKtm(claim.fotoKTM)}
+                            style={{ cursor: claim.fotoKTM ? 'zoom-in' : 'default' }}>
                             {claim.fotoKTM ? (
                               <img src={claim.fotoKTM} alt="KTM" />
                             ) : (
@@ -915,6 +916,23 @@ export default function LostFoundAdmin() {
           </div>
         </div>
       )}
+      {zoomKtm && (
+          <div 
+            onClick={() => setZoomKtm(null)}
+            style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              zIndex: 9999, cursor: 'zoom-out', padding: '20px'
+            }}
+          >
+            <img 
+              src={zoomKtm} 
+              alt="KTM Zoom"
+              style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: '12px', objectFit: 'contain' }}
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+        )}
     </div>
   );
 }

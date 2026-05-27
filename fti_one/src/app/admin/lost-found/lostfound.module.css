@@ -15,7 +15,11 @@
   margin: 0 auto;
   padding: 28px 24px 100px;
 }
-
+.ktmThumb:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+  transition: all 0.15s;
+}
 /* ══════════════════════════════════════════
    TOP BAR  (tabs + bell)
 ══════════════════════════════════════════ */

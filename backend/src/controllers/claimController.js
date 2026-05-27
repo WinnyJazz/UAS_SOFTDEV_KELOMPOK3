@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Claim = require("../models/Claim");
 const Barang = require("../models/Barang");
 const cloudinary = require("../config/cloudinary");
-
+const Mahasiswa = require("../models/Mahasiswa");
 const { createNotif } = require("../utils/notifHelper");
 
 /* ═════════════════════════════════════════════
@@ -78,30 +78,24 @@ const getAllClaims = async (req, res) => {
   try {
     const claims = await Claim.find().sort({ createdAt: -1 }).lean();
 
-    const enriched = await Promise.all(
-      claims.map(async (claim) => {
-        const barang = await Barang.findOne({ barangId: claim.barangId });
-        const user = await mongoose.model("Mahasiswa").findOne({ userId: claim.userId });
+    if (claims.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
+    }
 
-        return {
-          ...claim,
-          barangId: barang
-            ? {
-                barangId: barang.barangId,
-                nama: barang.nama,
-                lokasi: barang.lokasi,
-                foto: barang.foto ?? null,
-              }
-            : {
-                barangId: claim.barangId,
-                nama: claim.namaBarang ?? "—",
-                lokasi: claim.lokasiBarang ?? "—",
-                foto: null,
-              },
-          userId: user ?? null,
-        };
-      })
-    );
+    const barangIds = [...new Set(claims.map((c) => c.barangId))];
+    const barangList = await Barang.find({ barangId: { $in: barangIds } }).lean();
+    const barangMap = Object.fromEntries(barangList.map((b) => [b.barangId, b]));
+
+    const enriched = claims.map((claim) => {
+      const barang = barangMap[claim.barangId];
+      return {
+        ...claim,
+        barangId: barang
+          ? { barangId: barang.barangId, nama: barang.nama, lokasi: barang.lokasi, foto: barang.foto ?? null }
+          : { barangId: claim.barangId, nama: claim.namaBarang ?? "—", lokasi: claim.lokasiBarang ?? "—", foto: null },
+        userId: null, 
+      };
+    });
 
     return res.status(200).json({ success: true, data: enriched });
   } catch (error) {
@@ -155,31 +149,25 @@ const updateClaimStatus = async (req, res) => {
 const getMyClaims = async (req, res) => {
   try {
     const userId = req.user.userId;
-
     const claims = await Claim.find({ userId }).sort({ createdAt: -1 }).lean();
 
-    const enriched = await Promise.all(
-      claims.map(async (claim) => {
-        const barang = await Barang.findOne({ barangId: claim.barangId });
-    
-        return {
-          ...claim,
-          barangId: barang
-            ? {
-                barangId: barang.barangId,
-                nama: barang.nama,
-                lokasi: barang.lokasi,
-                foto: barang.foto ?? null,
-              }
-            : {
-                barangId: claim.barangId,
-                nama: claim.namaBarang ?? "Barang tidak diketahui",
-                lokasi: claim.lokasiBarang ?? "-",
-                foto: null,
-              },
-        };
-      })
-    );
+    if (claims.length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const barangIds = [...new Set(claims.map((c) => c.barangId))];
+    const barangList = await Barang.find({ barangId: { $in: barangIds } }).lean();
+    const barangMap  = Object.fromEntries(barangList.map((b) => [b.barangId, b]));
+
+    const enriched = claims.map((claim) => {
+      const barang = barangMap[claim.barangId];
+      return {
+        ...claim,
+        barangId: barang
+          ? { barangId: barang.barangId, nama: barang.nama, lokasi: barang.lokasi, foto: barang.foto ?? null }
+          : { barangId: claim.barangId, nama: claim.namaBarang ?? "Barang tidak diketahui", lokasi: claim.lokasiBarang ?? "-", foto: null },
+      };
+    });
 
     return res.json({ success: true, data: enriched });
   } catch (error) {
