@@ -48,17 +48,18 @@ export default function Navbar() {
 
   const fetchNotifPreview = async (token: string) => {
     try {
+      console.log("🔔 fetchNotifPreview dipanggil");
       const res = await fetch(
         "http://localhost:5000/api/dashboard/notifikasi?read=Belum+Dibaca",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.unreadCount ?? 0);
-        setNotifPreview((data.data ?? []).slice(0, 4));
-      }
-    } catch {
-      // silently fail
+      console.log("🔔 status:", res.status);
+      const data = await res.json();
+      console.log("🔔 data:", data);
+      setUnreadCount(data.unreadCount ?? 0);
+      setNotifPreview((data.data ?? []).slice(0, 4));
+    } catch (err) {
+      console.error("🔔 fetchNotifPreview error:", err);
     }
   };
 
@@ -99,32 +100,38 @@ export default function Navbar() {
 
   useEffect(() => {
     const loadUserData = () => {
-      const stored = localStorage.getItem("user");
-      const token = localStorage.getItem("token");
-      if (stored) {
-        const user = JSON.parse(stored);
-        setProfilePhoto(user.profilePhoto || null);
+  const stored = localStorage.getItem("user");
+  const token = localStorage.getItem("token");
+  
+  console.log("👤 stored:", stored);
+  console.log("👤 token:", token ? "ada" : "tidak ada");
+  
+  if (stored) {
+    const user = JSON.parse(stored);
+      console.log("👤 user.role:", user.role);
+      
+      const adminRole = user.role === "admin" || user.role === "superadmin";
+      console.log("👤 isAdmin:", adminRole);
+      
+      setProfilePhoto(user.profilePhoto || null);
+      setIsAdmin(adminRole);
 
-        const adminRole =
-          user.role === "admin" || user.role === "superadmin";
-        setIsAdmin(adminRole);
-
-        if (adminRole) {
-          setNavLinks([
-            { label: "Home", href: "/dashboard" },
-            { label: "About Us", href: "/aboutus" },
-            { label: "Aspirasi", href: "/admin/aspirasi" },
-            { label: "Info", href: "/admin/info" },
-            { label: "Lost & Found", href: "/admin/lost-found" },
-          ]);
-          if (token) fetchNotifPreview(token);
-        }
-      } else {
-        setProfilePhoto(null);
-        setIsAdmin(false);
-        setUnreadCount(0);
+      if (adminRole) {
+        setNavLinks([
+          { label: "Home", href: "/dashboard" },
+          { label: "About Us", href: "/aboutus" },
+          { label: "Aspirasi", href: "/admin/aspirasi" },
+          { label: "Info", href: "/admin/info" },
+          { label: "Lost & Found", href: "/admin/lost-found" },
+        ]);
+        if (token) fetchNotifPreview(token);
       }
-    };
+    } else {
+      setProfilePhoto(null);
+      setIsAdmin(false);
+      setUnreadCount(0);
+    }
+  };
 
     const handleLogout = () => {
       setProfilePhoto(null);

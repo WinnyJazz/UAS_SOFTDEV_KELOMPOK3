@@ -627,6 +627,133 @@
     font-family: 'Segoe UI', sans-serif;
 }
 
+/* ── ASPIRASI (NEW) ── */
+.tabRow {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.sesiSelect {
+    padding: 6px 12px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1e1b4b;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+}
+.sesiSelect:focus { border-color: #4338ca; }
+
+.pertanyaanGroup {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f3f4f6;
+}
+.pertanyaanGroup:last-child { border-bottom: none; }
+
+.pertanyaanHeading {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #f0f0ff;
+    border-left: 3px solid #4338ca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+
+.pertanyaanNum {
+    font-size: 12px;
+    font-weight: 800;
+    color: #4338ca;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.pertanyaanHeading p {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1b4b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.emptyJawaban {
+    font-size: 13px;
+    color: #9ca3af;
+    padding: 8px 14px;
+}
+
+.jawabanCard {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #faf9ff;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border: 1px solid #ede9fe;
+}
+
+.jawabanAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.jawabanContent { flex: 1; }
+.jawabanUserId  { font-size: 12px; font-weight: 700; color: #4338ca; margin-bottom: 3px; }
+.jawabanTeks    { font-size: 13px; color: #374151; line-height: 1.5; }
+.jawabanTime    { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+
+.hasilCard {
+    padding: 16px;
+    background: #faf9ff;
+    border-radius: 12px;
+    border: 1px solid #ede9fe;
+    margin-bottom: 12px;
+}
+.hasilCard:last-child { margin-bottom: 0; }
+
+.hasilHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.hasilHeader h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin: 0;
+}
+
+.hasilSesiBadge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #4338ca;
+    background: #e0e7ff;
+    padding: 2px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.hasilIsi  { font-size: 13px; color: #374151; line-height: 1.6; margin: 0 0 8px; }
+.hasilTime { font-size: 11px; color: #9ca3af; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
     .statRow { grid-template-columns: repeat(2, 1fr); }
@@ -636,4 +763,170 @@
     .sidebar { display: none; }
     .main { padding: 20px 16px; }
     .statRow { grid-template-columns: 1fr; }
+}
+
+/* ── WELCOME BANNER ── */
+.welcomeBanner {
+    background: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.35);
+}
+.welcomeTitle {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+}
+.welcomeTitle span { color: #fde68a; }
+.welcomeSub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 400;
+}
+
+/* ── STAT CARDS 4-col ── */
+.statRow4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.statCard4 {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.statCard4:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+}
+.statCardIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+.statCardBody {}
+.statCardLabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+}
+.statCardValue {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1e1b4b;
+    line-height: 1;
+}
+
+/* ── TWO COL CHART ── */
+.twoColChart {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* ── BAR CHART ── */
+.chartWrap {
+    display: flex;
+    gap: 10px;
+    height: 180px;
+    align-items: stretch;
+    padding-top: 8px;
+}
+.chartYAxis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 24px;
+}
+.chartYTick {
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 600;
+    text-align: right;
+    min-width: 20px;
+}
+.chartBars {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    border-bottom: 1.5px solid #e5e7eb;
+    padding-bottom: 0;
+}
+.chartBarCol {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    height: 100%;
+}
+.chartBar {
+    width: 100%;
+    background: #1e1b4b;
+    border-radius: 6px 6px 0 0;
+    min-height: 4px;
+    transition: height 0.4s ease;
+}
+.chartBarLabel {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+    padding-bottom: 2px;
+}
+
+/* ── ACTIVITY ITEM ── */
+.activityItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+.activityItem:last-child { border-bottom: none; }
+.activityIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.activityBody { flex: 1; }
+.activityTitle { font-size: 13px; font-weight: 700; color: #1e1b4b; }
+.activityDesc  { font-size: 12px; color: #6b7280; margin-top: 1px; }
+.activityTime  { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+
+/* ── RESPONSIVE additions ── */
+@media (max-width: 1100px) {
+    .statRow4 { grid-template-columns: repeat(2, 1fr); }
+    .twoColChart { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .statRow4 { grid-template-columns: 1fr 1fr; }
+    .welcomeBanner { padding: 20px; }
+    .welcomeTitle { font-size: 20px; }
 }
