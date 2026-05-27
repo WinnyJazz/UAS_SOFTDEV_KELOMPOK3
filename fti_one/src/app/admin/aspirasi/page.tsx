@@ -790,7 +790,7 @@ function HasilTab() {
 // ══════════════════════════════════════════════════════════
 interface Jawaban {
   _id: string;
-  sesiId: string;
+  sesiId: { _id: string; nama: string; bulan: number; tahun: number } | string;
   pertanyaanId: { _id: string; teks: string } | string;
   jawaban: string;
   nim?: string;
@@ -806,17 +806,24 @@ function ResponseTab() {
   const [selectedPertanyaanId, setSelectedPertanyaanId] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [sesiData, jawabanData] = await Promise.all([
+        fetch(`${API}/api/aspirasi/sesi`).then((r) => r.json()),
+        fetch(`${API}/api/aspirasi/jawaban`).then((r) => r.json()),
+      ]);
+      setSesiList(sesiData);
+      setJawabanList(jawabanData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    Promise.all([
-      fetch(`${API}/api/aspirasi/sesi`).then((r) => r.json()),
-      fetch(`${API}/api/aspirasi/jawaban`).then((r) => r.json()),
-    ])
-      .then(([sesiData, jawabanData]) => {
-        setSesiList(sesiData);
-        setJawabanList(jawabanData);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    fetchData();
   }, []);
 
   // Reset filter pertanyaan kalau ganti sesi
@@ -829,9 +836,11 @@ function ResponseTab() {
   // Jawaban yang cocok dengan sesi & pertanyaan yang dipilih
   const jawabanFiltered = jawabanList.filter((j) => {
     if (!selectedSesi) return false;
-    if (j.sesiId !== selectedSesi._id) return false;
+    // Handle sesiId sebagai object (setelah populate) atau string
+    const jSesiId = j.sesiId && typeof j.sesiId === "object" ? j.sesiId._id : j.sesiId;
+    if (jSesiId !== selectedSesi._id) return false;
     if (selectedPertanyaanId === "all") return true;
-    // Ganti bagian filter pertanyaanId
+    // Handle pertanyaanId sebagai object atau string
     const pid = j.pertanyaanId && typeof j.pertanyaanId === "object"
       ? j.pertanyaanId._id
       : j.pertanyaanId;
@@ -891,6 +900,16 @@ function ResponseTab() {
             <span className={styles.responseCountLabel}>jawaban</span>
           </div>
         )}
+
+        {/* Refresh Button */}
+        <button
+          className={styles.refreshBtn}
+          onClick={fetchData}
+          disabled={loading}
+          title="Refresh data jawaban"
+        >
+          {loading ? "⟳..." : "⟳"} Refresh
+        </button>
       </div>
 
       {/* ── Heading pertanyaan terpilih ── */}

@@ -53,13 +53,31 @@ interface SesiWithHasil {
   hasil: HasilRespons[];
 }
 
+interface UserJawaban {
+  _id: string;
+  pertanyaanId: {
+    _id: string;
+    teks: string;
+  };
+  sesiId: {
+    _id: string;
+    nama: string;
+    bulan: number;
+    tahun: number;
+  };
+  nim: string;
+  nama: string;
+  jawaban: string;
+  createdAt: string;
+}
+
 // ─── API Base ───────────────────────────────────────────────
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // ─── Main Component ─────────────────────────────────────────
 export default function UserAspirasiPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"timeline" | "form" | "hasil">("timeline");
+  const [activeTab, setActiveTab] = useState<"timeline" | "form" | "hasil" | "history">("timeline");
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -102,6 +120,7 @@ export default function UserAspirasiPage() {
             { key: "timeline", label: "TIMELINE & STATUS" },
             { key: "form", label: "ISI FORM" },
             { key: "hasil", label: "HASIL" },
+            { key: "history", label: "HISTORY" },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -117,6 +136,7 @@ export default function UserAspirasiPage() {
           {activeTab === "timeline" && <TimelineTab />}
           {activeTab === "form" && <IsiFormTab />}
           {activeTab === "hasil" && <HasilTab />}
+          {activeTab === "history" && <HistoryTab user={user} />}
         </div>
       </div>
     </div>
@@ -280,6 +300,8 @@ function IsiFormTab() {
             pertanyaanId: p._id,
             sesiId: sesiAktif._id,
             jawaban: answers[p._id] || "",
+            nim: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") || "{}").nim : "",
+            nama: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") || "{}").nama : "",
           }),
         }).then((r) => {
           if (!r.ok) throw new Error(`Gagal submit pertanyaan ${p._id}`);
@@ -519,6 +541,139 @@ function HasilTab() {
               )}
             </div>
           )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════
+// TAB 4 — HISTORY (user's submitted answers)
+// ══════════════════════════════════════════════════════════
+interface HistoryTabProps {
+  user: UserData | null;
+}
+
+function HistoryTab({ user }: HistoryTabProps) {
+  const [jawaban, setJawaban] = useState<UserJawaban[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.nim) {
+      setError("Data pengguna tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    fetch(`${API}/api/aspirasi/jawaban?nim=${user.nim}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data: UserJawaban[]) => {
+        setJawaban(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      })
+      .catch(() => setError("Gagal memuat history aspirasi. Coba lagi nanti."))
+      .finally(() => setLoading(false));
+  }, [user?.nim]);
+
+  const toggleExpand = (id: string) =>
+    setExpandedId((prev) => (prev === id ? null : id));
+
+  const groupBySesi = (data: UserJawaban[]) => {
+    return data.reduce((acc: Record<string, UserJawaban[]>, item) => {
+      const key = item.sesiId._id;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+  };
+
+  if (loading) return <div className={styles.loading}><span className={styles.spinner} />Memuat history...</div>;
+
+  if (error) return (
+    <div className={styles.errorState}>
+      <span className={styles.errorIcon}>⚠️</span>
+      <p>{error}</p>
+    </div>
+  );
+
+  if (jawaban.length === 0) return (
+    <div className={styles.emptyState}>
+      <span className={styles.emptyIcon}>📝</span>
+      <p>Anda belum mengirim aspirasi apapun.</p>
+    </div>
+  );
+
+  const grouped = groupBySesi(jawaban);
+  const sesiList = Object.entries(grouped).map(([sesiId, answers]) => ({
+    sesiId,
+    ...answers[0].sesiId,
+    answers,
+  }));
+
+  return (
+    <div className={styles.historyWrapper}>
+      <h2 className={styles.sectionTitle}>History Aspirasi Anda</h2>
+
+      {sesiList.map((sesi) => (
+        <div key={sesi.sesiId} className={styles.historySesiCard}>
+          <div className={styles.historySesiHeader}>
+            <div className={styles.historySesiTitle}>
+              <span>📋</span>
+              <div className={styles.historySesiInfo}>
+                <span className={styles.historySesiName}>{sesi.nama}</span>
+              </div>
+            </div>
+            <span className={styles.historyCountBadge}>{sesi.answers.length} jawaban</span>
+          </div>
+
+          <div className={styles.historyAnswersList}>
+            {sesi.answers.map((answer, idx) => (
+              <div key={answer._id} className={styles.historyAnswerCard}>
+                <div
+                  className={styles.historyAnswerHeader}
+                  onClick={() => toggleExpand(answer._id)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className={styles.historyAnswerQuestion}>
+                    <span className={styles.historyQNum}>{idx + 1}</span>
+                    <span className={styles.historyQText}>{answer.pertanyaanId.teks}</span>
+                  </div>
+                  <div className={styles.historyAnswerMeta}>
+                    <span className={styles.historySubmitDate}>
+                      {new Date(answer.createdAt).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })} {new Date(answer.createdAt).toLocaleTimeString("id-ID", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <button
+                      className={styles.expandBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleExpand(answer._id);
+                      }}
+                    >
+                      {expandedId === answer._id ? "▼" : "▶"}
+                    </button>
+                  </div>
+                </div>
+
+                {expandedId === answer._id && (
+                  <div className={styles.historyAnswerBody}>
+                    <p>{answer.jawaban}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
