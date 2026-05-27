@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════
    ASPIRASI USER — CSS Module
-   DPM purple theme — no dummy data version
 ═══════════════════════════════════════════ */
 
 /* ─── Page Layout ──────────────────────── */
@@ -72,8 +71,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─── Loading ───────────────────────────── */
@@ -100,7 +106,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Error State (full page) ───────────── */
@@ -382,7 +390,7 @@
   color: #1f1135;
   transition: border-color 0.2s;
   box-sizing: border-box;
-  background: #ffffff; 
+  background: #ffffff;
 }
 
 .qTextarea:focus {
@@ -590,8 +598,15 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .emptyDetail {
@@ -631,6 +646,177 @@
   margin: 0;
 }
 
+/* ═══════════════════════════════════════
+   TAB 4 — HISTORY (user submitted answers)
+═══════════════════════════════════════ */
+.historyWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-top: 0.3rem;
+}
+
+.historySesiCard {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.historySesiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.3rem;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.08));
+  border-bottom: 1px solid #ede9fe;
+}
+
+.historySesiTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.historySesiInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.historySesiName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f1135;
+}
+
+.historySesiDate {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.historyCountBadge {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.historyAnswersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.9rem 1.3rem;
+}
+
+.historyAnswerCard {
+  background: #fff;
+  border: 1px solid #ede9fe;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.historyAnswerCard:hover {
+  border-color: #7c3aed;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.12);
+}
+
+.historyAnswerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  gap: 0.8rem;
+  transition: background 0.15s;
+}
+
+.historyAnswerHeader:hover {
+  background: #faf8ff;
+}
+
+.historyAnswerQuestion {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.historyQNum {
+  background: #ede9fe;
+  color: #7c3aed;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.historyQText {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7c3aed;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.historyAnswerMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.historySubmitDate {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.expandBtn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #7c3aed;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.expandBtn:hover {
+  color: #6d28d9;
+}
+
+.historyAnswerBody {
+  background: #faf8ff;
+  padding: 1rem;
+  border-top: 1px solid #ede9fe;
+  animation: slideDown 0.2s ease;
+}
+
+.historyAnswerBody p {
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+  text-align: justify;
+}
+
 /* ─── Responsive ─────────────────────── */
 @media (max-width: 640px) {
   .tabBtn {
@@ -650,5 +836,27 @@
   .seeDetailsBtn {
     font-size: 0.7rem;
     padding: 0.4rem 0.8rem;
+  }
+
+  .historySesiHeader {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .historySesiTitle {
+    width: 100%;
+  }
+
+  .historyAnswerHeader {
+    flex-wrap: wrap;
+  }
+
+  .historyAnswerQuestion {
+    width: 100%;
+  }
+
+  .historyAnswerMeta {
+    width: 100%;
+    justify-content: space-between;
   }
 }

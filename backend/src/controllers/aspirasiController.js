@@ -175,7 +175,12 @@ exports.getJawaban = async (req, res) => {
     const filter = {};
     if (req.query.sesiId) filter.sesiId = req.query.sesiId;
     if (req.query.pertanyaanId) filter.pertanyaanId = req.query.pertanyaanId;
-    const jawaban = await Jawaban.find(filter).populate("pertanyaanId", "teks");
+    if (req.query.nim) filter.nim = req.query.nim;
+    if (req.query.mahasiswaId) filter.mahasiswaId = req.query.mahasiswaId;
+    const jawaban = await Jawaban.find(filter)
+      .populate("pertanyaanId", "teks")
+      .populate("sesiId", "nama bulan tahun")
+      .sort({ createdAt: -1 });
     res.json(jawaban);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -213,9 +218,8 @@ exports.submitSesiAspirasi = async (req, res) => {
     // 🔔 NOTIF FIXED
     const notif = await createNotif({
       title: "Aspirasi Sesi Selesai",
-      desc: `Mahasiswa menyelesaikan sesi "${
-        sesi?.nama || "Aspirasi"
-      }" (${saved.length} jawaban)`,
+      desc: `Mahasiswa menyelesaikan sesi "${sesi?.nama || "Aspirasi"
+        }" (${saved.length} jawaban)`,
       category: "Aspirasi",
       icon: "📋",
       iconBg: "#dbeafe",
