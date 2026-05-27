@@ -1,4 +1,4 @@
-const Notifikasi = require("../models/notifikasi");
+const Notifikasi = require("../models/Notifikasi");
 
 /* ══════════════════════════════════════════
    HELPER — buat notifikasi dari controller lain
