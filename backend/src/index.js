@@ -1,5 +1,5 @@
 require('dns').setServers(['8.8.8.8', '8.8.4.4']);
-require('dotenv').config(); // Load FIRST sebelum require apapun
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
@@ -8,12 +8,11 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const barangRoutes = require('./routes/barangRoutes');
 const claimRoutes = require('./routes/claimRoutes');
-const laporanRoutes = require('./routes/laporanRoutes');
-const chatRoutes    = require('./routes/chatRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const teamPhotoRoutes = require('./routes/teamPhotoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const informasiRoutes = require('./routes/informasiRoutes');
-const aspirasiRoutes   = require('./routes/aspirasiRoutes');
+const aspirasiRoutes = require('./routes/aspirasiRoutes');
 
 connectDB();
 
@@ -29,16 +28,15 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth',    authRoutes);
-app.use('/api/barang',  barangRoutes);
-app.use('/api/claim',   claimRoutes);
-app.use('/api/laporan', laporanRoutes);
-app.use('/api/chat',    chatRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/barang', barangRoutes);
+app.use('/api/claim', claimRoutes);
+app.use('/api/chat', chatRoutes);
 app.use('/api/team-photos', teamPhotoRoutes);
 app.use('/api/informasi', informasiRoutes);
-app.use('/api/aspirasi',   aspirasiRoutes);
+app.use('/api/aspirasi', aspirasiRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
 });
-app.use('/api/dashboard', dashboardRoutes);

@@ -1,51 +1,47 @@
+// controllers/claimController.js
+// ✅ Sudah ditambah trigger notifikasi admin
+
 const mongoose = require("mongoose");
 const Claim    = require("../models/Claim");
 const Barang   = require("../models/Barang");
 const cloudinary = require("../config/cloudinary");
 const Chat     = require("../models/Chat");
 
+// 🔔 Import helper notifikasi
+const { createNotif } = require("./notifikasiController");
+
 // POST /api/claim — Buat pengajuan claim baru
 const createClaim = async (req, res) => {
   try {
     const { barangId, nama, nim, nomorTelepon, fotoKTM } = req.body;
-    const userId = req.user.userId; // Dari middleware auth
+    const userId = req.user.userId;
 
     if (!barangId || !nama || !nim || !nomorTelepon || !fotoKTM) {
       return res.status(400).json({ success: false, message: "Semua field wajib diisi." });
     }
 
-    // Cek apakah barang ada dan statusnya tersedia
     const barang = await Barang.findOne({ barangId });
 
     if (!barang) {
-      return res.status(404).json({
-        success: false,
-        message: "Barang tidak ditemukan."
-      });
+      return res.status(404).json({ success: false, message: "Barang tidak ditemukan." });
     }
 
     if (barang.status !== "tersedia") {
       return res.status(400).json({
         success: false,
-        message: "Barang sudah tidak tersedia untuk diklaim."
+        message: "Barang sudah tidak tersedia untuk diklaim.",
       });
     }
 
-    // Cek apakah user sudah pernah claim barang ini
-    const existingClaim = await Claim.findOne({
-      userId,
-      barangId,
-    });
-
+    const existingClaim = await Claim.findOne({ userId, barangId });
     if (existingClaim) {
       return res.status(400).json({
         success: false,
         message: "Kamu sudah pernah mengajukan claim untuk barang ini.",
       });
     }
-    let fotoKtmUrl = null;
 
-    // Upload foto KTM ke Cloudinary (base64)
+    let fotoKtmUrl = null;
     if (fotoKTM) {
       const uploadResult = await cloudinary.uploader.upload(fotoKTM, {
         folder: "claims-ktm",
@@ -66,8 +62,20 @@ const createClaim = async (req, res) => {
 
     await claim.save();
 
-    // Optional: Update status barang menjadi 'diproses' atau semacamnya
-    // Untuk saat ini kita biarkan tersedia sampai admin menyetujui claim.
+    // ─────────────────────────────────────────
+    // 🔔 TRIGGER NOTIFIKASI ADMIN
+    // Kirim notif setiap ada klaim masuk
+    // ─────────────────────────────────────────
+    await createNotif({
+      title: "Pengajuan Klaim Baru",
+      desc: `${nama} (NIM: ${nim}) mengajukan klaim untuk barang "${barang.nama}". Menunggu verifikasi.`,
+      category: "Lost & Found",
+      icon: "📦",
+      iconBg: "#fef3c7",
+      refType: "claim",
+      refId: claim.claimId,
+      target: "admin",
+    });
 
     res.status(201).json({
       success: true,
@@ -84,16 +92,15 @@ const createClaim = async (req, res) => {
 const getAllClaims = async (req, res) => {
   try {
     const claims = await Claim.find().sort({ tanggal: -1 }).lean();
-    
-    // Manual population since we use custom string IDs (barangId, userId)
+
     const populatedClaims = await Promise.all(claims.map(async (claim) => {
       const barang = await mongoose.model("Barang").findOne({ barangId: claim.barangId });
-      const user = await mongoose.model("Mahasiswa").findOne({ userId: claim.userId });
+      const user   = await mongoose.model("Mahasiswa").findOne({ userId: claim.userId });
       return {
         ...claim,
-        claimUserId: claim.userId,   // preserve original string userId for chat
+        claimUserId: claim.userId,
         barangId: barang || null,
-        userId: user || null
+        userId: user || null,
       };
     }));
 
@@ -107,7 +114,7 @@ const getAllClaims = async (req, res) => {
 // PATCH /api/claim/:id/status — Update status claim (Approve/Reject)
 const updateClaimStatus = async (req, res) => {
   try {
-    const { status, catatan } = req.body; // status: 'disetujui' atau 'ditolak'
+    const { status, catatan } = req.body;
     const claim = await Claim.findOne({ claimId: req.params.id });
 
     if (!claim) {
@@ -116,18 +123,30 @@ const updateClaimStatus = async (req, res) => {
 
     claim.status = status;
     if (catatan) claim.catatan = catatan;
-
     await claim.save();
 
-    // Jika disetujui, update status barang menjadi 'dipinjam'
     if (status === "disetujui") {
       await Barang.findOneAndUpdate({ barangId: claim.barangId }, { status: "dipinjam" });
     }
 
-    // Auto-hapus chat bila sudah final
     if (status === "disetujui" || status === "ditolak") {
       await Chat.deleteMany({ konteksType: "claim", konteksId: claim.claimId });
     }
+
+    // ─────────────────────────────────────────
+    // 🔔 TRIGGER NOTIFIKASI ADMIN — status berubah
+    // ─────────────────────────────────────────
+    const isApproved = status === "disetujui";
+    await createNotif({
+      title: isApproved ? "Klaim Disetujui" : "Klaim Ditolak",
+      desc: `Klaim oleh ${claim.nama ?? "mahasiswa"} telah ${status}.${catatan ? ` Catatan: ${catatan}` : ""}`,
+      category: "Lost & Found",
+      icon: isApproved ? "✅" : "❌",
+      iconBg: isApproved ? "#dcfce7" : "#fee2e2",
+      refType: "claim",
+      refId: claim.claimId,
+      target: "admin",
+    });
 
     res.status(200).json({
       success: true,

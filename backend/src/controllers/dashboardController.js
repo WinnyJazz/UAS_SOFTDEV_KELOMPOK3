@@ -1,7 +1,7 @@
 const Barang = require("../models/Barang");
 const Claim = require("../models/Claim");
 const Aspirasi = require("../models/Aspirasi");
-const Notifikasi = require("../models/Notifikasi");
+const Notifikasi = require("../models/notifikasi");
 const Mahasiswa = require("../models/Mahasiswa");
 const Admin = require("../models/Admin");
 
@@ -223,7 +223,7 @@ exports.getNotifikasi = async (req, res) => {
       .limit(50)
       .lean();
 
-    const unreadCount = await Notifikasi.countDocuments({ isRead: false });
+    const unreadCount = await Notifikasi.countDocuments({ read: false });
 
     // Map ke format frontend
     const mapped = notifs.map((n) => {
@@ -238,14 +238,17 @@ exports.getNotifikasi = async (req, res) => {
       else if (refModel === "Informasi") { icon = "ℹ️"; iconBg = "#dbeafe"; cat = "Sistem"; }
 
       return {
-        id: n.notifikasiId || n._id.toString(),
+        id: n.notifId || n._id.toString(),
         _id: n._id.toString(),
         icon,
         iconBg,
-        title: n.pesan.length > 50 ? n.pesan.substring(0, 47) + "..." : n.pesan,
-        desc: n.pesan,
+        title: (n.title || "").length > 50
+          ? n.title.substring(0, 47) + "..."
+          : n.title,
+
+        desc: n.desc || "",
         time: formatRelativeTime(n.createdAt),
-        read: n.isRead,
+        read: n.read,
         category: cat,
       };
     });
@@ -266,7 +269,7 @@ exports.markNotifRead = async (req, res) => {
 
     await Notifikasi.findOneAndUpdate(
       { $or: [{ notifikasiId: id }, { _id: id }] },
-      { isRead: true }
+      { read: true }
     );
 
     return res.json({ success: true, message: "Notifikasi ditandai sudah dibaca" });
@@ -281,7 +284,7 @@ exports.markNotifRead = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.markAllNotifsRead = async (req, res) => {
   try {
-    await Notifikasi.updateMany({ isRead: false }, { isRead: true });
+    await Notifikasi.updateMany({ read: false }, { read: true });
 
     return res.json({ success: true, message: "Semua notifikasi ditandai sudah dibaca" });
   } catch (err) {

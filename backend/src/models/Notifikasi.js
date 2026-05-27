@@ -1,52 +1,69 @@
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
 
 const NotifikasiSchema = new mongoose.Schema(
   {
-    notifikasiId: {
+    notifId: {
       type: String,
+      default: () => uuidv4(),
       unique: true,
-      default: () => new mongoose.Types.ObjectId().toString(),
     },
-    // Relasi ke Mahasiswa (penerima notifikasi)
-    userId: {
-      type: String,
-      required: true,
-      ref: "Mahasiswa",
-    },
-    pesan: {
+
+    // Judul singkat notifikasi
+    title: {
       type: String,
       required: true,
     },
-    isRead: {
+
+    // Deskripsi detail
+    desc: {
+      type: String,
+      default: "",
+    },
+
+    // Kategori: "Lost & Found" | "Aspirasi" | "User" | "Sistem"
+    category: {
+      type: String,
+      enum: ["Lost & Found", "Aspirasi", "User", "Sistem"],
+      default: "Sistem",
+    },
+
+    // Emoji icon dan warna background
+    icon: {
+      type: String,
+      default: "🔔",
+    },
+    iconBg: {
+      type: String,
+      default: "#e0e7ff",
+    },
+
+    // Sudah dibaca atau belum
+    read: {
       type: Boolean,
       default: false,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    // target = referensi ke object Notifiable (Aspirasi / Claim / Informasi)
-    // Karena MongoDB flexible, kita pakai refPath pattern
+
+    // Target penerima: "admin" | userId spesifik
     target: {
-      refId: {
-        type: String,
-        required: true,
-      },
-      refModel: {
-        type: String,
-        required: true,
-        enum: ["Aspirasi", "Claim", "Informasi", "Barang"],
-      },
+      type: String,
+      default: "admin",
+    },
+
+    // Referensi ke entitas terkait (opsional)
+    refType: {
+      type: String,
+      enum: ["claim", "barang", "aspirasi", "jawaban", null],
+      default: null,
+    },
+    refId: {
+      type: String,
+      default: null,
     },
   },
   {
-    versionKey: false,
+    timestamps: true,
   }
 );
-
-NotifikasiSchema.methods.tandaiBaca = async function () {
-  this.isRead = true;
-  await this.save();
-};
 
 module.exports = mongoose.model("Notifikasi", NotifikasiSchema);
