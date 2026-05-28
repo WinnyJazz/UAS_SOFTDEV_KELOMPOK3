@@ -20,7 +20,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [navLinks, setNavLinks] = useState([
-    { label: "Home", href: "/" },
+    { label: "Home", href: "/homepage" },
     { label: "About Us", href: "/aboutus" },
     { label: "Aspirasi", href: "/aspirasi" },
     { label: "Info", href: "/info" },

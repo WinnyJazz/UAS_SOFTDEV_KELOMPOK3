@@ -177,6 +177,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSesi, setSelectedSesi] = useState<AsirasiSesi | null>(null);
+  const [nama, setNama] = useState("Mahasiswa");
 
   const token =
     typeof window !== "undefined" ? (localStorage.getItem("token") ?? "") : "";
@@ -190,6 +191,37 @@ export default function HomePage() {
       return null;
     }
   })();
+
+  // Ambil nama dari localStorage saat mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const parsedUser = JSON.parse(stored);
+        setNama(parsedUser.nickname || parsedUser.nama || "Mahasiswa");
+      }
+    } catch {
+      // biarkan default
+    }
+  }, []);
+
+  // Update nama kalau ada event profileUpdated (setelah edit profil)
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      try {
+        const stored = localStorage.getItem("user");
+        if (stored) {
+          const parsedUser = JSON.parse(stored);
+          setNama(parsedUser.nickname || parsedUser.nama || "Mahasiswa");
+        }
+      } catch {
+        // biarkan
+      }
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => window.removeEventListener("profileUpdated", handleProfileUpdate);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -218,7 +250,6 @@ export default function HomePage() {
 
   const claimDisetujui = claims.filter((c) => c.status === "disetujui").length;
   const claimPending   = claims.filter((c) => c.status === "pending").length;
-  const nama = claims[0]?.nama ?? "Mahasiswa";
 
   return (
     <main className={styles.homepage}>
