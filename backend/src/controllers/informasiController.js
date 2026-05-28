@@ -1,6 +1,43 @@
 const Informasi = require("../models/Informasi");
+const cloudinary = require("../config/cloudinary");
+const multer = require("multer");
+const { Readable } = require("stream");
 
-// GET /api/informasi (Publik & Admin)
+// ── Multer: simpan di memory ──
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// ── Helper: upload buffer ke Cloudinary ──
+const uploadToCloudinary = (buffer, folder = "informasi") => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: "image" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    Readable.from(buffer).pipe(stream);
+  });
+};
+
+// ── Helper: hapus gambar dari Cloudinary by URL ──
+const deleteFromCloudinary = async (urls = []) => {
+  for (const url of urls) {
+    try {
+      const parts = url.split("/");
+      const filenameWithExt = parts[parts.length - 1];
+      const folder = parts[parts.length - 2];
+      const publicId = `${folder}/${filenameWithExt.split(".")[0]}`;
+      await cloudinary.uploader.destroy(publicId);
+    } catch (e) {
+      console.error("Gagal hapus dari Cloudinary:", e.message);
+    }
+  }
+};
+
+exports.upload = upload;
+
 exports.getAllInformasi = async (req, res) => {
   try {
     const info = await Informasi.find().sort({ tanggal: -1 });
@@ -11,23 +48,49 @@ exports.getAllInformasi = async (req, res) => {
   }
 };
 
+exports.getInformasiById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const info = await Informasi.findOne({
+      $or: [{ informasiId: id }, { _id: id }],
+    });
+    if (!info) {
+      return res.status(404).json({ success: false, message: "Informasi tidak ditemukan" });
+    }
+    res.json({ success: true, data: info });
+  } catch (err) {
+    console.error("getInformasiById error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
-// POST /api/informasi (Khusus Admin)
 exports.createInformasi = async (req, res) => {
   try {
-    const { judul, isi, media, kategori } = req.body;
+    const { judul, isi, kategori, timeline, contactPerson, judulLinkTerkait, linkTerkait } = req.body;
     const adminId = req.user?.adminId || req.user?.id || "admin-system";
 
     if (!judul || !isi || !kategori) {
       return res.status(400).json({ success: false, message: "Judul, isi, dan kategori wajib diisi" });
     }
 
+    const mediaUrls = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const url = await uploadToCloudinary(file.buffer);
+        mediaUrls.push(url);
+      }
+    }
+
     const newInfo = await Informasi.create({
       adminId,
       judul,
       isi,
-      media: Array.isArray(media) ? media : media ? [media] : [],
+      media: mediaUrls,
       kategori,
+      timeline,
+      contactPerson,
+      judulLinkTerkait,
+      linkTerkait,
     });
 
     res.status(201).json({ success: true, data: newInfo, message: "Informasi berhasil ditambahkan" });
@@ -37,41 +100,38 @@ exports.createInformasi = async (req, res) => {
   }
 };
 
-// GET /api/informasi/:id
-exports.getInformasiById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const info = await Informasi.findOne({
-      $or: [{ informasiId: id }, { _id: id }]
-    });
-
-    if (!info) {
-      return res.status(404).json({ success: false, message: "Informasi tidak ditemukan" });
-    }
-
-    res.json({ success: true, data: info });
-  } catch (err) {
-    console.error("getInformasiById error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-
-  // PUT /api/informasi/:id (Khusus Admin)
 exports.updateInformasi = async (req, res) => {
   try {
     const { id } = req.params;
-    const { judul, isi, media, kategori, timeline, contactPerson, judulLinkTerkait, linkTerkait } = req.body;
+    const { judul, isi, kategori, timeline, contactPerson, judulLinkTerkait, linkTerkait, keepMedia } = req.body;
+
+    const existing = await Informasi.findOne({
+      $or: [{ informasiId: id }, { _id: id }],
+    });
+
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Informasi tidak ditemukan" });
+    }
+
+    const kept = Array.isArray(keepMedia) ? keepMedia : keepMedia ? [keepMedia] : [];
+    const toDelete = existing.media.filter((url) => !kept.includes(url));
+    await deleteFromCloudinary(toDelete);
+
+    const newUrls = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const url = await uploadToCloudinary(file.buffer);
+        newUrls.push(url);
+      }
+    }
+
+    const updatedMedia = [...kept, ...newUrls];
 
     const updated = await Informasi.findOneAndUpdate(
       { $or: [{ informasiId: id }, { _id: id }] },
-      { judul, isi, media: Array.isArray(media) ? media : media ? [media] : [], kategori, timeline, contactPerson, judulLinkTerkait, linkTerkait },
+      { judul, isi, media: updatedMedia, kategori, timeline, contactPerson, judulLinkTerkait, linkTerkait },
       { new: true }
     );
-
-    if (!updated) {
-      return res.status(404).json({ success: false, message: "Informasi tidak ditemukan" });
-    }
 
     res.json({ success: true, data: updated, message: "Informasi berhasil diperbarui" });
   } catch (err) {
@@ -80,17 +140,18 @@ exports.updateInformasi = async (req, res) => {
   }
 };
 
-// DELETE /api/informasi/:id (Khusus Admin)
 exports.deleteInformasi = async (req, res) => {
   try {
     const { id } = req.params;
     const info = await Informasi.findOneAndDelete({
-      $or: [{ informasiId: id }, { _id: id }]
+      $or: [{ informasiId: id }, { _id: id }],
     });
 
     if (!info) {
       return res.status(404).json({ success: false, message: "Informasi tidak ditemukan" });
     }
+
+    await deleteFromCloudinary(info.media || []);
 
     res.json({ success: true, message: "Informasi berhasil dihapus" });
   } catch (err) {
