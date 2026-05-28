@@ -1,11 +1,13 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://kelompok3softdev_db_user:rNANBB1Ns9N3CqX0@cluster0.tvpruf9.mongodb.net/?appName=Cluster0')
+mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log('✅ MongoDB connected');
     
     // Direct insert to collection
     const db = mongoose.connection.db;
+
     const result = await db.collection('notifikasis').insertOne({
       notifId: `NTF-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       title: 'Test Notifikasi Frontend',
@@ -18,15 +20,16 @@ mongoose.connect('mongodb+srv://kelompok3softdev_db_user:rNANBB1Ns9N3CqX0@cluste
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    
+
     console.log('✅ Test notifikasi berhasil dibuat!');
     console.log('   _id:', result.insertedId);
     console.log('   Collection: notifikasis');
-    console.log('\n   🎯 Sekarang buka frontend admin notifikasi page dan klik Refresh button');
-    
+    console.log('\n🎯 Sekarang buka frontend admin notifikasi page dan klik Refresh button');
+
     process.exit(0);
   })
   .catch(err => {
     console.error('❌ Error:', err.message);
     process.exit(1);
   });
+  
