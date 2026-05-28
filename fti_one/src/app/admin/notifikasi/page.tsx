@@ -74,17 +74,17 @@ export default function NotifikasiPage() {
   const deleteNotif = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const token = localStorage.getItem("token");
-    
+
     console.log("🗑️ DELETE id:", id); // ← cek id yang dikirim
-    
+
     const res = await fetch(`http://localhost:5000/api/dashboard/notifikasi/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
-    
+
     const json = await res.json();
     console.log("🗑️ DELETE response:", json); // ← cek response backend
-    
+
     fetchData();
   };
 
@@ -97,8 +97,8 @@ export default function NotifikasiPage() {
         readFilter === "Semua"
           ? true
           : readFilter === "Belum Dibaca"
-          ? !n.read
-          : n.read;
+            ? !n.read
+            : n.read;
 
       const matchSearch =
         n.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -115,8 +115,8 @@ export default function NotifikasiPage() {
         readFilter === "Semua"
           ? true
           : readFilter === "Belum Dibaca"
-          ? !n.read
-          : n.read;
+            ? !n.read
+            : n.read;
       return matchRead;
     });
 
@@ -131,7 +131,15 @@ export default function NotifikasiPage() {
     return data.filter((d) => d.read).length;
   };
 
+  const tagClass: Record<string, string> = {
+    "Lost & Found": styles.tagLostFound,
+    "Aspirasi": styles.tagAspirasi,
+    "User": styles.tagUser,
+    "Sistem": styles.tagSistem,
+  };
   return (
+
+
     <div className={styles.page}>
       {/* HEADER */}
       <div className={styles.header}>
@@ -159,9 +167,8 @@ export default function NotifikasiPage() {
             <button
               key={f}
               onClick={() => setReadFilter(f)}
-              className={`${styles.chip} ${
-                readFilter === f ? styles.activeChip : ""
-              }`}
+              className={`${styles.chip} ${readFilter === f ? styles.activeChip : ""
+                }`}
             >
               {f}
               <span>{countRead(f)}</span>
@@ -178,9 +185,8 @@ export default function NotifikasiPage() {
           <button
             key={cat}
             onClick={() => setCategory(cat)}
-            className={`${styles.chip} ${
-              category === cat ? styles.activeChip : ""
-            }`}
+            className={`${styles.chip} ${category === cat ? styles.activeChip : ""
+              }`}
           >
             {cat}
             {/* ✅ angka category sekarang ikut readFilter */}
@@ -212,7 +218,9 @@ export default function NotifikasiPage() {
               <div className={styles.content}>
                 <div className={styles.top}>
                   <h3>{n.title}</h3>
-                  <span className={styles.tag}>{n.category}</span>
+                  <span className={`${styles.tag} ${tagClass[n.category] ?? ""}`}>
+                    {n.category}
+                  </span>
                 </div>
                 <p>{n.desc}</p>
                 {n.time && (

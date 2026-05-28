@@ -93,7 +93,7 @@ const getAllClaims = async (req, res) => {
         barangId: barang
           ? { barangId: barang.barangId, nama: barang.nama, lokasi: barang.lokasi, foto: barang.foto ?? null }
           : { barangId: claim.barangId, nama: claim.namaBarang ?? "—", lokasi: claim.lokasiBarang ?? "—", foto: null },
-        userId: null, 
+        userId: null,
       };
     });
 
@@ -116,6 +116,10 @@ const updateClaimStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Klaim tidak ditemukan." });
     }
 
+    // Fetch barang untuk dapat nama terbaru
+    const barang = await Barang.findOne({ barangId: claim.barangId }).lean();
+    const namaBarang = barang?.nama || claim.namaBarang || claim.barangId;
+
     claim.status = status;
     if (catatan) claim.catatan = catatan;
     await claim.save();
@@ -127,7 +131,8 @@ const updateClaimStatus = async (req, res) => {
     const isApproved = status === "disetujui";
     await createNotif({
       title: isApproved ? "Klaim Disetujui" : "Klaim Ditolak",
-      desc: `Klaim barang "${claim.namaBarang || claim.barangId}" telah ${status}${catatan ? ` - ${catatan}` : ""}`,
+      desc: `Klaim barang "${namaBarang}" telah ${status}${catatan ? ` - ${catatan}` : ""}`,
+      // pakai namaBarang, bukan claim.barangId
       category: "Lost & Found",
       icon: isApproved ? "✅" : "❌",
       iconBg: isApproved ? "#dcfce7" : "#fee2e2",
@@ -157,7 +162,7 @@ const getMyClaims = async (req, res) => {
 
     const barangIds = [...new Set(claims.map((c) => c.barangId))];
     const barangList = await Barang.find({ barangId: { $in: barangIds } }).lean();
-    const barangMap  = Object.fromEntries(barangList.map((b) => [b.barangId, b]));
+    const barangMap = Object.fromEntries(barangList.map((b) => [b.barangId, b]));
 
     const enriched = claims.map((claim) => {
       const barang = barangMap[claim.barangId];

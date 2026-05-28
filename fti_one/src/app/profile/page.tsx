@@ -24,15 +24,14 @@ export default function Profile() {
     const [editedNickname, setEditedNickname] = useState('');
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [photoPreview, setPhotoPreview] = useState<string>('');
+    const [photoChanged, setPhotoChanged] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        // Ambil data user dari localStorage
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
 
         if (!token || !userData) {
-            // Redirect ke login jika belum login
             router.push('/login');
             return;
         }
@@ -56,7 +55,6 @@ export default function Profile() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
 
-        // Dispatch custom event untuk clear profile photo di navbar
         const logoutEvent = new CustomEvent('userLoggedOut');
         window.dispatchEvent(logoutEvent);
 
@@ -65,13 +63,14 @@ export default function Profile() {
 
     const handleEditProfile = () => {
         setIsEditing(true);
+        setPhotoChanged(false);
     };
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setPhotoFile(file);
-            // Create preview
+            setPhotoChanged(true);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPhotoPreview(reader.result as string);
@@ -95,16 +94,14 @@ export default function Profile() {
         try {
             const token = localStorage.getItem('token');
 
-            // Prepare payload
             const payload: any = {
                 nickname: editedNickname.trim(),
             };
 
-            if (photoPreview) {
+            if (photoChanged && photoPreview) {
                 payload.profilePhoto = photoPreview;
             }
 
-            // Call backend API
             const response = await fetch('http://localhost:5000/api/auth/update-profile', {
                 method: 'PUT',
                 headers: {
@@ -117,7 +114,6 @@ export default function Profile() {
             const data = await response.json();
 
             if (response.ok) {
-                // Update user data di state dan localStorage
                 const updatedUser: UserData = {
                     ...user,
                     nickname: data.data.nickname,
@@ -127,7 +123,6 @@ export default function Profile() {
                 setUser(updatedUser);
                 localStorage.setItem('user', JSON.stringify(updatedUser));
 
-                // Dispatch custom event untuk update navbar
                 const profileUpdateEvent = new CustomEvent('profileUpdated', {
                     detail: { profilePhoto: data.data.profilePhoto }
                 });
@@ -136,6 +131,7 @@ export default function Profile() {
                 setMessage('Profil berhasil diperbarui!');
                 setMessageType('success');
                 setIsEditing(false);
+                setPhotoChanged(false);
             } else {
                 setMessage(data.message || 'Gagal menyimpan profil');
                 setMessageType('error');
@@ -153,6 +149,7 @@ export default function Profile() {
         setIsEditing(false);
         setEditedNickname(user?.nickname || user?.nama || '');
         setPhotoFile(null);
+        setPhotoChanged(false);
         if (user?.profilePhoto) {
             setPhotoPreview(user.profilePhoto);
         } else {
@@ -160,7 +157,6 @@ export default function Profile() {
         }
     };
 
-    // Get display name (nickname atau nama)
     const displayName = user?.nickname || user?.nama || 'Pengguna';
 
     if (loading) {
@@ -219,11 +215,6 @@ export default function Profile() {
                                 <span className={styles.infoLabel}>Nickname</span>
                                 <span className={styles.infoValue}>{displayName}</span>
                             </div>
-
-                            {/* <div className={styles.infoItem}>
-                                <span className={styles.infoLabel}>Nama Asli</span>
-                                <span className={styles.infoValue}>{user.nama}</span>
-                            </div> */}
 
                             <div className={styles.infoItem}>
                                 <span className={styles.infoLabel}>Email</span>

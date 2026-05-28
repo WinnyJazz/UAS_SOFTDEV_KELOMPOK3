@@ -151,12 +151,12 @@ export default function StatusPage() {
                         <div className={styles.statusLabel} style={{ color: cfg.color }}>
                           {cfg.label}
                         </div>
-                        <button
+                        {/* <button
                           className={`${styles.btnChat} ${unread ? styles.btnChatUnread : ''}`}
                           onClick={() => setOpenChatId(isOpen ? null : claim.claimId)}
                         >
                           {unread ? '💬 Pesan Baru!' : '💬 Chat'}
-                        </button>
+                        </button> */}
                       </div>
                     </div>
 

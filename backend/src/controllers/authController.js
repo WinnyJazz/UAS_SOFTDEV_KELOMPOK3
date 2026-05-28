@@ -698,7 +698,7 @@ const resetPassword = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { userId } = req.user;
-    const { nickname, profilePhoto } = req.body; 
+    const { nickname, profilePhoto } = req.body;
 
     const mahasiswa = await Mahasiswa.findOne({ userId });
     if (!mahasiswa) {
@@ -706,10 +706,19 @@ const updateProfile = async (req, res) => {
     }
 
     if (profilePhoto) {
-      // Hapus foto lama kalau ada
+      // Hapus foto lama kalau ada, tapi jangan stop kalau gagal
       if (mahasiswa.profilePhoto) {
-        const publicId = mahasiswa.profilePhoto.split('/').slice(-2).join('/').split('.')[0];
-        await cloudinary.uploader.destroy(publicId);
+        try {
+          const publicId = mahasiswa.profilePhoto
+            .split('/')
+            .slice(-2)
+            .join('/')
+            .split('.')[0];
+          await cloudinary.uploader.destroy(publicId);
+        } catch (destroyError) {
+          console.warn('[updateProfile] Gagal hapus foto lama:', destroyError.message);
+          // Lanjut meski foto lama gagal dihapus
+        }
       }
 
       const uploadResult = await cloudinary.uploader.upload(profilePhoto, {
@@ -720,7 +729,7 @@ const updateProfile = async (req, res) => {
         ],
       });
 
-      mahasiswa.profilePhoto = uploadResult.secure_url; 
+      mahasiswa.profilePhoto = uploadResult.secure_url;
     }
 
     if (nickname !== undefined) {
