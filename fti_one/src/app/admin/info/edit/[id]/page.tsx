@@ -32,12 +32,20 @@ export default function AdminInfoEditPage() {
     judul: '',
     isi: '',
     kategori: 'Pengumuman',
-    media: [] as string[],
     timeline: '',
     contactPerson: '',
     judulLinkTerkait: '',
     linkTerkait: '',
   });
+
+  // URL Cloudinary lama yang masih dipertahankan
+  const [keepMedia, setKeepMedia] = useState<string[]>([]);
+  // File baru yang mau diupload
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+
+  // Gabungan untuk slideshow preview: keepMedia + newPreviews
+  const allPreviews = [...keepMedia, ...newPreviews];
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -60,16 +68,15 @@ export default function AdminInfoEditPage() {
           judul: info.judul,
           isi: info.isi,
           kategori: info.kategori,
-          media: Array.isArray(info.media)
-            ? info.media
-            : info.media
-            ? [info.media as unknown as string]
-            : [],
           timeline: info.timeline || '',
           contactPerson: info.contactPerson || '',
           judulLinkTerkait: info.judulLinkTerkait || '',
           linkTerkait: info.linkTerkait || '',
         });
+        // Semua media lama di-keep dulu
+        setKeepMedia(
+          Array.isArray(info.media) ? info.media : info.media ? [info.media as unknown as string] : []
+        );
       }
     } catch (err) {
       console.error('Gagal fetch detail:', err);
@@ -80,25 +87,26 @@ export default function AdminInfoEditPage() {
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm((prev) => ({
-          ...prev,
-          media: [...prev.media, reader.result as string],
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
+    const previews = files.map((f) => URL.createObjectURL(f));
+    setNewFiles((prev) => [...prev, ...files]);
+    setNewPreviews((prev) => [...prev, ...previews]);
     if (fileRef.current) fileRef.current.value = '';
   };
 
   const removePhoto = (idx: number) => {
-    setForm((prev) => {
-      const next = prev.media.filter((_, i) => i !== idx);
-      setPreviewSlide(Math.min(previewSlide, next.length - 1));
-      return { ...prev, media: next };
-    });
+    if (idx < keepMedia.length) {
+      // Hapus dari keepMedia (URL Cloudinary lama)
+      setKeepMedia((prev) => prev.filter((_, i) => i !== idx));
+    } else {
+      // Hapus dari file baru
+      const newIdx = idx - keepMedia.length;
+      setNewFiles((prev) => prev.filter((_, i) => i !== newIdx));
+      setNewPreviews((prev) => {
+        URL.revokeObjectURL(prev[newIdx]);
+        return prev.filter((_, i) => i !== newIdx);
+      });
+    }
+    setPreviewSlide((s) => Math.min(s, allPreviews.length - 2));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,17 +116,31 @@ export default function AdminInfoEditPage() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     try {
+      const formData = new FormData();
+      formData.append('judul', form.judul);
+      formData.append('isi', form.isi);
+      formData.append('kategori', form.kategori);
+      formData.append('timeline', form.timeline);
+      formData.append('contactPerson', form.contactPerson);
+      formData.append('judulLinkTerkait', form.judulLinkTerkait);
+      formData.append('linkTerkait', form.linkTerkait);
+      formData.append('adminId', user.adminId || user.id || 'admin');
+
+      // Kirim URL lama yang masih dipertahankan
+      keepMedia.forEach((url) => formData.append('keepMedia', url));
+
+      // Kirim file baru
+      newFiles.forEach((file) => formData.append('media', file));
+
       const res = await fetch(`http://localhost:5000/api/informasi/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          // Jangan set Content-Type, biar browser set boundary otomatis
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...form,
-          adminId: user.adminId || user.id || 'admin',
-        }),
+        body: formData,
       });
+
       const data = await res.json();
       if (data.success) {
         alert('Informasi berhasil diperbarui!');
@@ -148,10 +170,7 @@ export default function AdminInfoEditPage() {
     <div className={styles.pageWrapper}>
       {/* ── HEADER ── */}
       <div className={styles.adminHeader}>
-        <button
-          className={styles.btnBack}
-          onClick={() => router.push(`/admin/info/${id}`)}
-        >
+        <button className={styles.btnBack} onClick={() => router.push(`/admin/info/${id}`)}>
           ← Batal
         </button>
         <div className={styles.headerTitle}>
@@ -170,30 +189,22 @@ export default function AdminInfoEditPage() {
           <div className={styles.formSection}>
             <div className={styles.sectionLabel}>📷 FOTO</div>
 
-            {form.media.length > 0 && (
+            {allPreviews.length > 0 && (
               <div className={styles.photoPreview}>
-                <img src={form.media[previewSlide]} alt="preview" />
-                {form.media.length > 1 && (
+                <img src={allPreviews[previewSlide]} alt="preview" />
+                {allPreviews.length > 1 && (
                   <div className={styles.slideControls}>
                     <button
                       type="button"
                       onClick={() =>
-                        setPreviewSlide(
-                          (s) => (s - 1 + form.media.length) % form.media.length
-                        )
+                        setPreviewSlide((s) => (s - 1 + allPreviews.length) % allPreviews.length)
                       }
-                    >
-                      ‹
-                    </button>
-                    <span>{previewSlide + 1} / {form.media.length}</span>
+                    >‹</button>
+                    <span>{previewSlide + 1} / {allPreviews.length}</span>
                     <button
                       type="button"
-                      onClick={() =>
-                        setPreviewSlide((s) => (s + 1) % form.media.length)
-                      }
-                    >
-                      ›
-                    </button>
+                      onClick={() => setPreviewSlide((s) => (s + 1) % allPreviews.length)}
+                    >›</button>
                   </div>
                 )}
                 <button
@@ -206,15 +217,13 @@ export default function AdminInfoEditPage() {
               </div>
             )}
 
-            {form.media.length > 1 && (
+            {allPreviews.length > 1 && (
               <div className={styles.thumbRow}>
-                {form.media.map((src, i) => (
+                {allPreviews.map((src, i) => (
                   <img
                     key={i}
                     src={src}
-                    className={`${styles.thumb} ${
-                      i === previewSlide ? styles.thumbActive : ''
-                    }`}
+                    className={`${styles.thumb} ${i === previewSlide ? styles.thumbActive : ''}`}
                     onClick={() => setPreviewSlide(i)}
                     alt={`foto ${i + 1}`}
                   />
@@ -231,13 +240,10 @@ export default function AdminInfoEditPage() {
                 onChange={handleFiles}
                 className={styles.hiddenInput}
               />
-              <span>
-                📁 Unggah foto {form.media.length > 0 ? '(tambah lagi)' : ''}
-              </span>
+              <span>📁 Unggah foto {allPreviews.length > 0 ? '(tambah lagi)' : ''}</span>
             </label>
           </div>
 
-          {/* ── JUDUL ── */}
           <div className={styles.formGroup}>
             <label>JUDUL INFORMASI</label>
             <input
@@ -249,7 +255,6 @@ export default function AdminInfoEditPage() {
             />
           </div>
 
-          {/* ── KATEGORI ── */}
           <div className={styles.formGroup}>
             <label>KATEGORI</label>
             <select
@@ -262,7 +267,6 @@ export default function AdminInfoEditPage() {
             </select>
           </div>
 
-          {/* ── TIMELINE ── */}
           <div className={styles.formGroup}>
             <label>TIMELINE</label>
             <input
@@ -273,7 +277,6 @@ export default function AdminInfoEditPage() {
             />
           </div>
 
-          {/* ── DESKRIPSI ── */}
           <div className={styles.formGroup}>
             <label>DESKRIPSI</label>
             <textarea
@@ -285,42 +288,33 @@ export default function AdminInfoEditPage() {
             />
           </div>
 
-          {/* ── CONTACT PERSON ── */}
           <div className={styles.formGroup}>
             <label>CONTACT PERSON</label>
             <input
               type="text"
               placeholder="Masukkan contact person"
               value={form.contactPerson}
-              onChange={(e) =>
-                setForm({ ...form, contactPerson: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, contactPerson: e.target.value })}
             />
           </div>
 
-          {/* ── JUDUL LINK TERKAIT ── */}
           <div className={styles.formGroup}>
             <label>JUDUL LINK TERKAIT</label>
             <input
               type="text"
               placeholder="Masukkan judul link terkait"
               value={form.judulLinkTerkait}
-              onChange={(e) =>
-                setForm({ ...form, judulLinkTerkait: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, judulLinkTerkait: e.target.value })}
             />
           </div>
 
-          {/* ── LINK TERKAIT ── */}
           <div className={styles.formGroup}>
             <label>LINK TERKAIT</label>
             <input
               type="url"
               placeholder="Masukkan link terkait"
               value={form.linkTerkait}
-              onChange={(e) =>
-                setForm({ ...form, linkTerkait: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, linkTerkait: e.target.value })}
             />
           </div>
 
@@ -332,11 +326,7 @@ export default function AdminInfoEditPage() {
             >
               Batal
             </button>
-            <button
-              type="submit"
-              className={styles.btnSubmit}
-              disabled={isSubmitting}
-            >
+            <button type="submit" className={styles.btnSubmit} disabled={isSubmitting}>
               {isSubmitting ? 'Menyimpan...' : '💾 Simpan Perubahan'}
             </button>
           </div>
