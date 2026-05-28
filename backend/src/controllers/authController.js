@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Mahasiswa = require("../models/Mahasiswa");
 const Admin = require("../models/Admin");
+const cloudinary = require('../config/cloudinary');
 const { sendVerificationEmail, sendResetPasswordEmail } = require("../utils/emailService");
 
 // ─────────────────────────────────────────
@@ -408,7 +409,15 @@ const getAllUsers = async (req, res) => {
       return res.status(403).json({ message: "Akses ditolak." });
     }
 
-    const mahasiswas = await Mahasiswa.find({}, { password: 0, verificationToken: 0, verificationTokenExpiry: 0 });
+    // authController.js - getAllUsers
+    const mahasiswas = await Mahasiswa.find({}, {
+      password: 0,
+      verificationToken: 0,
+      verificationTokenExpiry: 0,
+      resetPasswordToken: 0,
+      resetPasswordTokenExpiry: 0,
+      profilePhoto: 0
+    });
     const admins = await Admin.find({}, { password: 0 });
 
     // Email yang sudah ada di Admin collection (mencegah double)
@@ -540,7 +549,7 @@ const downgradeAdmin = async (req, res) => {
       if (adminDoc) {
         const existing = await Mahasiswa.findOne({ email: adminDoc.email });
         if (!existing && adminDoc.nim) {
-          existing = await Mahasiswa.findOne({ nim: adminDoc.nim }); 
+          existing = await Mahasiswa.findOne({ nim: adminDoc.nim });
         }
         if (existing) {
           existing.role = "mahasiswa";  // restore role, NIM tetap sama
@@ -688,33 +697,40 @@ const resetPassword = async (req, res) => {
 // ─────────────────────────────────────────
 const updateProfile = async (req, res) => {
   try {
-    const { userId } = req.user; // dari JWT token
-    const { nickname, profilePhoto } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({ message: "User tidak terautentikasi." });
-    }
+    const { userId } = req.user;
+    const { nickname, profilePhoto } = req.body; 
 
     const mahasiswa = await Mahasiswa.findOne({ userId });
-
     if (!mahasiswa) {
-      return res.status(404).json({ message: "User tidak ditemukan." });
+      return res.status(404).json({ message: 'User tidak ditemukan.' });
     }
 
-    // Update nickname jika dikirim
-    if (nickname !== undefined && nickname !== null) {
-      mahasiswa.nickname = nickname.trim() || null;
+    if (profilePhoto) {
+      // Hapus foto lama kalau ada
+      if (mahasiswa.profilePhoto) {
+        const publicId = mahasiswa.profilePhoto.split('/').slice(-2).join('/').split('.')[0];
+        await cloudinary.uploader.destroy(publicId);
+      }
+
+      const uploadResult = await cloudinary.uploader.upload(profilePhoto, {
+        folder: 'profile_photos',
+        transformation: [
+          { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+          { quality: 'auto', fetch_format: 'auto' },
+        ],
+      });
+
+      mahasiswa.profilePhoto = uploadResult.secure_url; 
     }
 
-    // Update profilePhoto jika dikirim
-    if (profilePhoto !== undefined && profilePhoto !== null) {
-      mahasiswa.profilePhoto = profilePhoto;
+    if (nickname !== undefined) {
+      mahasiswa.nickname = nickname?.trim() || null;
     }
 
     await mahasiswa.save();
 
     return res.status(200).json({
-      message: "Profil berhasil diperbarui.",
+      message: 'Profil berhasil diperbarui.',
       data: {
         userId: mahasiswa.userId,
         nama: mahasiswa.nama,
@@ -726,8 +742,8 @@ const updateProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("[updateProfile]", error.message);
-    return res.status(500).json({ message: "Terjadi kesalahan server: " + error.message });
+    console.error('[updateProfile]', error.message);
+    return res.status(500).json({ message: 'Terjadi kesalahan server: ' + error.message });
   }
 };
 
