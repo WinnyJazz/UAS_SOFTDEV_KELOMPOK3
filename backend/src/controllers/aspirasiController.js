@@ -177,6 +177,7 @@ exports.getJawaban = async (req, res) => {
     if (req.query.pertanyaanId) filter.pertanyaanId = req.query.pertanyaanId;
     if (req.query.nim) filter.nim = req.query.nim;
     if (req.query.mahasiswaId) filter.mahasiswaId = req.query.mahasiswaId;
+    if (req.query.userId) filter.userId = req.query.userId;
     const jawaban = await Jawaban.find(filter)
       .populate("pertanyaanId", "teks")
       .populate("sesiId", "nama bulan tahun")

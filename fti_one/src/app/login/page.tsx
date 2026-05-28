@@ -63,7 +63,7 @@ export default function Login() {
           } else if (role === 'admin') {
             router.push('/dashboard');
           } else {
-            router.push('/dashboard');
+            router.push('/homepage');
           }
         }, 1500);
       } else {

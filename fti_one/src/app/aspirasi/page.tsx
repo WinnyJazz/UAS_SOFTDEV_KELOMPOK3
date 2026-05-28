@@ -302,6 +302,9 @@ function IsiFormTab() {
             jawaban: answers[p._id] || "",
             nim: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") || "{}").nim : "",
             nama: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") || "{}").nama : "",
+            userId: localStorage.getItem("token")
+              ? JSON.parse(atob(localStorage.getItem("token")!.split(".")[1])).userId
+              : "",
           }),
         }).then((r) => {
           if (!r.ok) throw new Error(`Gagal submit pertanyaan ${p._id}`);
