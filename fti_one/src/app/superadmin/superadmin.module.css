@@ -930,3 +930,53 @@
     .welcomeBanner { padding: 20px; }
     .welcomeTitle { font-size: 20px; }
 }
+
+/* ── NIM FILTER ── */
+.nimFilterWrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.nimSearchInput {
+    padding: 8px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #1e1b4b;
+    background: #fff;
+    outline: none;
+    width: 220px;
+    transition: border-color 0.18s;
+    font-family: inherit;
+}
+.nimSearchInput:focus { border-color: #4338ca; }
+
+.nimFilterClear {
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 20px;
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.nimFilterClear:hover { border-color: #4338ca; color: #4338ca; }
+
+.nimFilterCount {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+}
+
+.nimHighlight {
+    background: #fef9c3;
+    border-radius: 3px;
+    padding: 0 1px;
+    color: #1e1b4b;
+    font-weight: 700;
+}

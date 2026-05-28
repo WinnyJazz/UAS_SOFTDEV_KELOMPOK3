@@ -109,6 +109,22 @@ function BarChart({ data }: { data: { label: string; value: number }[] }) {
     );
 }
 
+// ── NIM Highlight Helper ───────────────────────────────
+function HighlightText({ text, query }: { text: string; query: string }) {
+    if (!query.trim() || !text) return <>{text}</>;
+    const idx = text.toLowerCase().indexOf(query.trim().toLowerCase());
+    if (idx === -1) return <>{text}</>;
+    return (
+        <>
+            {text.slice(0, idx)}
+            <span className={styles.nimHighlight}>
+                {text.slice(idx, idx + query.trim().length)}
+            </span>
+            {text.slice(idx + query.trim().length)}
+        </>
+    );
+}
+
 // ── Main Component ─────────────────────────────────────
 export default function SuperAdminDashboard() {
     const router = useRouter();
@@ -126,6 +142,9 @@ export default function SuperAdminDashboard() {
     const [sesiTerkini, setSesiTerkini] = useState<SesiAspirasi | null>(null);
 
     const [activeSection, setActiveSection] = useState<Section>('overview');
+
+    // NIM filter state
+    const [nimFilter, setNimFilter] = useState('');
 
     // LF state (from DB)
     const [lfItems, setLfItems] = useState<LFItem[]>([]);
@@ -254,7 +273,6 @@ export default function SuperAdminDashboard() {
                     setSelectedSesi(terkini._id);
                     fetchJawabanTerkini(token, terkini._id);
                 }
-                // Hitung total aspirasi dari jumlah jawaban unik per sesi
                 setTotalAspirasi(data.length);
             }
         } catch (err) { console.error(err); }
@@ -275,7 +293,7 @@ export default function SuperAdminDashboard() {
         finally { setLoadingJawaban(false); }
     };
 
-        const fetchJawabanTerkini = async (token: string, sesiId: string) => {
+    const fetchJawabanTerkini = async (token: string, sesiId: string) => {
         try {
             const res = await fetch(
                 `http://localhost:5000/api/aspirasi/jawaban?sesiId=${sesiId}`,
@@ -283,13 +301,12 @@ export default function SuperAdminDashboard() {
             );
             if (res.ok) {
                 const data: Jawaban[] = await res.json();
-                // hitung unique userId = jumlah responden unik
                 const uniqueUsers = new Set(data.map(j => j.userId));
                 setRespondentCount(uniqueUsers.size);
             }
         } catch (err) { console.error(err); }
     };
-    
+
     const fetchHasil = async (token: string) => {
         try {
             const res = await fetch('http://localhost:5000/api/aspirasi/hasil', {
@@ -298,9 +315,7 @@ export default function SuperAdminDashboard() {
             if (res.ok) {
                 const data: HasilRespons[] = await res.json();
                 setHasilList(data);
-                // hasil = selesai direspon DPM
                 setAspirasiSelesai(data.length);
-                // fetch semua sesi untuk hitung total jawaban (dalam proses = sesi - selesai)
             }
         } catch (err) { console.error(err); }
     };
@@ -373,12 +388,19 @@ export default function SuperAdminDashboard() {
     const adminDowngradeable = admins.filter(a => a.role === 'admin');
     const superAdmins = admins.filter(a => a.role === 'superadmin');
 
+    // ── NIM / Nama filter (client-side) ──
+    const filteredMahasiswaBiasa = nimFilter.trim()
+        ? mahasiswaBiasa.filter(m =>
+            m.nim?.toLowerCase().includes(nimFilter.trim().toLowerCase()) ||
+            m.nama?.toLowerCase().includes(nimFilter.trim().toLowerCase())
+        )
+        : mahasiswaBiasa;
+
     const lfTotal = lfItems.length;
     const lfClaimed = lfItems.filter(i => i.status === 'Claimed').length;
     const lfPending = lfItems.filter(i => i.status === 'Pending').length;
     const lfTersedia = lfItems.filter(i => i.status === 'Pending').length;
 
-    // Aspirasi dalam proses = sesi yang belum ada hasilnya
     const aspirasiDalamProsesCount = Math.max(0, sesiList.length - hasilList.length);
     const aspirasiResponseRate = sesiList.length > 0
         ? Math.round((hasilList.length / sesiList.length) * 100)
@@ -575,14 +597,29 @@ export default function SuperAdminDashboard() {
                         <div>
                             <div className={styles.pageTitle}>User Data</div>
                             <div className={styles.statRow}>
-                                <div className={styles.statCard}><div className={styles.statIcon}>👥</div><div className={styles.statLabel}>Total Mahasiswa</div><div className={styles.statValue}>{mahasiswas.length}</div></div>
-                                <div className={styles.statCard}><div className={styles.statIcon}>🟢</div><div className={styles.statLabel}>Terverifikasi</div><div className={styles.statValue}>{mahasiswas.filter(m => m.isVerified).length}</div></div>
-                                <div className={styles.statCard}><div className={styles.statIcon}>⏳</div><div className={styles.statLabel}>Belum Verifikasi</div><div className={styles.statValue}>{mahasiswas.filter(m => !m.isVerified).length}</div></div>
+                                <div className={styles.statCard}>
+                                    <div className={styles.statIcon}>👥</div>
+                                    <div className={styles.statLabel}>Total Mahasiswa</div>
+                                    <div className={styles.statValue}>{mahasiswas.length}</div>
+                                </div>
+                                <div className={styles.statCard}>
+                                    <div className={styles.statIcon}>🟢</div>
+                                    <div className={styles.statLabel}>Terverifikasi</div>
+                                    <div className={styles.statValue}>{mahasiswas.filter(m => m.isVerified).length}</div>
+                                </div>
+                                <div className={styles.statCard}>
+                                    <div className={styles.statIcon}>⏳</div>
+                                    <div className={styles.statLabel}>Belum Verifikasi</div>
+                                    <div className={styles.statValue}>{mahasiswas.filter(m => !m.isVerified).length}</div>
+                                </div>
                             </div>
 
                             <div className={styles.bigCard}>
                                 <div className={styles.cardHeader}>
-                                    <h3>🎓 Daftar Mahasiswa ({mahasiswaBiasa.length})</h3>
+                                    <h3>
+                                        🎓 Daftar Mahasiswa ({filteredMahasiswaBiasa.length}
+                                        {nimFilter.trim() && ` dari ${mahasiswaBiasa.length}`})
+                                    </h3>
                                     {selectedUsers.length > 0 && (
                                         <div className={styles.inlineActionBar}>
                                             <span className={styles.selectedCount}>{selectedUsers.length} dipilih</span>
@@ -592,34 +629,89 @@ export default function SuperAdminDashboard() {
                                         </div>
                                     )}
                                 </div>
+
+                                {/* ── NIM / Nama Filter ── */}
+                                <div className={styles.nimFilterWrap}>
+                                    <input
+                                        type="text"
+                                        className={styles.nimSearchInput}
+                                        placeholder="🔍 Cari NIM atau nama..."
+                                        value={nimFilter}
+                                        onChange={e => {
+                                            setNimFilter(e.target.value);
+                                            setSelectedUsers([]);
+                                        }}
+                                    />
+                                    {nimFilter.trim() && (
+                                        <>
+                                            <button
+                                                className={styles.nimFilterClear}
+                                                onClick={() => { setNimFilter(''); setSelectedUsers([]); }}>
+                                                ✕ Clear
+                                            </button>
+                                            <span className={styles.nimFilterCount}>
+                                                {filteredMahasiswaBiasa.length} hasil ditemukan
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+
                                 <div className={styles.tableWrap}>
                                     <table className={styles.tbl}>
                                         <thead>
                                             <tr>
                                                 <th style={{ width: 40 }}>
-                                                    <input type="checkbox" className={styles.checkbox}
-                                                        checked={selectedUsers.length === mahasiswaBiasa.length && mahasiswaBiasa.length > 0}
-                                                        onChange={e => setSelectedUsers(e.target.checked ? mahasiswaBiasa.map(m => m.userId) : [])} />
+                                                    <input
+                                                        type="checkbox"
+                                                        className={styles.checkbox}
+                                                        checked={
+                                                            selectedUsers.length === filteredMahasiswaBiasa.length &&
+                                                            filteredMahasiswaBiasa.length > 0
+                                                        }
+                                                        onChange={e =>
+                                                            setSelectedUsers(
+                                                                e.target.checked
+                                                                    ? filteredMahasiswaBiasa.map(m => m.userId)
+                                                                    : []
+                                                            )
+                                                        }
+                                                    />
                                                 </th>
                                                 <th>Nama</th><th>Email</th><th>NIM</th><th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {mahasiswaBiasa.length > 0 ? mahasiswaBiasa.map(mhs => (
+                                            {filteredMahasiswaBiasa.length > 0 ? filteredMahasiswaBiasa.map(mhs => (
                                                 <tr key={mhs.userId} className={selectedUsers.includes(mhs.userId) ? styles.rowSelected : ''}>
-                                                    <td><input type="checkbox" className={styles.checkbox}
-                                                        checked={selectedUsers.includes(mhs.userId)}
-                                                        onChange={() => handleUserSelect(mhs.userId)} /></td>
-                                                    <td>{mhs.nama}</td>
+                                                    <td>
+                                                        <input
+                                                            type="checkbox"
+                                                            className={styles.checkbox}
+                                                            checked={selectedUsers.includes(mhs.userId)}
+                                                            onChange={() => handleUserSelect(mhs.userId)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <HighlightText text={mhs.nama} query={nimFilter} />
+                                                    </td>
                                                     <td>{mhs.email}</td>
-                                                    <td>{mhs.nim}</td>
-                                                    <td>{mhs.isVerified
-                                                        ? <span className={styles.badgeVerified}>✅ Terverifikasi</span>
-                                                        : <span className={styles.badgeUnverified}>❌ Belum Verifikasi</span>}
+                                                    <td>
+                                                        <HighlightText text={mhs.nim ?? ''} query={nimFilter} />
+                                                    </td>
+                                                    <td>
+                                                        {mhs.isVerified
+                                                            ? <span className={styles.badgeVerified}>✅ Terverifikasi</span>
+                                                            : <span className={styles.badgeUnverified}>❌ Belum Verifikasi</span>}
                                                     </td>
                                                 </tr>
                                             )) : (
-                                                <tr><td colSpan={5} className={styles.emptyState}>Tidak ada mahasiswa</td></tr>
+                                                <tr>
+                                                    <td colSpan={5} className={styles.emptyState}>
+                                                        {nimFilter.trim()
+                                                            ? `Tidak ada mahasiswa dengan NIM/nama "${nimFilter}"`
+                                                            : 'Tidak ada mahasiswa'}
+                                                    </td>
+                                                </tr>
                                             )}
                                         </tbody>
                                     </table>
