@@ -20,7 +20,7 @@
 
 .header p {
   margin: 4px 0 0;
-  color: #000000;
+  color: #e0e7ff;
 }
 
 .refreshBtn {
@@ -136,6 +136,7 @@
 .top h3 {
   margin: 0;
   font-size: 16px;
+  color: #1f2937;
 }
 
 .tag {
@@ -149,6 +150,13 @@
   margin: 6px 0 0;
   color: #6b7280;
   font-size: 14px;
+}
+
+.time {
+  margin-top: 6px;
+  color: #9ca3af;
+  font-size: 12px;
+  display: block;
 }
 
 /* STATES */

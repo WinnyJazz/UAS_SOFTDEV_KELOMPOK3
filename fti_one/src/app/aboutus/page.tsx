@@ -262,10 +262,10 @@ export default function InformasiPage() {
         {activeTab === 'who' && (
           <div className={styles.section}>
 
-            {/* Decorative dots */}
+            {/* Decorative dots
             <div className={styles.dotsTop} aria-hidden="true">
               <span /><span /><span />
-            </div>
+            </div> */}
 
             {/* Title */}
             <h1 className={styles.mainTitle}>

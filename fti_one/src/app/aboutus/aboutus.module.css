@@ -74,12 +74,12 @@
   align-items: center;
 }
 
-/* ── DECORATIVE DOTS ── */
+/* * ── DECORATIVE DOTS ──
 .dotsTop {
   display: flex;
   gap: 6px;
   margin-bottom: 20px;
-}
+} */
 
 .dotsTop span {
   width: 8px;

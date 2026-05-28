@@ -19,7 +19,11 @@ const createNotif = async ({
       category = "Sistem";
     }
 
+    // Generate notifId di helper, jangan andalkan pre-hook
+    const notifId = `NTF-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
     const notif = new Notifikasi({
+      notifId,
       title,
       desc,
       category,
@@ -31,14 +35,15 @@ const createNotif = async ({
       read: false,
     });
 
-    console.log("📝 [createNotif] mau save notif:", notif);
+    console.log("📝 [createNotif] mau save notif:", { title, category, target });
 
     const saved = await notif.save();
 
-    console.log("✅ [createNotif] berhasil disimpan, _id:", saved._id);
+    console.log("✅ [createNotif] berhasil disimpan, _id:", saved._id, "notifId:", saved.notifId);
     return saved;
   } catch (err) {
-    console.error("❌ [createNotif] ERROR:", err); // <-- lihat full error disini
+    console.error("❌ [createNotif] ERROR:", err.message);
+    console.error("   Stack:", err.stack);
     return null;
   }
 };

@@ -63,14 +63,9 @@ const notifikasiSchema = new mongoose.Schema(
 );
 
 /**
- * Auto generate notifId biar gampang tracking
+ * notifId dibuat langsung di notifHelper.js, bukan di pre-hook
+ * untuk menghindari issues dengan Mongoose model caching
  */
-notifikasiSchema.pre("save", function (next) {
-  if (!this.notifId) {
-    this.notifId = `NTF-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-  }
-  next();
-});
 
 module.exports =
   mongoose.models.Notifikasi ||

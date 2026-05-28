@@ -243,9 +243,26 @@ exports.submitSesiAspirasi = async (req, res) => {
 
 exports.submitJawaban = async (req, res) => {
   try {
-    const jawaban = new Jawaban(req.body);
-    await jawaban.save();
-    res.status(201).json(jawaban);
+    const { pertanyaanId, sesiId, jawaban, nim, nama } = req.body;
+    const newJawaban = new Jawaban(req.body);
+    await newJawaban.save();
+    
+    // 🔔 TRIGGER NOTIFIKASI KE ADMIN
+    const sesi = await SesiAspirasi.findById(sesiId);
+    const pertanyaan = await Pertanyaan.findById(pertanyaanId);
+    
+    await createNotif({
+      title: "Jawaban Aspirasi Masuk",
+      desc: `Mahasiswa ${nama} (NIM: ${nim}) menjawab pertanyaan di sesi "${sesi?.nama || "Aspirasi"}"`,
+      category: "Aspirasi",
+      icon: "📋",
+      iconBg: "#dbeafe",
+      refType: "jawaban",
+      refId: newJawaban._id.toString(),
+      target: "admin",
+    });
+    
+    res.status(201).json(newJawaban);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -270,6 +287,20 @@ exports.createHasil = async (req, res) => {
   try {
     const hasil = new HasilRespons(req.body);
     await hasil.save();
+    
+    // 🔔 TRIGGER NOTIFIKASI KE ADMIN
+    const sesi = await SesiAspirasi.findById(hasil.sesiId);
+    await createNotif({
+      title: "Aspirasi Baru Masuk",
+      desc: `Sesi: ${sesi?.nama || "Aspirasi"} — Jawaban baru dari mahasiswa`,
+      category: "Aspirasi",
+      icon: "📋",
+      iconBg: "#dbeafe",
+      refType: "aspirasi",
+      refId: hasil._id.toString(),
+      target: "admin",
+    });
+    
     res.status(201).json(hasil);
   } catch (err) {
     res.status(400).json({ message: err.message });
