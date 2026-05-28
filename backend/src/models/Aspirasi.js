@@ -29,6 +29,7 @@ const JawabanSchema = new mongoose.Schema(
     pertanyaanId: { type: mongoose.Schema.Types.ObjectId, ref: "Pertanyaan", required: true },
     sesiId: { type: mongoose.Schema.Types.ObjectId, ref: "SesiAspirasi", required: true },
     mahasiswaId: { type: mongoose.Schema.Types.ObjectId, ref: "Mahasiswa" },
+    userId: { type: String }, 
     nim: { type: String },
     nama: { type: String },
     jawaban: { type: String, required: true },
