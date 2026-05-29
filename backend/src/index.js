@@ -13,6 +13,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const informasiRoutes = require('./routes/informasiRoutes');
 const aspirasiRoutes = require('./routes/aspirasiRoutes');
 const notifikasiRoutes = require('./routes/notifikasiRoutes');
+const settingRoutes = require('./routes/settingRoute');
 
 connectDB();
 
@@ -36,6 +37,7 @@ app.use('/api/informasi', informasiRoutes);
 app.use('/api/aspirasi', aspirasiRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifikasi', notifikasiRoutes);
+app.use('/api/settings', settingRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
