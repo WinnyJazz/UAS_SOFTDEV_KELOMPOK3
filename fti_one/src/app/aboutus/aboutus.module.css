@@ -257,7 +257,18 @@
   font-size: 11px;
 }
 
-
+.divisionCard h4 {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+.divisionTaskHeading {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
 /* ======================================
    OUR TEAM TAB
    ====================================== */

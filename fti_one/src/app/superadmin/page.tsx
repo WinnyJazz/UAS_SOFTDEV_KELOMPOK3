@@ -18,6 +18,7 @@ interface User {
     role: string;
     isVerified?: boolean;
     profilePhoto?: string | null;
+    nickname?: string | null;
 }
 
 interface AdminUser {
@@ -74,6 +75,36 @@ interface HasilRespons {
     createdAt: string;
 }
 
+// ── Overview data interface ────────────────────────────
+interface OverviewData {
+    lostFound: {
+        totalBarang: number;
+        claimed: number;
+        pending: number;
+        expired: number;
+    };
+    aspirasi: {
+        totalAspirasi: number;
+        dalamProses: number;
+        selesai: number;
+        totalJawaban: number;
+    };
+    users: {
+        totalMahasiswa: number;
+        terverifikasi: number;
+        belumVerifikasi: number;
+        totalAdmin: number;
+        unreadNotif: number;
+    };
+    recentActivity: {
+        icon: string;
+        iconBg: string;
+        text: string;
+        time: string;
+        category: string;
+    }[];
+}
+
 // ── Mock fallback notifs ───────────────────────────────
 const INITIAL_NOTIFS: NotifItem[] = [
     { id: 1, icon: '📦', iconBg: '#ede9fe', title: 'Claim Barang Baru', desc: 'Budi Santoso mengklaim charger hitam di R.904', time: '2 menit lalu', read: false, category: 'Lost & Found' },
@@ -125,6 +156,15 @@ function HighlightText({ text, query }: { text: string; query: string }) {
     );
 }
 
+// ── Sidebar Avatar Icon ────────────────────────────────
+function AvatarIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.85)" width="52" height="52">
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+        </svg>
+    );
+}
+
 // ── Main Component ─────────────────────────────────────
 export default function SuperAdminDashboard() {
     const router = useRouter();
@@ -142,19 +182,15 @@ export default function SuperAdminDashboard() {
     const [sesiTerkini, setSesiTerkini] = useState<SesiAspirasi | null>(null);
 
     const [activeSection, setActiveSection] = useState<Section>('overview');
-
-    // NIM filter state
     const [nimFilter, setNimFilter] = useState('');
-
-    // LF state (from DB)
     const [lfItems, setLfItems] = useState<LFItem[]>([]);
 
-    // Notif state
+    const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
+
     const [notifs, setNotifs] = useState<NotifItem[]>(INITIAL_NOTIFS);
     const [notifReadFilter, setNotifReadFilter] = useState<NotifReadFilter>('Semua');
     const [notifCatFilter, setNotifCatFilter] = useState<NotifCategory>('Semua');
 
-    // Aspirasi state (real data)
     const [sesiList, setSesiList] = useState<SesiAspirasi[]>([]);
     const [selectedSesi, setSelectedSesi] = useState<string>('');
     const [jawabanList, setJawabanList] = useState<Jawaban[]>([]);
@@ -162,24 +198,11 @@ export default function SuperAdminDashboard() {
     const [aspirasiTab, setAspirasiTab] = useState<'jawaban' | 'hasil'>('jawaban');
     const [loadingJawaban, setLoadingJawaban] = useState(false);
 
-    // Aspirasi overview stats (from API)
-    const [totalAspirasi, setTotalAspirasi] = useState(0);
-    const [aspirasiDalamProses, setAspirasiDalamProses] = useState(0);
-    const [aspirasiSelesai, setAspirasiSelesai] = useState(0);
-
-    // Weekly claim chart data
-    const [weeklyClaimData, setWeeklyClaimData] = useState([
+    const [weeklyClaimData] = useState([
         { label: 'M1', value: 4 },
         { label: 'M2', value: 7 },
         { label: 'M3', value: 5 },
         { label: 'M4', value: 9 },
-    ]);
-
-    // Recent activity
-    const [recentActivity, setRecentActivity] = useState([
-        { icon: '📦', iconBg: '#ede9fe', title: 'Claim Barang Baru', desc: 'Mahasiswa melakukan claim barang', time: '2 menit lalu' },
-        { icon: '💬', iconBg: '#d1fae5', title: 'Aspirasi Baru', desc: 'Aspirasi baru telah masuk', time: '10 menit lalu' },
-        { icon: '👤', iconBg: '#dbeafe', title: 'User Baru', desc: 'Mahasiswa baru berhasil register', time: '1 jam lalu' },
     ]);
 
     useEffect(() => {
@@ -202,6 +225,7 @@ export default function SuperAdminDashboard() {
         fetchNotifs(token);
         fetchSesi(token);
         fetchHasil(token);
+        fetchOverview(token); 
         setLoading(false);
 
         const handleProfileUpdate = () => {
@@ -214,6 +238,22 @@ export default function SuperAdminDashboard() {
         window.addEventListener('profileUpdated', handleProfileUpdate);
         return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
     }, [router]);
+
+    // ── NEW: Fetch overview from backend ──────────────
+    const fetchOverview = async (token: string) => {
+        try {
+            const res = await fetch('http://localhost:5000/api/dashboard/overview', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            console.log('overviewData:', data);
+            if (res.ok) {
+                setOverviewData(data.data);
+            }
+        } catch (err) {
+            console.error('fetchOverview error:', err);
+        }
+    };
 
     const fetchUsers = async (token: string) => {
         try {
@@ -258,7 +298,6 @@ export default function SuperAdminDashboard() {
         } catch (err) { console.error(err); }
     };
 
-    // ── Aspirasi fetch ──
     const fetchSesi = async (token: string) => {
         try {
             const res = await fetch('http://localhost:5000/api/aspirasi/sesi', {
@@ -266,14 +305,20 @@ export default function SuperAdminDashboard() {
             });
             if (res.ok) {
                 const data: SesiAspirasi[] = await res.json();
-                setSesiList(data);
-                if (data.length > 0) {
-                    const terkini = data[0];
+
+                // Sort dari yang paling baru (tahun & bulan terbesar duluan)
+                const sorted = [...data].sort((a, b) =>
+                    b.tahun !== a.tahun ? b.tahun - a.tahun : b.bulan - a.bulan
+                );
+
+                setSesiList(sorted);
+
+                if (sorted.length > 0) {
+                    const terkini = sorted[0];
                     setSesiTerkini(terkini);
                     setSelectedSesi(terkini._id);
                     fetchJawabanTerkini(token, terkini._id);
                 }
-                setTotalAspirasi(data.length);
             }
         } catch (err) { console.error(err); }
     };
@@ -315,7 +360,6 @@ export default function SuperAdminDashboard() {
             if (res.ok) {
                 const data: HasilRespons[] = await res.json();
                 setHasilList(data);
-                setAspirasiSelesai(data.length);
             }
         } catch (err) { console.error(err); }
     };
@@ -388,7 +432,6 @@ export default function SuperAdminDashboard() {
     const adminDowngradeable = admins.filter(a => a.role === 'admin');
     const superAdmins = admins.filter(a => a.role === 'superadmin');
 
-    // ── NIM / Nama filter (client-side) ──
     const filteredMahasiswaBiasa = nimFilter.trim()
         ? mahasiswaBiasa.filter(m =>
             m.nim?.toLowerCase().includes(nimFilter.trim().toLowerCase()) ||
@@ -396,71 +439,72 @@ export default function SuperAdminDashboard() {
         )
         : mahasiswaBiasa;
 
-    const lfTotal = lfItems.length;
-    const lfClaimed = lfItems.filter(i => i.status === 'Claimed').length;
-    const lfPending = lfItems.filter(i => i.status === 'Pending').length;
-    const lfTersedia = lfItems.filter(i => i.status === 'Pending').length;
+    // ── Use overviewData for Lost & Found stats (correct pending count) ──
+    const lfTotal = overviewData?.lostFound?.totalBarang ?? lfItems.length;
+    const lfClaimed = overviewData?.lostFound?.claimed ?? lfItems.filter(i => i.status === 'Claimed').length;
+    const lfPending = overviewData?.lostFound?.pending ?? lfItems.filter(i => i.status === 'Pending').length;
+    const lfExpired = overviewData?.lostFound?.expired ?? lfItems.filter(i => i.status === 'Expired').length;
 
-    const aspirasiDalamProsesCount = Math.max(0, sesiList.length - hasilList.length);
+    // ── Aspirasi stats ──
+    const aspirasiDalamProsesCount = overviewData?.aspirasi?.dalamProses ?? Math.max(0, sesiList.length - hasilList.length);
     const aspirasiResponseRate = sesiList.length > 0
         ? Math.round((hasilList.length / sesiList.length) * 100)
         : 0;
+
+    // ── Recent activity: prefer API data, fallback to static ──
+    const recentActivity = overviewData?.recentActivity?.map(a => ({
+        icon: a.icon,
+        iconBg: a.iconBg,
+        title: a.text,
+        desc: a.category,
+        time: a.time,
+    })) ?? [
+            { icon: '📦', iconBg: '#ede9fe', title: 'Claim Barang Baru', desc: 'Mahasiswa melakukan claim barang', time: '2 menit lalu' },
+            { icon: '💬', iconBg: '#d1fae5', title: 'Aspirasi Baru', desc: 'Aspirasi baru telah masuk', time: '10 menit lalu' },
+            { icon: '👤', iconBg: '#dbeafe', title: 'User Baru', desc: 'Mahasiswa baru berhasil register', time: '1 jam lalu' },
+        ];
 
     if (loading) return <div className={styles.loading}>Loading...</div>;
     if (!user) return null;
 
     const nav = (s: Section) => setActiveSection(s);
 
+    const navItems: { id: Section; label: string }[] = [
+        { id: 'overview', label: 'Overview' },
+        ...(user.role === 'superadmin' ? [
+            { id: 'userdata' as Section, label: 'User data' },
+        ] : []),
+        { id: 'notif', label: 'Notification' },
+    ];
+
     return (
         <div className={styles.root}>
-
-            {/* ── NAVBAR ── */}
-            <nav className={styles.navbar}>
-                <div className={styles.navLogo} onClick={() => nav('overview')}>
-                    <span>DPM</span><span>FTI</span>
-                </div>
-                <ul className={styles.navLinks}>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#" className={styles.navActive}>About Us</a></li>
-                    <li><a href="#">Aspirasi</a></li>
-                    <li><a href="#">Info</a></li>
-                    <li><a href="#">Lost &amp; Found</a></li>
-                </ul>
-                <div className={styles.navAvatar}>
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                    </svg>
-                </div>
-            </nav>
-
-            {/* ── LAYOUT ── */}
             <div className={styles.layout}>
 
                 {/* ── SIDEBAR ── */}
                 <aside className={styles.sidebar}>
                     <div className={styles.sidebarAvatar}>
                         {user.profilePhoto ? (
-                            <img src={user.profilePhoto} alt="Profile"
-                                style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover' }} />
+                            <img
+                                src={user.profilePhoto}
+                                alt="Profile"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         ) : (
-                            <svg viewBox="0 0 24 24" fill="rgba(255,255,255,.85)" width="48" height="48">
-                                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                            </svg>
+                            <AvatarIcon />
                         )}
                     </div>
+
                     <div className={styles.sidebarName}>{user.nama}</div>
-                    <div className={styles.sidebarRole}>{user.role === 'superadmin' ? 'Super Admin' : 'Admin'}</div>
+
                     <ul className={styles.sidebarMenu}>
-                        {([
-                            ['overview', '📊 Overview'],
-                            ...(user.role === 'superadmin' ? [
-                                ['userdata', '👥 User Data'],
-                            ] : []),
-                        ] as [Section, string][]).map(([id, label]) => (
+                        {navItems.map(({ id, label }) => (
                             <li key={id}>
-                                <a href="#"
+                                <a
+                                    href="#"
                                     className={activeSection === id ? styles.sidebarActive : ''}
-                                    onClick={e => { e.preventDefault(); nav(id); }}>
+                                    onClick={e => { e.preventDefault(); nav(id); }}
+                                >
                                     {label}
                                     {id === 'notif' && unreadCount > 0 && (
                                         <span className={styles.notifDot}>{unreadCount}</span>
@@ -469,79 +513,51 @@ export default function SuperAdminDashboard() {
                             </li>
                         ))}
                     </ul>
+
                     <button onClick={handleLogout} className={styles.sidebarLogout}>Logout</button>
                 </aside>
 
-                {/* ── MAIN ── */}
+                {/* ── MAIN CONTENT ── */}
                 <main className={styles.main}>
                     {error && <div className={styles.errorBanner}>{error}</div>}
 
                     {/* ══════════ OVERVIEW ══════════ */}
                     {activeSection === 'overview' && (
                         <div>
-                            {/* Welcome Banner */}
                             <div className={styles.welcomeBanner}>
-                                <div>
-                                    <div className={styles.welcomeTitle}>Welcome back, <span>{user.nama}</span></div>
-                                    <div className={styles.welcomeSub}>Pantau aktivitas sistem DPM FTI secara realtime.</div>
+                                <div className={styles.welcomeTitle}>
+                                    Hello welcome <span>{user.role === 'superadmin' ? 'Super Admin' : (user.nickname || user.nama)}!</span>
+                                </div>
+                                <div className={styles.welcomeSub}>
+                                    Pantau aktivitas sistem DPM FTI secara realtime.
                                 </div>
                             </div>
 
-                            {/* Stat Cards — 4 kolom horizontal */}
-                            <div className={styles.statRow4}>
-                                <div className={styles.statCard4}>
-                                    <div className={styles.statCardIcon} style={{ background: '#f0f0ff' }}>💬</div>
-                                    <div className={styles.statCardBody}>
-                                        <div className={styles.statCardLabel}>Aspirasi Masuk</div>
-                                        <div className={styles.statCardValue}>{sesiList.length}</div>
-                                    </div>
+                            {/* Lost & Found Section */}
+                            <div className={styles.sectionLabel}>Lost &amp; Found</div>
+                            <div className={styles.statRow}>
+                                <div className={styles.statCard}>
+                                    <div className={styles.statIcon}>📦</div>
+                                    <div className={styles.statLabel}>Total Barang</div>
+                                    <div className={styles.statValue}>{lfTotal}</div>
+                                    <div className={styles.statSub}>dari database</div>
                                 </div>
-                                <div className={styles.statCard4}>
-                                    <div className={styles.statCardIcon} style={{ background: '#fef9ec' }}>⏳</div>
-                                    <div className={styles.statCardBody}>
-                                        <div className={styles.statCardLabel}>Claim Pending</div>
-                                        <div className={styles.statCardValue}>{lfPending}</div>
-                                    </div>
+                                <div className={styles.statCard}>
+                                    <div className={styles.statIcon}>✅</div>
+                                    <div className={styles.statLabel}>Barang Claimed</div>
+                                    <div className={styles.statValue}>{lfClaimed}</div>
+                                    <div className={styles.statSub}>{lfTotal > 0 ? Math.round((lfClaimed / lfTotal) * 100) : 0}% claim rate</div>
                                 </div>
-                                <div className={styles.statCard4}>
-                                    <div className={styles.statCardIcon} style={{ background: '#fff4ec' }}>📦</div>
-                                    <div className={styles.statCardBody}>
-                                        <div className={styles.statCardLabel}>Barang Tersedia</div>
-                                        <div className={styles.statCardValue}>{lfTersedia}</div>
-                                    </div>
-                                </div>
-                                <div className={styles.statCard4}>
-                                    <div className={styles.statCardIcon} style={{ background: '#edf4ff' }}>👥</div>
-                                    <div className={styles.statCardBody}>
-                                        <div className={styles.statCardLabel}>Total Mahasiswa</div>
-                                        <div className={styles.statCardValue}>{mahasiswas.length}</div>
-                                    </div>
+                                <div className={styles.statCard}>
+                                    <div className={styles.statIcon}>⏳</div>
+                                    <div className={styles.statLabel}>Pending Claim</div>
+                                    <div className={styles.statValue}>{lfPending}</div>
+                                    <div className={styles.statSub}>Perlu verifikasi</div>
                                 </div>
                             </div>
 
-                            {/* Chart + Activity */}
-                            <div className={styles.twoColChart}>
-                                <div className={styles.bigCard}>
-                                    <h3>📊 Claim Barang per Minggu</h3>
-                                    <BarChart data={weeklyClaimData} />
-                                </div>
-                                <div className={styles.bigCard}>
-                                    <h3>🕐 Recent Activity</h3>
-                                    {recentActivity.map((a, i) => (
-                                        <div key={i} className={styles.activityItem}>
-                                            <div className={styles.activityIcon} style={{ background: a.iconBg }}>{a.icon}</div>
-                                            <div className={styles.activityBody}>
-                                                <div className={styles.activityTitle}>{a.title}</div>
-                                                <div className={styles.activityDesc}>{a.desc}</div>
-                                                <div className={styles.activityTime}>{a.time}</div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Aspirasi Summary (from API) */}
-                            <div className={styles.sectionLabel}>💬 Aspirasi</div>
+                            {/* Aspirasi Section */}
+                            <div className={styles.sectionLabel}>Aspirasi</div>
                             <div className={styles.statRow}>
                                 <div className={styles.statCard}>
                                     <div className={styles.statIcon}>💬</div>
@@ -567,26 +583,60 @@ export default function SuperAdminDashboard() {
                                 </div>
                             </div>
 
-                            {/* LF Summary */}
-                            <div className={styles.sectionLabel}>🔍 Lost &amp; Found</div>
-                            <div className={styles.statRow}>
-                                <div className={styles.statCard}>
-                                    <div className={styles.statIcon}>📦</div>
-                                    <div className={styles.statLabel}>Total Barang</div>
-                                    <div className={styles.statValue}>{lfTotal}</div>
-                                    <div className={styles.statSub}>dari database</div>
+                            {/* Chart + Activity */}
+                            <div className={styles.twoColChart}>
+                                <div className={styles.bigCard}>
+                                    <h3>📊 Claim Barang per Minggu</h3>
+                                    <BarChart data={weeklyClaimData} />
                                 </div>
-                                <div className={styles.statCard}>
-                                    <div className={styles.statIcon}>✅</div>
-                                    <div className={styles.statLabel}>Barang Claimed</div>
-                                    <div className={styles.statValue}>{lfClaimed}</div>
-                                    <div className={styles.statSub}>{lfTotal > 0 ? Math.round((lfClaimed / lfTotal) * 100) : 0}% claim rate</div>
+                                <div className={styles.bigCard}>
+                                    <h3>🕐 Recent Activity</h3>
+                                    {recentActivity.map((a, i) => (
+                                        <div key={i} className={styles.activityItem}>
+                                            <div className={styles.activityIcon} style={{ background: a.iconBg }}>{a.icon}</div>
+                                            <div className={styles.activityBody}>
+                                                <div className={styles.activityTitle}>{a.title}</div>
+                                                <div className={styles.activityDesc}>{a.desc}</div>
+                                                <div className={styles.activityTime}>{a.time}</div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className={styles.statCard}>
-                                    <div className={styles.statIcon}>⏳</div>
-                                    <div className={styles.statLabel}>Pending Claim</div>
-                                    <div className={styles.statValue}>{lfPending}</div>
-                                    <div className={styles.statSub}>Perlu verifikasi</div>
+                            </div>
+
+                            {/* Bottom stat row */}
+                            <div className={styles.statRow4}>
+                                <div className={styles.statCard4}>
+                                    <div className={styles.statCardIcon}>💬</div>
+                                    <div className={styles.statCardBody}>
+                                        <div className={styles.statCardLabel}>Total Sesi Aspirasi</div>
+                                        <div className={styles.statCardValue}>{sesiList.length}</div>
+                                    </div>
+                                </div>
+                                <div className={styles.statCard4}>
+                                    <div className={styles.statCardIcon}>✉️</div>
+                                    <div className={styles.statCardBody}>
+                                        <div className={styles.statCardLabel}>Total Jawaban Masuk</div>
+                                        <div className={styles.statCardValue}>
+                                            {overviewData?.aspirasi?.totalJawaban ?? 0}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className={styles.statCard4}>
+                                    <div className={styles.statCardIcon}>📦</div>
+                                    <div className={styles.statCardBody}>
+                                        <div className={styles.statCardLabel}>Barang Tersedia</div>
+                                        <div className={styles.statCardValue}>{lfTotal - lfClaimed - lfExpired}</div>
+                                    </div>
+                                </div>
+                                <div className={styles.statCard4}>
+                                    <div className={styles.statCardIcon}>👥</div>
+                                    <div className={styles.statCardBody}>
+                                        <div className={styles.statCardLabel}>Total Mahasiswa</div>
+                                        <div className={styles.statCardValue}>
+                                            {overviewData?.users?.totalMahasiswa ?? mahasiswas.length}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -630,28 +680,18 @@ export default function SuperAdminDashboard() {
                                     )}
                                 </div>
 
-                                {/* ── NIM / Nama Filter ── */}
                                 <div className={styles.nimFilterWrap}>
                                     <input
                                         type="text"
                                         className={styles.nimSearchInput}
                                         placeholder="🔍 Cari NIM atau nama..."
                                         value={nimFilter}
-                                        onChange={e => {
-                                            setNimFilter(e.target.value);
-                                            setSelectedUsers([]);
-                                        }}
+                                        onChange={e => { setNimFilter(e.target.value); setSelectedUsers([]); }}
                                     />
                                     {nimFilter.trim() && (
                                         <>
-                                            <button
-                                                className={styles.nimFilterClear}
-                                                onClick={() => { setNimFilter(''); setSelectedUsers([]); }}>
-                                                ✕ Clear
-                                            </button>
-                                            <span className={styles.nimFilterCount}>
-                                                {filteredMahasiswaBiasa.length} hasil ditemukan
-                                            </span>
+                                            <button className={styles.nimFilterClear} onClick={() => { setNimFilter(''); setSelectedUsers([]); }}>✕ Clear</button>
+                                            <span className={styles.nimFilterCount}>{filteredMahasiswaBiasa.length} hasil ditemukan</span>
                                         </>
                                     )}
                                 </div>
@@ -664,17 +704,8 @@ export default function SuperAdminDashboard() {
                                                     <input
                                                         type="checkbox"
                                                         className={styles.checkbox}
-                                                        checked={
-                                                            selectedUsers.length === filteredMahasiswaBiasa.length &&
-                                                            filteredMahasiswaBiasa.length > 0
-                                                        }
-                                                        onChange={e =>
-                                                            setSelectedUsers(
-                                                                e.target.checked
-                                                                    ? filteredMahasiswaBiasa.map(m => m.userId)
-                                                                    : []
-                                                            )
-                                                        }
+                                                        checked={selectedUsers.length === filteredMahasiswaBiasa.length && filteredMahasiswaBiasa.length > 0}
+                                                        onChange={e => setSelectedUsers(e.target.checked ? filteredMahasiswaBiasa.map(m => m.userId) : [])}
                                                     />
                                                 </th>
                                                 <th>Nama</th><th>Email</th><th>NIM</th><th>Status</th>
@@ -684,20 +715,13 @@ export default function SuperAdminDashboard() {
                                             {filteredMahasiswaBiasa.length > 0 ? filteredMahasiswaBiasa.map(mhs => (
                                                 <tr key={mhs.userId} className={selectedUsers.includes(mhs.userId) ? styles.rowSelected : ''}>
                                                     <td>
-                                                        <input
-                                                            type="checkbox"
-                                                            className={styles.checkbox}
+                                                        <input type="checkbox" className={styles.checkbox}
                                                             checked={selectedUsers.includes(mhs.userId)}
-                                                            onChange={() => handleUserSelect(mhs.userId)}
-                                                        />
+                                                            onChange={() => handleUserSelect(mhs.userId)} />
                                                     </td>
-                                                    <td>
-                                                        <HighlightText text={mhs.nama} query={nimFilter} />
-                                                    </td>
+                                                    <td><HighlightText text={mhs.nama} query={nimFilter} /></td>
                                                     <td>{mhs.email}</td>
-                                                    <td>
-                                                        <HighlightText text={mhs.nim ?? ''} query={nimFilter} />
-                                                    </td>
+                                                    <td><HighlightText text={mhs.nim ?? ''} query={nimFilter} /></td>
                                                     <td>
                                                         {mhs.isVerified
                                                             ? <span className={styles.badgeVerified}>✅ Terverifikasi</span>
@@ -707,9 +731,7 @@ export default function SuperAdminDashboard() {
                                             )) : (
                                                 <tr>
                                                     <td colSpan={5} className={styles.emptyState}>
-                                                        {nimFilter.trim()
-                                                            ? `Tidak ada mahasiswa dengan NIM/nama "${nimFilter}"`
-                                                            : 'Tidak ada mahasiswa'}
+                                                        {nimFilter.trim() ? `Tidak ada mahasiswa dengan NIM/nama "${nimFilter}"` : 'Tidak ada mahasiswa'}
                                                     </td>
                                                 </tr>
                                             )}

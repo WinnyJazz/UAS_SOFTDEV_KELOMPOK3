@@ -408,7 +408,10 @@ export default function LostFoundStudent() {
                     type="text"
                     placeholder="Masukkan NIM anda"
                     value={claimData.nim}
-                    onChange={(e) => setClaimData({ ...claimData, nim: e.target.value })}
+                    onChange={(e) => {
+                      const onlyNumbers = e.target.value.replace(/\D/g, '');
+                      setClaimData({ ...claimData, nim: onlyNumbers });
+                    }}
                   />
                 </div>
                 <div className={styles.claimFormGroup}>
@@ -417,7 +420,10 @@ export default function LostFoundStudent() {
                     type="text"
                     placeholder="Masukkan nomor telepon anda"
                     value={claimData.nomorTelepon}
-                    onChange={(e) => setClaimData({ ...claimData, nomorTelepon: e.target.value })}
+                    onChange={(e) => {
+                      const onlyNumbers = e.target.value.replace(/\D/g, '');
+                      setClaimData({ ...claimData, nomorTelepon: onlyNumbers });
+                    }}
                   />
                 </div>
                 <div className={styles.claimFormGroup}>

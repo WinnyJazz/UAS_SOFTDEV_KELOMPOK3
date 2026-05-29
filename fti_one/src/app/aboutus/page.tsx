@@ -319,8 +319,8 @@ export default function InformasiPage() {
               {komisiData.map((komisi, i) => (
                 <div key={i} className={styles.divisionCard}>
                   <h2 className={styles.divisionCardTitle}>{komisi.title}</h2>
-                  <h4>Tugas harian komisi {i + 1} :</h4>
-                  <br />
+                  <p className={styles.divisionTaskHeading}>Tugas harian komisi {i + 1} :</p>
+                  {/* <br /> */}
                   <ul className={styles.divisionTaskList}>
                     {komisi.tasks.map((task, j) => (
                       <li key={j} className={styles.divisionTaskItem}>

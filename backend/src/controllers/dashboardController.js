@@ -1,6 +1,6 @@
 const Barang = require("../models/Barang");
 const Claim = require("../models/Claim");
-const Aspirasi = require("../models/Aspirasi");
+const { SesiAspirasi, HasilRespons, Jawaban } = require("../models/Aspirasi");
 const Notifikasi = require("../models/Notifikasi");
 const Mahasiswa = require("../models/Mahasiswa");
 const Admin = require("../models/Admin");
@@ -24,28 +24,10 @@ function formatRelativeTime(date) {
 }
 
 // ─────────────────────────────────────────────
-// Helper: map status Barang DB → label frontend
-// ─────────────────────────────────────────────
-// Barang.status enum: "tersedia" | "dipinjam" | "hilang" | "rusak"
-// Claim.status enum : "pending" | "disetujui" | "ditolak" | "selesai"
-//
-// Logika pemetaan ke LFStatus frontend (Pending | Claimed | Expired):
-//   - Barang punya Claim disetujui/selesai → "Claimed"
-//   - Barang status "hilang" / "rusak"     → "Expired"
-//   - Sisanya                              → "Pending"
-// ─────────────────────────────────────────────
-function mapLFStatus(barang, claimedBarangIds) {
-  if (claimedBarangIds.has(barang.barangId)) return "Claimed";
-  if (barang.status === "hilang" || barang.status === "rusak") return "Expired";
-  return "Pending";
-}
-
-// ─────────────────────────────────────────────
 // GET /api/dashboard/overview
 // ─────────────────────────────────────────────
 exports.getOverview = async (req, res) => {
   try {
-    // Claim yang sudah disetujui/selesai → barang dianggap "Claimed"
     // ── Lost & Found ──
     const totalBarang = await Barang.countDocuments();
 
@@ -57,14 +39,16 @@ exports.getOverview = async (req, res) => {
       status: { $in: ["hilang", "rusak"] },
     });
 
-    const pendingCount = await Barang.countDocuments({
-      status: "tersedia",
+    // Pending Claim = jumlah Claim dengan status "pending"
+    const pendingCount = await Claim.countDocuments({
+      status: "pending",
     });
 
     // ── Aspirasi ──
-    const totalAspirasi = await Aspirasi.countDocuments();
-    const dalamProses = await Aspirasi.countDocuments({ status: "diproses" });
-    const selesai = await Aspirasi.countDocuments({ status: "disetujui" });
+    const totalAspirasi = await SesiAspirasi.countDocuments();
+    const selesai = await HasilRespons.countDocuments();
+    const totalJawaban = await Jawaban.countDocuments();
+    const dalamProses = Math.max(0, totalAspirasi - selesai);
 
     // ── Users ──
     const totalMahasiswa = await Mahasiswa.countDocuments();
@@ -73,14 +57,13 @@ exports.getOverview = async (req, res) => {
     const totalAdmin = await Admin.countDocuments({ role: "admin" });
     const unreadNotif = await Notifikasi.countDocuments({ isRead: false });
 
-    // ── Aktivitas Terbaru (gabungan Claim + Aspirasi + Mahasiswa baru) ──
-    const [recentClaims, recentAspirasi, recentMahasiswa] = await Promise.all([
+    // ── Aktivitas Terbaru (gabungan Claim + SesiAspirasi + Mahasiswa baru) ──
+    const [recentClaims, recentSesi, recentMahasiswa] = await Promise.all([
       Claim.find()
         .sort({ tanggal: -1 })
         .limit(3)
-        .populate({ path: "barangId", model: "Barang", localField: "barangId", foreignField: "barangId", select: "nama" })
         .lean(),
-      Aspirasi.find()
+      SesiAspirasi.find()
         .sort({ createdAt: -1 })
         .limit(3)
         .lean(),
@@ -103,11 +86,11 @@ exports.getOverview = async (req, res) => {
       });
     });
 
-    recentAspirasi.forEach((a) => {
+    recentSesi.forEach((a) => {
       recentActivity.push({
         icon: "💬",
         iconBg: "#d1fae5",
-        text: `Aspirasi baru: "${a.judul}"`,
+        text: `Sesi aspirasi baru: "${a.nama}"`,
         time: formatRelativeTime(a.createdAt),
         category: "Aspirasi",
         _date: a.createdAt,
@@ -127,7 +110,7 @@ exports.getOverview = async (req, res) => {
 
     // Urutkan berdasarkan tanggal terbaru, ambil 5 teratas
     recentActivity.sort((a, b) => new Date(b._date) - new Date(a._date));
-    const top5 = recentActivity.slice(0, 5).map(({ _date, ...rest }) => rest);
+    const top5 = recentActivity.slice(0, 3).map(({ _date, ...rest }) => rest);
 
     return res.json({
       success: true,
@@ -135,13 +118,14 @@ exports.getOverview = async (req, res) => {
         lostFound: {
           totalBarang,
           claimed: claimedCount,
-          pending: Math.max(0, pendingCount),
+          pending: pendingCount,
           expired: expiredCount,
         },
         aspirasi: {
           totalAspirasi,
           dalamProses,
           selesai,
+          totalJawaban, 
         },
         users: {
           totalMahasiswa,
@@ -174,8 +158,8 @@ exports.getLostFound = async (req, res) => {
         b.status === "dipinjam"
           ? "Claimed"
           : b.status === "hilang" || b.status === "rusak"
-          ? "Expired"
-          : "Pending",
+            ? "Expired"
+            : "Pending",
     }));
 
     res.json({
@@ -198,13 +182,11 @@ exports.getNotifikasi = async (req, res) => {
   try {
     const { read, category } = req.query;
 
-    const query = { target: "admin" }; // ✅ filter target admin
+    const query = { target: "admin" };
 
-    // ✅ pakai field "read" sesuai schema
     if (read === "Belum Dibaca") query.read = false;
     else if (read === "Sudah Dibaca") query.read = true;
 
-    // ✅ pakai field "category" langsung sesuai schema
     if (category && category !== "Semua") {
       query.category = category;
     }
@@ -216,10 +198,9 @@ exports.getNotifikasi = async (req, res) => {
 
     const unreadCount = await Notifikasi.countDocuments({
       target: "admin",
-      read: false, // ✅ konsisten
+      read: false,
     });
 
-    // ✅ langsung pakai data dari DB, tidak perlu derive ulang
     const mapped = notifs.map((n) => ({
       id: n.notifId || n._id.toString(),
       _id: n._id.toString(),
@@ -248,9 +229,8 @@ exports.markNotifRead = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // ✅ coba match notifId dulu, fallback ke _id
     const notif = await Notifikasi.findOneAndUpdate(
-      { $or: [{ notifId: id }, { _id: id }] }, // ✅ "notifId" bukan "notifikasiId"
+      { $or: [{ notifId: id }, { _id: id }] },
       { read: true },
       { new: true }
     );
@@ -272,7 +252,7 @@ exports.markNotifRead = async (req, res) => {
 exports.markAllNotifsRead = async (req, res) => {
   try {
     await Notifikasi.updateMany(
-      { target: "admin", read: false }, // ✅ tambah filter target
+      { target: "admin", read: false },
       { read: true }
     );
 

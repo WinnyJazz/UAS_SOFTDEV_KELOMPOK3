@@ -183,12 +183,12 @@ export default function AdminInfoPage() {
     <div className={styles.pageWrapper}>
       {/* ── HEADER ── */}
       <div className={styles.adminHeader}>
-        <button
+        {/* <button
           className={styles.btnBack}
           onClick={() => router.push('/admin/dashboard')}
         >
           ← Dashboard
-        </button>
+        </button> */}
         <div className={styles.headerTitle}>
           <span className={styles.headerBadge}>ADMIN</span>
           <span>Manajemen Informasi</span>
