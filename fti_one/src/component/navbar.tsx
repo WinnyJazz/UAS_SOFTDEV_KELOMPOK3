@@ -51,6 +51,7 @@ export default function Navbar() {
   const fetchNotifPreviewAdmin = async (token: string) => {
     try {
       const res = await fetch(
+
         "http://localhost:5000/api/notifikasi?read=Belum+Dibaca",
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -217,8 +218,12 @@ export default function Navbar() {
       {/* Logo */}
       <Link href="/aboutus" className={styles.logoLink}>
         <div className={styles.logoCircle}>
-          <span className={styles.logoText}>DPM</span>
-          <span className={styles.logoSub}>FTI</span>
+          <img
+            src="/Rectangle.png"
+            alt="DPM FTI Logo"
+            className={styles.logoImg}
+            style={{ width: "28px", height: "28px", objectFit: "contain" }}
+          />
         </div>
       </Link>
 
@@ -228,9 +233,8 @@ export default function Navbar() {
           <li key={link.href}>
             <Link
               href={link.href}
-              className={`${styles.navItem} ${
-                pathname === link.href ? styles.active : ""
-              }`}
+              className={`${styles.navItem} ${pathname === link.href ? styles.active : ""
+                }`}
             >
               {link.label}
             </Link>
@@ -295,9 +299,8 @@ export default function Navbar() {
                     notifPreview.map((n) => (
                       <div
                         key={n.id}
-                        className={`${styles.notifDropItem} ${
-                          !n.read ? styles.notifDropUnread : ""
-                        }`}
+                        className={`${styles.notifDropItem} ${!n.read ? styles.notifDropUnread : ""
+                          }`}
                         onClick={() => {
                           markOneRead(n.id);
                           setShowNotifDropdown(false);
