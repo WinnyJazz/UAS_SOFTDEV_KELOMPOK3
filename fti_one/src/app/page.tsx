@@ -13,7 +13,7 @@ const features = [
     icon: "/Rectangle (3).png",
     href: "/lost-found",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis erat et quam iaculis faucibus at sit amet nibh. Vestibulum dignissim lectus",
+      "Pernah kehilangan barang di kampus? Tenang, fitur ini membantu mahasiswa mencari dan menemukan kembali barang yang hilang maupun ditemukan di area kampus.",
   },
   {
     id: "aspirasi",
@@ -21,7 +21,7 @@ const features = [
     icon: "/Rectangle (5).png",
     href: "/aspirasi",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis erat et quam iaculis faucibus at sit amet nibh. Vestibulum dignissim lectus",
+      "Fitur aspirasi hadir sebagai ruang bagi mahasiswa FTI untuk menyampaikan saran, kritik, maupun masukan secara mudah dan terbuka demi mendukung perkembangan lingkungan kampus yang lebih baik.",
   },
   {
     id: "about-us",
@@ -29,7 +29,7 @@ const features = [
     icon: "/Rectangle (2).png",
     href: "/aboutus",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis erat et quam iaculis faucibus at sit amet nibh. Vestibulum dignissim lectus",
+      "Kami hadir sebagai wadah komunikasi dan pelayanan mahasiswa FTI untuk membantu penyampaian informasi, aspirasi, serta berbagai kebutuhan mahasiswa demi menciptakan lingkungan kampus yang lebih aktif, responsif, dan kolaboratif.",
   },
   {
     id: "information",
@@ -37,7 +37,7 @@ const features = [
     icon: "/Rectangle (4).png",
     href: "/info",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec quis erat et quam iaculis faucibus at sit amet nibh. Vestibulum dignissim lectus",
+      "Tempat untuk mendapatkan info terbaru seputar kegiatan kampus, pengumuman penting, event mahasiswa, hingga berbagai informasi akademik dan non-akademik.",
   },
 ];
 
@@ -124,7 +124,7 @@ export default function Home() {
         <div className={styles.heroText}>
           <h1 className={styles.title}>
             <span className={styles.titleWhite}>WELCOME TO</span>
-            <span className={styles.titlePink}>SISFOR DPM FTI UNTAR</span>
+            <span className={styles.titlePink}>DPM FTI UNTAR</span>
           </h1>
           <button className={styles.exploreBtn} onClick={scrollToFeatures}>
             EXPLORE
