@@ -31,7 +31,10 @@ export default function Dashboard() {
       router.push('/superadmin');
       return;
     }
-
+    if (parsedUser.role === 'mahasiswa') {
+      router.push('/homepage');
+      return;
+    }
     setUser(parsedUser);
     setLoading(false);
   }, [router]);
