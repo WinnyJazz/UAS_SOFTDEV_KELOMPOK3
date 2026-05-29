@@ -48,21 +48,29 @@ const komisiData = [
 ];
 
 const DIVISIONS = [
-  { id: 'bphi',    label: 'BPHI' },
+  { id: 'bphi', label: 'BPHI' },
   { id: 'komisi1', label: 'KOMISI 1' },
   { id: 'komisi2', label: 'KOMISI 2' },
   { id: 'komisi3', label: 'KOMISI 3' },
   { id: 'komisi4', label: 'KOMISI 4' },
 ];
-
+function IconEdit() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
 
 // Types 
 
 interface TeamPhoto {
-  _id:      string;
+  _id: string;
   division: string;
-  name:     string;
+  name: string;
   imageUrl: string;
 }
 
@@ -72,38 +80,40 @@ export default function InformasiPage() {
   const [activeTab, setActiveTab] = useState<Tab>('who');
 
   // Our Team state
-  const [isSuperAdmin, setIsSuperAdmin]   = useState(false);
-  const [token, setToken]                 = useState<string | null>(null);
-  const [photos, setPhotos]               = useState<TeamPhoto[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<TeamPhoto[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
-  const [uploadingDiv, setUploadingDiv]   = useState<string | null>(null);
-  const [deletingId, setDeletingId]       = useState<string | null>(null);
-  const [nameInput, setNameInput]         = useState('');
-  const [nameModalDiv, setNameModalDiv]   = useState<string | null>(null);
-  const [pendingFile, setPendingFile]     = useState<File | null>(null);
-  const [toastMsg, setToastMsg]           = useState('');
-
+  const [uploadingDiv, setUploadingDiv] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState('');
+  const [nameModalDiv, setNameModalDiv] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [toastMsg, setToastMsg] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [editingVideo, setEditingVideo] = useState(false);
+  const [videoInput, setVideoInput] = useState('');
   const memberInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const groupInputRef   = useRef<HTMLInputElement>(null);
+  const groupInputRef = useRef<HTMLInputElement>(null);
 
   // ── Auth init ──
   useEffect(() => {
     try {
       const stored = localStorage.getItem('user');
-      const tok    = localStorage.getItem('token');
+      const tok = localStorage.getItem('token');
       if (stored) {
         const u = JSON.parse(stored);
         setIsSuperAdmin(u.role === 'superadmin');
       }
       if (tok) setToken(tok);
-    } catch (_) {}
+    } catch (_) { }
   }, []);
 
   // ── Fetch foto saat tab team dibuka ──
   const fetchPhotos = useCallback(async () => {
     setLoadingPhotos(true);
     try {
-      const res  = await fetch(`${API_BASE}/api/team-photos`);
+      const res = await fetch(`${API_BASE}/api/team-photos`);
       const json = await res.json();
       if (json.success) setPhotos(json.data);
     } catch (_) {
@@ -139,14 +149,14 @@ export default function InformasiPage() {
 
     try {
       const formData = new FormData();
-      formData.append('file',     pendingFile);
+      formData.append('file', pendingFile);
       formData.append('division', divId);
-      formData.append('name',     nameInput.trim());
+      formData.append('name', nameInput.trim());
 
-      const res  = await fetch(`${API_BASE}/api/team-photos`, {
-        method:  'POST',
+      const res = await fetch(`${API_BASE}/api/team-photos`, {
+        method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
-        body:    formData,
+        body: formData,
       });
       const json = await res.json();
 
@@ -175,8 +185,8 @@ export default function InformasiPage() {
     if (!confirm('Hapus foto ini?')) return;
     setDeletingId(id);
     try {
-      const res  = await fetch(`${API_BASE}/api/team-photos/${id}`, {
-        method:  'DELETE',
+      const res = await fetch(`${API_BASE}/api/team-photos/${id}`, {
+        method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
@@ -192,11 +202,31 @@ export default function InformasiPage() {
       setDeletingId(null);
     }
   };
-
+  const toEmbedUrl = (url: string): string | null => {
+    try {
+      // Sudah embed
+      if (url.includes('youtube.com/embed/')) return url;
+      // youtu.be/ID
+      const short = url.match(/youtu\.be\/([^?&]+)/);
+      if (short) return `https://www.youtube.com/embed/${short[1]}`;
+      // youtube.com/watch?v=ID
+      const watch = url.match(/[?&]v=([^?&]+)/);
+      if (watch) return `https://www.youtube.com/embed/${watch[1]}`;
+      return null;
+    } catch (_) { return null; }
+  };
   // ── Derived ──
-  const groupPhoto  = photos.find(p => p.division === 'group');
-  const byDiv       = (id: string) => photos.filter(p => p.division === id);
+  const groupPhoto = photos.find(p => p.division === 'group');
+  const byDiv = (id: string) => photos.filter(p => p.division === id);
 
+  useEffect(() => {
+    fetch(`${API_BASE}/api/settings/video-url`)
+      .then(r => r.json())
+      .then(json => {
+        if (json.success && json.data) setVideoUrl(json.data);
+      })
+      .catch(() => { });
+  }, []);
 
   return (
     <div className={styles.pageWrapper}>
@@ -253,9 +283,8 @@ export default function InformasiPage() {
 
       {/* ── Content Card ── */}
       <div
-        className={`${styles.card} ${
-          activeTab === 'divisions' || activeTab === 'team' ? styles.divisionCardWrapper : ''
-        }`}
+        className={`${styles.card} ${activeTab === 'divisions' || activeTab === 'team' ? styles.divisionCardWrapper : ''
+          }`}
       >
 
         {/* ══ WHO ARE WE ══ */}
@@ -288,6 +317,74 @@ export default function InformasiPage() {
                 kepentingan mahasiswa Fakultas Teknologi Informasi.
               </p>
             </div>
+            {/* <div className={styles.divider} aria-hidden="true" /> */}
+            <div className={styles.videoSection}>
+              <div className={styles.videoHeader}>
+                {/* <h3 className={styles.videoTitle}>Tentang Kami</h3> */}
+                {isSuperAdmin && !editingVideo && (
+                  <button
+                    className={styles.videoEditBtn}
+                    onClick={() => { setVideoInput(videoUrl); setEditingVideo(true); }}
+                  >
+                    <IconEdit /> Ganti video
+                  </button>
+                )}
+              </div>
+
+              {isSuperAdmin && editingVideo && (
+                <div className={styles.videoEditRow}>
+                  <input
+                    className={styles.videoEditInput}
+                    type="text"
+                    value={videoInput}
+                    onChange={e => setVideoInput(e.target.value)}
+                    placeholder="Paste link YouTube..."
+                    autoFocus
+                    onKeyDown={e => e.key === 'Escape' && setEditingVideo(false)}
+                  />
+                  <button
+                    className={styles.videoSaveBtn}
+                    onClick={async () => {
+                      const embed = toEmbedUrl(videoInput.trim());
+                      if (!embed) { showToast('Link YouTube tidak valid.'); return; }
+                      try {
+                        const res = await fetch(`${API_BASE}/api/settings/video-url`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                          body: JSON.stringify({ url: embed }),
+                        });
+                        const json = await res.json();
+                        if (json.success) { setVideoUrl(embed); setEditingVideo(false); showToast('Video berhasil diganti!'); }
+                        else showToast(json.message ?? 'Gagal menyimpan.');
+                      } catch (_) { showToast('Terjadi kesalahan.'); }
+                    }}
+                    disabled={!videoInput.trim()}
+                  >
+                    Simpan
+                  </button>
+                  <button className={styles.videoCancelBtn} onClick={() => setEditingVideo(false)}>
+                    Batal
+                  </button>
+                </div>
+              )}
+
+              <div className={styles.videoWrapper}>
+                {videoUrl ? (
+                  <iframe
+                    className={styles.videoIframe}
+                    src={videoUrl}
+                    title="Video DPM FTI UNTAR"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className={styles.videoPlaceholder}>
+                    <span style={{ color: 'rgba(100,100,100,0.5)', fontSize: '13px' }}>Memuat video...</span>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Divider */}
             <div className={styles.divider} aria-hidden="true" />
@@ -309,7 +406,28 @@ export default function InformasiPage() {
                 </li>
               ))}
             </ol>
+
+            {/* ── Maskot Section ── */}
+            <div className={styles.divider} aria-hidden="true" />
+            <div className={styles.mascotSection}>
+              <h2 className={styles.mascotTitle}>MASKOT KAMI</h2>
+              <div className={styles.mascotBlock}>
+                <img src="/Mascot.png" alt="Maskot DPM FTI" className={styles.mascotImg} />
+                <div className={styles.mascotText}>
+                  {/* <h3 className={styles.mascotName}>Dipo</h3> */}
+                  <p className={styles.mascotDesc}>
+                    Dipo hadir sebagai simbol semangat
+                    dan keberanian mahasiswa FTI Untar dalam menyuarakan aspirasi. Layaknya badak yang kokoh dan
+                    tangguh, Dipo mencerminkan keteguhan DPM FTI dalam memperjuangkan hak-hak mahasiswa.
+                    Dengan semangatnya yang membara, Dipo selalu siap mendampingi setiap langkah perjuangan
+                    civitas akademika Fakultas Teknologi Informasi Universitas Tarumanagara.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
+
+
         )}
 
         {/* ══ DIVISIONS ══ */}
@@ -419,7 +537,7 @@ export default function InformasiPage() {
 
                 {/* ── Per-Division Sections ── */}
                 {DIVISIONS.map(div => {
-                  const divPhotos   = byDiv(div.id);
+                  const divPhotos = byDiv(div.id);
                   const isUploading = uploadingDiv === div.id;
 
                   return (
@@ -484,7 +602,7 @@ export default function InformasiPage() {
 
                 {isSuperAdmin && (
                   <div className={styles.adminBadge}>
-                    <IconStar /> Mode Superadmin 
+                    <IconStar /> Mode Superadmin
                   </div>
                 )}
               </>
