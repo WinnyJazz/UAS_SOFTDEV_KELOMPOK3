@@ -33,10 +33,9 @@ const notifikasiSchema = new mongoose.Schema(
       default: "#e0e7ff",
     },
 
-    // siapa target notif (admin / user / all = broadcast ke semua user)
+    // siapa target notif (admin / all = broadcast ke semua user / userId = notif untuk user spesifik)
     target: {
       type: String,
-      enum: ["admin", "user", "all"],
       default: "admin",
     },
 

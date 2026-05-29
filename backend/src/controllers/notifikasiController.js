@@ -158,6 +158,9 @@ exports.getNotifikasiUser = async (req, res) => {
       req.user?.id ||
       req.user?._id;
 
+    console.log("🔍 userId dari JWT:", userId);
+    console.log("🔍 type:", typeof userId);
+    
     console.log("[getNotifikasiUser] userId dari JWT:", userId);
     console.log("[getNotifikasiUser] req.user:", req.user);
 

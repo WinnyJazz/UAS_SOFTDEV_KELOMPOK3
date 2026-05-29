@@ -49,35 +49,27 @@ export default function Navbar() {
 
   // ── Fetch notif untuk ADMIN ──
   const fetchNotifPreviewAdmin = async (token: string) => {
-      try {
-        const res = await fetch(
-          "http://localhost:5000/api/dashboard/notifikasi?read=Belum+Dibaca",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const data = await res.json();
-        setUnreadCount(data.unreadCount ?? 0);
-        setNotifPreview((data.data ?? []).slice(0, 4));
-      } catch (err) {
-        console.error("fetchNotifPreview admin error:", err);
-      }
-    };
+    try {
+      const res = await fetch(
+        "http://localhost:5000/api/notifikasi?read=Belum+Dibaca",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      setUnreadCount(data.unreadCount ?? 0);
+      setNotifPreview((data.data ?? []).slice(0, 4));
+    } catch (err) {
+      console.error("fetchNotifPreview admin error:", err);
+    }
+  };
 
-    // ── Fetch notif untuk USER ──
-    const fetchNotifPreviewUser = async (token: string) => {
+  // ── Fetch notif untuk USER ──
+  const fetchNotifPreviewUser = async (token: string) => {
     try {
       const res = await fetch(
         "http://localhost:5000/api/notifikasi/user?read=Belum+Dibaca",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       const data = await res.json();
-
-      console.log("🔔 USER NOTIF:", data);
-
       setUnreadCount(data.unreadCount ?? 0);
       setNotifPreview((data.data ?? []).slice(0, 4));
     } catch (err) {
@@ -91,7 +83,7 @@ export default function Navbar() {
     if (!token) return;
     try {
       const endpoint = isAdmin
-        ? "http://localhost:5000/api/dashboard/notifikasi/read-all"
+        ? "http://localhost:5000/api/notifikasi/read-all"
         : "http://localhost:5000/api/notifikasi/user/read-all";
       await fetch(endpoint, {
         method: "PATCH",
@@ -109,10 +101,7 @@ export default function Navbar() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const endpoint = isAdmin
-        ? `http://localhost:5000/api/dashboard/notifikasi/${id}/read`
-        : `http://localhost:5000/api/notifikasi/${id}/read`;
-      await fetch(endpoint, {
+      await fetch(`http://localhost:5000/api/notifikasi/${id}/read`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });

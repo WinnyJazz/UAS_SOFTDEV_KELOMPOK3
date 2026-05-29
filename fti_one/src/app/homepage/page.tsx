@@ -228,8 +228,11 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       try {
-        const jawabanUrl = userId
-          ? `/api/aspirasi/jawaban?userId=${userId}`
+        const stored = localStorage.getItem("user");
+        const nim = stored ? JSON.parse(stored).nim : null;
+
+        const jawabanUrl = nim
+          ? `/api/aspirasi/jawaban?nim=${nim}`
           : "/api/aspirasi/jawaban";
 
         const [claimData, jawabanData] = await Promise.all([

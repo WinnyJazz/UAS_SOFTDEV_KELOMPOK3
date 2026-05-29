@@ -368,6 +368,9 @@ export default function LostFoundAdmin() {
     try {
       setActionLoading(true);
       const token = getToken();
+
+      console.log("🚀 Approve claim:", claimId);
+      console.log("🚀 URL:", `${CLAIMS_API_URL}/${claimId}/status`)
       const res = await fetch(`${CLAIMS_API_URL}/${claimId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

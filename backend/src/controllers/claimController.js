@@ -53,7 +53,7 @@ const createClaim = async (req, res) => {
       lokasiBarang: barang.lokasi,
     });
 
-    // Buat notifikasi untuk admin (non-blocking)
+    // Notif untuk admin (non-blocking)
     createNotif({
       title: "📦 Pengajuan Klaim Baru",
       desc: `${nama} (NIM: ${nim}) mengajukan klaim untuk "${barang.nama}".`,
@@ -120,7 +120,9 @@ const updateClaimStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Klaim tidak ditemukan." });
     }
 
-    // Fetch barang untuk dapat nama terbaru
+    console.log("🎯 claim.userId:", claim.userId);
+    console.log("🎯 type:", typeof claim.userId);
+    
     const barang = await Barang.findOne({ barangId: claim.barangId }).lean();
     const namaBarang = barang?.nama || claim.namaBarang || claim.barangId;
 
@@ -133,7 +135,11 @@ const updateClaimStatus = async (req, res) => {
     }
 
     const isApproved = status === "disetujui";
-    // Buat notifikasi untuk admin (non-blocking)
+
+    // Debug — hapus setelah konfirmasi notif berfungsi
+    console.log("🎯 Sending notif to userId:", String(claim.userId));
+
+    // Notif untuk ADMIN
     createNotif({
       title: isApproved ? "✅ Klaim Disetujui" : "❌ Klaim Ditolak",
       desc: `Klaim untuk "${namaBarang}" telah ${status}${catatan ? ` - ${catatan}` : ""}`,
@@ -143,9 +149,21 @@ const updateClaimStatus = async (req, res) => {
       refType: "Claim",
       refId: claim._id.toString(),
       target: "admin",
-    }).catch((err) => {
-      console.error("❌ Notif creation failed:", err);
-    });
+    }).catch((err) => console.error("❌ Notif admin failed:", err));
+
+    // Notif untuk USER yang mengajukan klaim
+    createNotif({
+      title: isApproved ? "✅ Klaim Anda Disetujui!" : "❌ Klaim Anda Ditolak",
+      desc: isApproved
+        ? `Klaim untuk "${namaBarang}" disetujui. Silakan ambil barang di lokasi yang ditentukan.`
+        : `Klaim untuk "${namaBarang}" ditolak${catatan ? `: ${catatan}` : "."}`,
+      category: "Lost & Found",
+      icon: isApproved ? "✅" : "❌",
+      iconBg: isApproved ? "#dcfce7" : "#fee2e2",
+      refType: "Claim",
+      refId: claim._id.toString(),
+      target: String(claim.userId), // harus sama persis dengan userId di JWT payload
+    }).catch((err) => console.error("❌ Notif user failed:", err));
 
     return res.json({ success: true, message: `Klaim berhasil ${status}`, data: claim });
   } catch (error) {

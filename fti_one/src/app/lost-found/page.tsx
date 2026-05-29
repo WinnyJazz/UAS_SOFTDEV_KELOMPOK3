@@ -40,7 +40,6 @@ export default function LostFoundStudent() {
     fotoKTM: null as string | null,
   });
   const [submitting, setSaving] = useState(false);
-  const [hasUnreadChats, setHasUnreadChats] = useState(false);
   const ktmInputRef = useRef<HTMLInputElement>(null);
 
   const fetchAvailableLocations = async () => {
@@ -76,7 +75,6 @@ export default function LostFoundStudent() {
 
       const data = await res.json();
       if (data.success) {
-        // Only show items that are 'tersedia' for students
         setBarangList(data.data.filter((item: BarangItem) => item.status === 'tersedia'));
       }
     } catch (err) {
@@ -86,33 +84,10 @@ export default function LostFoundStudent() {
     }
   };
 
-  // Fetch barang on mount (no auth required to view)
   useEffect(() => {
-    const token = localStorage.getItem('token');
     fetchBarang();
     fetchAvailableLocations();
-
-    // Check for unread chats (only if logged in)
-    const checkChats = async () => {
-      if (!token) return; // Skip if not logged in
-      try {
-        const res = await fetch('http://localhost:5000/api/chat/mine', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data.success) {
-          const unread = data.data.some((chat: any) =>
-            chat.pesan.length > 0 && chat.pesan[chat.pesan.length - 1].pengirim === 'admin'
-          );
-          setHasUnreadChats(unread);
-        }
-      } catch (err) { }
-    };
-
-    checkChats();
-    const interval = setInterval(checkChats, 5000);
-    return () => clearInterval(interval);
-  }, [router]);
+  }, []);
 
   // Debounced search
   useEffect(() => {
@@ -126,7 +101,7 @@ export default function LostFoundStudent() {
   // Refresh available locations periodically
   useEffect(() => {
     fetchAvailableLocations();
-    const interval = setInterval(fetchAvailableLocations, 10000); // Refresh setiap 10 detik
+    const interval = setInterval(fetchAvailableLocations, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -141,19 +116,16 @@ export default function LostFoundStudent() {
   };
 
   const handleClaimClick = (item: BarangItem) => {
-    // Check if user is logged in
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
 
     if (!token || !storedUser) {
-      // Redirect to login if not authenticated
       router.push('/login');
       return;
     }
 
     setSelectedBarang(item);
     setShowClaimForm(true);
-    // Autofill nama & nim from stored user if available
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setClaimData((prev) => ({
@@ -218,10 +190,10 @@ export default function LostFoundStudent() {
   return (
     <div className={styles.pageWrapper}>
 
-      {/* ===== QUICK ACTION BUTTONS (di atas background ungu) ===== */}
+      {/* ===== QUICK ACTION BUTTONS ===== */}
       <div className={styles.quickActions}>
         <button
-          className={`${styles.btnStatus} ${hasUnreadChats ? styles.btnStatusUnread : ''}`}
+          className={styles.btnStatus}
           onClick={() => {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -233,7 +205,6 @@ export default function LostFoundStudent() {
         >
           <div className={styles.iconWrapper}>
             <span className={styles.btnIcon}>🔔</span>
-            {hasUnreadChats && <span className={styles.unreadBadge}>New</span>}
           </div>
           <span>
             <strong>Status &amp; Notifikasi</strong>
@@ -242,7 +213,7 @@ export default function LostFoundStudent() {
         </button>
       </div>
 
-      {/* ===== SEARCH & FILTER (di atas background ungu) ===== */}
+      {/* ===== SEARCH & FILTER ===== */}
       <div className={styles.searchWrapper}>
         <div className={styles.filterContainer}>
           <button
@@ -301,7 +272,7 @@ export default function LostFoundStudent() {
         </div>
       </div>
 
-      {/* ===== WHITE CARD CONTAINER — hanya mencakup daftar barang ===== */}
+      {/* ===== WHITE CARD CONTAINER ===== */}
       <div className={styles.content}>
         <div className={styles.cardContainer}>
           {loading ? (
