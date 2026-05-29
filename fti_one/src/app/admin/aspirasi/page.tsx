@@ -1,8 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./aspirasi.module.css";
-import navbar from "../../../component/navbar";
 
 interface UserData {
   userId: string;
@@ -12,10 +11,9 @@ interface UserData {
   role: string;
 }
 
-// ─── Types ────────────────────────────────────────────────
 interface Sesi {
   _id: string;
-  nama: string; // e.g. "Aspirasi Januari 2026"
+  nama: string;
   bulan: number;
   tahun: number;
   pertanyaan: Pertanyaan[];
@@ -46,10 +44,82 @@ interface HasilRespons {
   uploadedAt: string;
 }
 
-// ─── API Base ─────────────────────────────────────────────
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface CustomSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  disabled?: boolean;
+  variant?: "dark" | "light";
+}
+
+function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder = "-- Pilih --",
+  disabled = false,
+  variant = "dark",
+}: CustomSelectProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const wrapClass = [
+    styles.customSelect,
+    variant === "light" ? styles.customSelectLight : "",
+    disabled ? styles.customSelectDisabled : "",
+  ].filter(Boolean).join(" ");
+
+  return (
+    <div ref={ref} className={wrapClass}>
+      <button
+        type="button"
+        className={styles.customSelectTrigger}
+        onClick={() => !disabled && setOpen((o) => !o)}
+        disabled={disabled}
+      >
+        <span className={selected ? styles.customSelectValue : styles.customSelectPlaceholder}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <span className={`${styles.customSelectChevron} ${open ? styles.customSelectChevronOpen : ""}`}>
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div className={styles.customSelectDropdown}>
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={`${styles.customSelectOption} ${opt.value === value ? styles.customSelectOptionActive : ""}`}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-// ─── Main Component ───────────────────────────────────────
 export default function AdminAspirasiPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"timeline" | "form" | "hasil" | "response">("timeline");
@@ -57,49 +127,24 @@ export default function AdminAspirasiPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in and has admin/superadmin role
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
-
-    if (!token || !userData) {
-      // Redirect to login if not authenticated
-      router.push("/login");
-      return;
-    }
-
+    if (!token || !userData) { router.push("/login"); return; }
     try {
       const parsedUser = JSON.parse(userData);
-
-      // Check if user has admin or superadmin role
-      if (parsedUser.role !== "admin" && parsedUser.role !== "superadmin") {
-        // Redirect to dashboard if not authorized
-        router.push("/dashboard");
-        return;
-      }
-
+      if (parsedUser.role !== "admin" && parsedUser.role !== "superadmin") { router.push("/dashboard"); return; }
       setUser(parsedUser);
       setLoading(false);
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      router.push("/login");
-    }
+    } catch { router.push("/login"); }
   }, [router]);
 
-  if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
-  }
-
-  if (!user) {
-    return null;
-  }
+  if (loading) return <div className={styles.loading}>Loading...</div>;
+  if (!user) return null;
 
   return (
     <div className={styles.pageWrapper}>
-
       <div className={styles.container}>
         <p className={styles.pageLabel}>ASPIRASI ADMIN</p>
-
-        {/* Tab Toggle */}
         <div className={styles.tabBar}>
           {[
             { key: "timeline", label: "TIMELINE & STATUS" },
@@ -116,8 +161,6 @@ export default function AdminAspirasiPage() {
             </button>
           ))}
         </div>
-
-        {/* Tab Content */}
         <div className={styles.tabContent}>
           {activeTab === "timeline" && <TimelineTab />}
           {activeTab === "form" && <IsiFormTab />}
@@ -140,11 +183,7 @@ function TimelineTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newStep, setNewStep] = useState({ label: "", deskripsi: "", status: "pending" as const, tanggal: "" });
 
-  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-  useEffect(() => {
-    fetchSteps();
-  }, []);
+  useEffect(() => { fetchSteps(); }, []);
 
   const fetchSteps = async () => {
     try {
@@ -152,7 +191,6 @@ function TimelineTab() {
       const data = await res.json();
       setSteps(data.sort((a: TimelineStep, b: TimelineStep) => a.urutan - b.urutan));
     } catch {
-      // use dummy data for preview
       setSteps([
         { _id: "1", label: "Pembukaan Aspirasi", deskripsi: "Form aspirasi dibuka untuk mahasiswa", status: "done", tanggal: "2026-01-01", urutan: 1 },
         { _id: "2", label: "Pengumpulan Data", deskripsi: "Rekap data aspirasi dari seluruh mahasiswa", status: "done", tanggal: "2026-01-15", urutan: 2 },
@@ -160,50 +198,35 @@ function TimelineTab() {
         { _id: "4", label: "Disampaikan ke Pihak Atas", deskripsi: "Hasil aspirasi disampaikan ke dekan/wakil dekan", status: "pending", tanggal: "", urutan: 4 },
         { _id: "5", label: "Tindak Lanjut", deskripsi: "Menunggu tindak lanjut dari pihak fakultas", status: "pending", tanggal: "", urutan: 5 },
       ]);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const saveEdit = async (id: string) => {
     try {
       await fetch(`${API}/api/aspirasi/timeline/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editData),
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editData),
       });
     } catch { }
     setSteps(steps.map(s => s._id === id ? { ...s, ...editData } : s));
-    setEditingId(null);
-    setEditData({});
+    setEditingId(null); setEditData({});
   };
 
   const addStep = async () => {
-    const step: TimelineStep = {
-      _id: Date.now().toString(),
-      ...newStep,
-      urutan: steps.length + 1,
-    };
+    const step: TimelineStep = { _id: Date.now().toString(), ...newStep, urutan: steps.length + 1 };
     try {
       const res = await fetch(`${API}/api/aspirasi/timeline`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newStep),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newStep),
       });
       const created = await res.json();
       setSteps([...steps, created]);
-    } catch {
-      setSteps([...steps, step]);
-    }
+    } catch { setSteps([...steps, step]); }
     setShowAddModal(false);
     setNewStep({ label: "", deskripsi: "", status: "pending", tanggal: "" });
   };
 
   const deleteStep = async (id: string) => {
     if (!confirm("Hapus langkah ini?")) return;
-    try {
-      await fetch(`${API}/api/aspirasi/timeline/${id}`, { method: "DELETE" });
-    } catch { }
+    try { await fetch(`${API}/api/aspirasi/timeline/${id}`, { method: "DELETE" }); } catch { }
     setSteps(steps.filter(s => s._id !== id));
   };
 
@@ -212,6 +235,12 @@ function TimelineTab() {
 
   const statusLabel = (s: string) =>
     s === "done" ? "✅ Selesai" : s === "active" ? "🔄 Sedang Berjalan" : "⏳ Menunggu";
+
+  const STATUS_OPTIONS = [
+    { value: "pending", label: "⏳ Menunggu" },
+    { value: "active", label: "🔄 Sedang Berjalan" },
+    { value: "done", label: "✅ Selesai" },
+  ];
 
   if (loading) return <div className={styles.loading}>Memuat timeline...</div>;
 
@@ -232,33 +261,18 @@ function TimelineTab() {
             <div className={styles.timelineCard}>
               {editingId === step._id ? (
                 <div className={styles.editForm}>
-                  <input
-                    className={styles.editInput}
-                    value={editData.label ?? step.label}
-                    onChange={e => setEditData({ ...editData, label: e.target.value })}
-                    placeholder="Nama tahap"
-                  />
-                  <textarea
-                    className={styles.editTextarea}
-                    value={editData.deskripsi ?? step.deskripsi}
-                    onChange={e => setEditData({ ...editData, deskripsi: e.target.value })}
-                    placeholder="Deskripsi"
-                  />
-                  <select
-                    className={styles.editSelect}
+                  <input className={styles.editInput} value={editData.label ?? step.label}
+                    onChange={e => setEditData({ ...editData, label: e.target.value })} placeholder="Nama tahap" />
+                  <textarea className={styles.editTextarea} value={editData.deskripsi ?? step.deskripsi}
+                    onChange={e => setEditData({ ...editData, deskripsi: e.target.value })} placeholder="Deskripsi" />
+                  <CustomSelect
+                    variant="light"
                     value={editData.status ?? step.status}
-                    onChange={e => setEditData({ ...editData, status: e.target.value as any })}
-                  >
-                    <option value="pending">⏳ Menunggu</option>
-                    <option value="active">🔄 Sedang Berjalan</option>
-                    <option value="done">✅ Selesai</option>
-                  </select>
-                  <input
-                    type="date"
-                    className={styles.editInput}
-                    value={editData.tanggal ?? step.tanggal}
-                    onChange={e => setEditData({ ...editData, tanggal: e.target.value })}
+                    onChange={v => setEditData({ ...editData, status: v as any })}
+                    options={STATUS_OPTIONS}
                   />
+                  <input type="date" className={styles.editInput} value={editData.tanggal ?? step.tanggal}
+                    onChange={e => setEditData({ ...editData, tanggal: e.target.value })} />
                   <div className={styles.editActions}>
                     <button className={styles.saveBtn} onClick={() => saveEdit(step._id)}>Simpan</button>
                     <button className={styles.cancelBtn} onClick={() => { setEditingId(null); setEditData({}); }}>Batal</button>
@@ -292,19 +306,22 @@ function TimelineTab() {
         ))}
       </div>
 
-      {/* Add Modal */}
       {showAddModal && (
         <div className={styles.modalOverlay} onClick={() => setShowAddModal(false)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>Tambah Tahap Timeline</h3>
-            <input className={styles.editInput} placeholder="Nama Tahap" value={newStep.label} onChange={e => setNewStep({ ...newStep, label: e.target.value })} />
-            <textarea className={styles.editTextarea} placeholder="Deskripsi tahap..." value={newStep.deskripsi} onChange={e => setNewStep({ ...newStep, deskripsi: e.target.value })} />
-            <select className={styles.editSelect} value={newStep.status} onChange={e => setNewStep({ ...newStep, status: e.target.value as any })}>
-              <option value="pending">⏳ Menunggu</option>
-              <option value="active">🔄 Sedang Berjalan</option>
-              <option value="done">✅ Selesai</option>
-            </select>
-            <input type="date" className={styles.editInput} value={newStep.tanggal} onChange={e => setNewStep({ ...newStep, tanggal: e.target.value })} />
+            <input className={styles.editInput} placeholder="Nama Tahap" value={newStep.label}
+              onChange={e => setNewStep({ ...newStep, label: e.target.value })} />
+            <textarea className={styles.editTextarea} placeholder="Deskripsi tahap..." value={newStep.deskripsi}
+              onChange={e => setNewStep({ ...newStep, deskripsi: e.target.value })} />
+            <CustomSelect
+              variant="light"
+              value={newStep.status}
+              onChange={v => setNewStep({ ...newStep, status: v as any })}
+              options={STATUS_OPTIONS}
+            />
+            <input type="date" className={styles.editInput} value={newStep.tanggal}
+              onChange={e => setNewStep({ ...newStep, tanggal: e.target.value })} />
             <div className={styles.editActions}>
               <button className={styles.saveBtn} onClick={addStep}>Simpan</button>
               <button className={styles.cancelBtn} onClick={() => setShowAddModal(false)}>Batal</button>
@@ -317,10 +334,9 @@ function TimelineTab() {
 }
 
 // ══════════════════════════════════════════════════════════
-// TAB 2 — ISI FORM (Pertanyaan per Sesi)
+// TAB 2 — ISI FORM
 // ══════════════════════════════════════════════════════════
 function IsiFormTab() {
-  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const [sesiList, setSesiList] = useState<Sesi[]>([]);
   const [selectedSesi, setSelectedSesi] = useState<Sesi | null>(null);
   const [loading, setLoading] = useState(true);
@@ -332,6 +348,7 @@ function IsiFormTab() {
   const [editPertanyaanTeks, setEditPertanyaanTeks] = useState("");
 
   const BULAN = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  const BULAN_OPTIONS = BULAN.map((b, i) => ({ value: String(i + 1), label: b }));
 
   useEffect(() => { fetchSesi(); }, []);
 
@@ -342,19 +359,15 @@ function IsiFormTab() {
       setSesiList(data);
     } catch {
       setSesiList([
-        {
-          _id: "s1", nama: "Aspirasi Januari 2026", bulan: 1, tahun: 2026, pertanyaan: [
-            { _id: "p1", teks: "Apa kendala yang Anda alami selama perkuliahan?", sesiId: "s1" },
-            { _id: "p2", teks: "Apa saran Anda untuk meningkatkan kualitas pembelajaran di fakultas?", sesiId: "s1" },
-          ], createdAt: "2026-01-01"
-        },
+        { _id: "s1", nama: "Aspirasi Januari 2026", bulan: 1, tahun: 2026, pertanyaan: [
+          { _id: "p1", teks: "Apa kendala yang Anda alami selama perkuliahan?", sesiId: "s1" },
+          { _id: "p2", teks: "Apa saran Anda untuk meningkatkan kualitas pembelajaran di fakultas?", sesiId: "s1" },
+        ], createdAt: "2026-01-01" },
         { _id: "s2", nama: "Aspirasi Februari 2026", bulan: 2, tahun: 2026, pertanyaan: [], createdAt: "2026-02-01" },
         { _id: "s3", nama: "Aspirasi Maret 2026", bulan: 3, tahun: 2026, pertanyaan: [], createdAt: "2026-03-01" },
         { _id: "s4", nama: "Aspirasi April 2026", bulan: 4, tahun: 2026, pertanyaan: [], createdAt: "2026-04-01" },
       ]);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const addSesi = async () => {
@@ -362,15 +375,11 @@ function IsiFormTab() {
     const sesi: Sesi = { _id: Date.now().toString(), nama, bulan: newSesi.bulan, tahun: newSesi.tahun, pertanyaan: [], createdAt: new Date().toISOString() };
     try {
       const res = await fetch(`${API}/api/aspirasi/sesi`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...newSesi, nama }),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newSesi, nama }),
       });
       const created = await res.json();
       setSesiList([...sesiList, created]);
-    } catch {
-      setSesiList([...sesiList, sesi]);
-    }
+    } catch { setSesiList([...sesiList, sesi]); }
     setShowAddSesi(false);
   };
 
@@ -386,9 +395,7 @@ function IsiFormTab() {
     const p: Pertanyaan = { _id: Date.now().toString(), teks: newPertanyaan, sesiId: selectedSesi._id };
     try {
       const res = await fetch(`${API}/api/aspirasi/sesi/${selectedSesi._id}/pertanyaan`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teks: newPertanyaan }),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teks: newPertanyaan }),
       });
       const created = await res.json();
       const updated = { ...selectedSesi, pertanyaan: [...selectedSesi.pertanyaan, created] };
@@ -399,8 +406,7 @@ function IsiFormTab() {
       setSelectedSesi(updated);
       setSesiList(sesiList.map(s => s._id === selectedSesi._id ? updated : s));
     }
-    setNewPertanyaan("");
-    setShowAddPertanyaan(false);
+    setNewPertanyaan(""); setShowAddPertanyaan(false);
   };
 
   const deletePertanyaan = async (pid: string) => {
@@ -415,9 +421,7 @@ function IsiFormTab() {
     if (!selectedSesi || !editPertanyaanId) return;
     try {
       await fetch(`${API}/api/aspirasi/pertanyaan/${editPertanyaanId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ teks: editPertanyaanTeks }),
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teks: editPertanyaanTeks }),
       });
     } catch { }
     const updated = {
@@ -433,7 +437,6 @@ function IsiFormTab() {
 
   return (
     <div className={styles.formWrapper}>
-      {/* Left: Daftar Sesi */}
       <div className={styles.sesiPanel}>
         <div className={styles.panelHeader}>
           <h3 className={styles.panelTitle}>Sesi Aspirasi</h3>
@@ -459,7 +462,6 @@ function IsiFormTab() {
         </div>
       </div>
 
-      {/* Right: Pertanyaan */}
       <div className={styles.pertanyaanPanel}>
         {!selectedSesi ? (
           <div className={styles.emptyState}>
@@ -486,11 +488,8 @@ function IsiFormTab() {
                 <div key={p._id} className={styles.pertanyaanCard}>
                   {editPertanyaanId === p._id ? (
                     <div className={styles.editInline}>
-                      <textarea
-                        className={styles.editTextarea}
-                        value={editPertanyaanTeks}
-                        onChange={e => setEditPertanyaanTeks(e.target.value)}
-                      />
+                      <textarea className={styles.editTextarea} value={editPertanyaanTeks}
+                        onChange={e => setEditPertanyaanTeks(e.target.value)} />
                       <div className={styles.editActions}>
                         <button className={styles.saveBtn} onClick={saveEditPertanyaan}>Simpan</button>
                         <button className={styles.cancelBtn} onClick={() => setEditPertanyaanId(null)}>Batal</button>
@@ -515,17 +514,20 @@ function IsiFormTab() {
         )}
       </div>
 
-      {/* Modal Tambah Sesi */}
       {showAddSesi && (
         <div className={styles.modalOverlay} onClick={() => setShowAddSesi(false)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>Tambah Sesi Baru</h3>
             <label className={styles.modalLabel}>Bulan</label>
-            <select className={styles.editSelect} value={newSesi.bulan} onChange={e => setNewSesi({ ...newSesi, bulan: parseInt(e.target.value) })}>
-              {BULAN.map((b, i) => <option key={i} value={i + 1}>{b}</option>)}
-            </select>
+            <CustomSelect
+              variant="light"
+              value={String(newSesi.bulan)}
+              onChange={v => setNewSesi({ ...newSesi, bulan: parseInt(v) })}
+              options={BULAN_OPTIONS}
+            />
             <label className={styles.modalLabel}>Tahun</label>
-            <input type="number" className={styles.editInput} value={newSesi.tahun} onChange={e => setNewSesi({ ...newSesi, tahun: parseInt(e.target.value) })} />
+            <input type="number" className={styles.editInput} value={newSesi.tahun}
+              onChange={e => setNewSesi({ ...newSesi, tahun: parseInt(e.target.value) })} />
             <div className={styles.editActions}>
               <button className={styles.saveBtn} onClick={addSesi}>Buat Sesi</button>
               <button className={styles.cancelBtn} onClick={() => setShowAddSesi(false)}>Batal</button>
@@ -534,19 +536,13 @@ function IsiFormTab() {
         </div>
       )}
 
-      {/* Modal Tambah Pertanyaan */}
       {showAddPertanyaan && (
         <div className={styles.modalOverlay} onClick={() => setShowAddPertanyaan(false)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>Tambah Pertanyaan</h3>
             <p className={styles.modalSubtitle}>Sesi: {selectedSesi?.nama}</p>
-            <textarea
-              className={styles.editTextarea}
-              placeholder="Tulis pertanyaan..."
-              value={newPertanyaan}
-              onChange={e => setNewPertanyaan(e.target.value)}
-              rows={4}
-            />
+            <textarea className={styles.editTextarea} placeholder="Tulis pertanyaan..." value={newPertanyaan}
+              onChange={e => setNewPertanyaan(e.target.value)} rows={4} />
             <div className={styles.editActions}>
               <button className={styles.saveBtn} onClick={addPertanyaan}>Tambah</button>
               <button className={styles.cancelBtn} onClick={() => setShowAddPertanyaan(false)}>Batal</button>
@@ -559,10 +555,9 @@ function IsiFormTab() {
 }
 
 // ══════════════════════════════════════════════════════════
-// TAB 3 — HASIL (Input hasil aspirasi per sesi)
+// TAB 3 — HASIL
 // ══════════════════════════════════════════════════════════
 function HasilTab() {
-  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const [sesiList, setSesiList] = useState<Sesi[]>([]);
   const [hasilList, setHasilList] = useState<HasilRespons[]>([]);
   const [loading, setLoading] = useState(true);
@@ -582,10 +577,8 @@ function HasilTab() {
         fetch(`${API}/api/aspirasi/sesi`),
         fetch(`${API}/api/aspirasi/hasil`),
       ]);
-      const sData = await sRes.json();
-      const hData = await hRes.json();
-      setSesiList(sData);
-      setHasilList(hData);
+      setSesiList(await sRes.json());
+      setHasilList(await hRes.json());
     } catch {
       setSesiList([
         { _id: "s1", nama: "Aspirasi Januari 2026", bulan: 1, tahun: 2026, pertanyaan: [], createdAt: "" },
@@ -597,29 +590,22 @@ function HasilTab() {
         { _id: "h1", sesiId: "s1", namaSesi: "Aspirasi Januari 2026", namaAspirasi: "Kendala terkait manajemen media sosial FTI Untar dan LINTAR", hasilRespons: "Meskipun media sosial FTI Untar dan Lintar sudah dikelola dengan baik, keterbatasan SDM tetap menjadi kendala utama.", uploadedAt: "2026-05-10" },
         { _id: "h2", sesiId: "s1", namaSesi: "Aspirasi Januari 2026", namaAspirasi: "Kendala mahasiswa terkait kegiatan kemahasiswaan", hasilRespons: "Fakultas telah menyelenggarakan berbagai seminar dan webinar terkait hardskill.", uploadedAt: "2026-05-10" },
       ]);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const submitHasil = async () => {
     const sesi = sesiList.find(s => s._id === form.sesiId);
     const payload = { ...form, namaSesi: sesi?.nama || "" };
     if (editId) {
-      try {
-        await fetch(`${API}/api/aspirasi/hasil/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      } catch { }
+      try { await fetch(`${API}/api/aspirasi/hasil/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch { }
       setHasilList(hasilList.map(h => h._id === editId ? { ...h, ...payload } : h));
       setEditId(null);
     } else {
       const newH: HasilRespons = { _id: Date.now().toString(), ...payload, uploadedAt: new Date().toISOString() };
       try {
         const res = await fetch(`${API}/api/aspirasi/hasil`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        const created = await res.json();
-        setHasilList([...hasilList, created]);
-      } catch {
-        setHasilList([...hasilList, newH]);
-      }
+        setHasilList([...hasilList, await res.json()]);
+      } catch { setHasilList([...hasilList, newH]); }
     }
     setShowAddModal(false);
     setForm({ sesiId: "", namaAspirasi: "", hasilRespons: "" });
@@ -632,22 +618,22 @@ function HasilTab() {
   };
 
   const hasilFiltered = hasilList
-    .filter(h =>
-      (!selectedSesi || h.sesiId === selectedSesi._id) &&
-      h.namaAspirasi.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) =>
-      filterMode === "terbaru"
-        ? new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-        : new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
+    .filter(h => (!selectedSesi || h.sesiId === selectedSesi._id) && h.namaAspirasi.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => filterMode === "terbaru"
+      ? new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+      : new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
     );
+
+  const SESI_OPTIONS = [
+    { value: "", label: "-- Pilih Sesi --" },
+    ...sesiList.map(s => ({ value: s._id, label: s.nama })),
+  ];
 
   if (loading) return <div className={styles.loading}>Memuat hasil...</div>;
 
   return (
     <div className={styles.hasilWrapper}>
       <div className={styles.formWrapper}>
-        {/* LEFT: Sesi panel */}
         <div className={styles.sesiPanel}>
           <div className={styles.panelHeader}>
             <h3 className={styles.panelTitle}>Sesi Aspirasi</h3>
@@ -686,37 +672,25 @@ function HasilTab() {
           </div>
         </div>
 
-        {/* RIGHT: Hasil list */}
         <div className={styles.pertanyaanPanel}>
           <div className={styles.hasilPanelTopBar}>
             <div className={styles.searchWrapper}>
               <span className={styles.searchIcon}>🔍</span>
-              <input
-                className={styles.searchInput}
-                placeholder="Cari hasil..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
+              <input className={styles.searchInput} placeholder="Cari hasil..."
+                value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
             <div className={styles.filterWrapper}>
-              <button
-                className={styles.filterToggleBtn}
-                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              >
+              <button className={styles.filterToggleBtn} onClick={() => setShowFilterDropdown(!showFilterDropdown)}>
                 {filterMode === "terbaru" ? "Terbaru ▾" : "Terlama ▾"}
               </button>
               {showFilterDropdown && (
                 <div className={styles.filterDropdown}>
-                  <button
-                    className={`${styles.filterOption} ${filterMode === "terbaru" ? styles.filterOptionActive : ""}`}
-                    onClick={() => { setFilterMode("terbaru"); setShowFilterDropdown(false); }}
-                  >
+                  <button className={`${styles.filterOption} ${filterMode === "terbaru" ? styles.filterOptionActive : ""}`}
+                    onClick={() => { setFilterMode("terbaru"); setShowFilterDropdown(false); }}>
                     Dari yang terkini sampai terlama
                   </button>
-                  <button
-                    className={`${styles.filterOption} ${filterMode === "terlama" ? styles.filterOptionActive : ""}`}
-                    onClick={() => { setFilterMode("terlama"); setShowFilterDropdown(false); }}
-                  >
+                  <button className={`${styles.filterOption} ${filterMode === "terlama" ? styles.filterOptionActive : ""}`}
+                    onClick={() => { setFilterMode("terlama"); setShowFilterDropdown(false); }}>
                     Dari yang terlama
                   </button>
                 </div>
@@ -759,21 +733,29 @@ function HasilTab() {
         </div>
       </div>
 
-      <button className={styles.fab} onClick={() => { setForm({ sesiId: selectedSesi?._id || "", namaAspirasi: "", hasilRespons: "" }); setShowAddModal(true); }}>+</button>
+      <button className={styles.fab} onClick={() => {
+        setForm({ sesiId: selectedSesi?._id || "", namaAspirasi: "", hasilRespons: "" });
+        setShowAddModal(true);
+      }}>+</button>
 
       {showAddModal && (
         <div className={styles.modalOverlay} onClick={() => { setShowAddModal(false); setEditId(null); }}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>{editId ? "Edit Hasil" : "Tambah Hasil Aspirasi"}</h3>
             <label className={styles.modalLabel}>Sesi</label>
-            <select className={styles.editSelect} value={form.sesiId} onChange={e => setForm({ ...form, sesiId: e.target.value })}>
-              <option value="">-- Pilih Sesi --</option>
-              {sesiList.map(s => <option key={s._id} value={s._id}>{s.nama}</option>)}
-            </select>
+            <CustomSelect
+              variant="light"
+              value={form.sesiId}
+              onChange={v => setForm({ ...form, sesiId: v })}
+              options={SESI_OPTIONS}
+              placeholder="-- Pilih Sesi --"
+            />
             <label className={styles.modalLabel}>Nama Aspirasi</label>
-            <textarea className={styles.editTextarea} placeholder="Judul/nama aspirasi..." value={form.namaAspirasi} onChange={e => setForm({ ...form, namaAspirasi: e.target.value })} rows={2} />
+            <textarea className={styles.editTextarea} placeholder="Judul/nama aspirasi..." value={form.namaAspirasi}
+              onChange={e => setForm({ ...form, namaAspirasi: e.target.value })} rows={2} />
             <label className={styles.modalLabel}>Hasil Respons</label>
-            <textarea className={styles.editTextarea} placeholder="Tulis hasil/respons aspirasi..." value={form.hasilRespons} onChange={e => setForm({ ...form, hasilRespons: e.target.value })} rows={5} />
+            <textarea className={styles.editTextarea} placeholder="Tulis hasil/respons aspirasi..." value={form.hasilRespons}
+              onChange={e => setForm({ ...form, hasilRespons: e.target.value })} rows={5} />
             <div className={styles.editActions}>
               <button className={styles.saveBtn} onClick={submitHasil}>Upload</button>
               <button className={styles.cancelBtn} onClick={() => { setShowAddModal(false); setEditId(null); }}>Batal</button>
@@ -786,7 +768,7 @@ function HasilTab() {
 }
 
 // ══════════════════════════════════════════════════════════
-// TAB 4 — RESPONSE (jawaban mahasiswa, filter per pertanyaan)
+// TAB 4 — RESPONSE
 // ══════════════════════════════════════════════════════════
 interface Jawaban {
   _id: string;
@@ -799,7 +781,6 @@ interface Jawaban {
 }
 
 function ResponseTab() {
-  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const [sesiList, setSesiList] = useState<Sesi[]>([]);
   const [jawabanList, setJawabanList] = useState<Jawaban[]>([]);
   const [selectedSesi, setSelectedSesi] = useState<Sesi | null>(null);
@@ -810,90 +791,74 @@ function ResponseTab() {
     setLoading(true);
     try {
       const [sesiData, jawabanData] = await Promise.all([
-        fetch(`${API}/api/aspirasi/sesi`).then((r) => r.json()),
-        fetch(`${API}/api/aspirasi/jawaban`).then((r) => r.json()),
+        fetch(`${API}/api/aspirasi/sesi`).then(r => r.json()),
+        fetch(`${API}/api/aspirasi/jawaban`).then(r => r.json()),
       ]);
       setSesiList(sesiData);
       setJawabanList(jawabanData);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  // Reset filter pertanyaan kalau ganti sesi
   const handleSesiChange = (sesiId: string) => {
-    const sesi = sesiList.find((s) => s._id === sesiId) || null;
-    setSelectedSesi(sesi);
+    setSelectedSesi(sesiList.find(s => s._id === sesiId) || null);
     setSelectedPertanyaanId("all");
   };
 
-  // Jawaban yang cocok dengan sesi & pertanyaan yang dipilih
-  const jawabanFiltered = jawabanList.filter((j) => {
+  const jawabanFiltered = jawabanList.filter(j => {
     if (!selectedSesi) return false;
-    // Handle sesiId sebagai object (setelah populate) atau string
     const jSesiId = j.sesiId && typeof j.sesiId === "object" ? j.sesiId._id : j.sesiId;
     if (jSesiId !== selectedSesi._id) return false;
     if (selectedPertanyaanId === "all") return true;
-    // Handle pertanyaanId sebagai object atau string
-    const pid = j.pertanyaanId && typeof j.pertanyaanId === "object"
-      ? j.pertanyaanId._id
-      : j.pertanyaanId;
+    const pid = j.pertanyaanId && typeof j.pertanyaanId === "object" ? j.pertanyaanId._id : j.pertanyaanId;
     return pid === selectedPertanyaanId;
   });
 
-  // Teks pertanyaan yang sedang dipilih (untuk heading)
-  const pertanyaanTerpilih = selectedSesi?.pertanyaan.find(
-    (p) => p._id === selectedPertanyaanId
-  );
+  const pertanyaanTerpilih = selectedSesi?.pertanyaan.find(p => p._id === selectedPertanyaanId);
+
+  const SESI_OPTIONS = [
+    { value: "", label: "-- Pilih Sesi --" },
+    ...sesiList.map(s => ({ value: s._id, label: s.nama })),
+  ];
+
+  const PERTANYAAN_OPTIONS = [
+    { value: "all", label: "Semua Pertanyaan" },
+    ...(selectedSesi?.pertanyaan.map((p, i) => ({
+      value: p._id,
+      label: `${i + 1}. ${p.teks.length > 60 ? p.teks.slice(0, 60) + "..." : p.teks}`,
+    })) || []),
+  ];
 
   if (loading) return <div className={styles.loading}>Memuat response...</div>;
 
   return (
     <div className={styles.responseWrapper}>
-
-      {/* ── Filter Bar ── */}
       <div className={styles.responseFilterBar}>
-
-        {/* Pilih Sesi */}
         <div className={styles.filterGroup}>
           <label className={styles.filterLabel}>SESI</label>
-          <select
-            className={styles.filterSelect}
+          <CustomSelect
+            variant="dark"
             value={selectedSesi?._id || ""}
-            onChange={(e) => handleSesiChange(e.target.value)}
-          >
-            <option value="">-- Pilih Sesi --</option>
-            {sesiList.map((s) => (
-              <option key={s._id} value={s._id}>{s.nama}</option>
-            ))}
-          </select>
+            onChange={handleSesiChange}
+            options={SESI_OPTIONS}
+            placeholder="-- Pilih Sesi --"
+          />
         </div>
 
-        {/* Pilih Pertanyaan */}
         <div className={styles.filterGroup}>
           <label className={styles.filterLabel}>PERTANYAAN</label>
-          <select
-            className={styles.filterSelect}
+          <CustomSelect
+            variant="dark"
             value={selectedPertanyaanId}
-            onChange={(e) => setSelectedPertanyaanId(e.target.value)}
+            onChange={setSelectedPertanyaanId}
+            options={PERTANYAAN_OPTIONS}
             disabled={!selectedSesi}
-          >
-            <option value="all">Semua Pertanyaan</option>
-            {selectedSesi?.pertanyaan.map((p, i) => (
-              <option key={p._id} value={p._id}>
-                {i + 1}. {p.teks.length > 60 ? p.teks.slice(0, 60) + "..." : p.teks}
-              </option>
-            ))}
-          </select>
+            placeholder="Semua Pertanyaan"
+          />
         </div>
 
-        {/* Counter */}
         {selectedSesi && (
           <div className={styles.responseCounter}>
             <span className={styles.responseCountNum}>{jawabanFiltered.length}</span>
@@ -901,18 +866,11 @@ function ResponseTab() {
           </div>
         )}
 
-        {/* Refresh Button */}
-        <button
-          className={styles.refreshBtn}
-          onClick={fetchData}
-          disabled={loading}
-          title="Refresh data jawaban"
-        >
+        <button className={styles.refreshBtn} onClick={fetchData} disabled={loading} title="Refresh data jawaban">
           {loading ? "⟳..." : "⟳"} Refresh
         </button>
       </div>
 
-      {/* ── Heading pertanyaan terpilih ── */}
       {selectedSesi && selectedPertanyaanId !== "all" && pertanyaanTerpilih && (
         <div className={styles.pertanyaanHeading}>
           <span className={styles.pertanyaanHeadingQ}>❓</span>
@@ -920,7 +878,6 @@ function ResponseTab() {
         </div>
       )}
 
-      {/* ── Empty states ── */}
       {!selectedSesi && (
         <div className={styles.emptyState}>
           <span className={styles.emptyIcon}>📋</span>
@@ -935,36 +892,24 @@ function ResponseTab() {
         </div>
       )}
 
-      {/* ── Daftar Jawaban ── */}
       <div className={styles.jawabanGrid}>
-        {jawabanFiltered.map((j) => {
-          const pteks = j.pertanyaanId && typeof j.pertanyaanId === "object"
-            ? j.pertanyaanId.teks
-            : "";
+        {jawabanFiltered.map(j => {
+          const pteks = j.pertanyaanId && typeof j.pertanyaanId === "object" ? j.pertanyaanId.teks : "";
           return (
             <div key={j._id} className={styles.jawabanCard}>
-              {/* Header: nama/nim mahasiswa */}
               <div className={styles.jawabanCardHeader}>
-                <div className={styles.jawabanAvatar}>
-                  {(j.nama || "A")[0].toUpperCase()}
-                </div>
+                <div className={styles.jawabanAvatar}>{(j.nama || "A")[0].toUpperCase()}</div>
                 <div>
                   <p className={styles.jawabanNama}>{j.nama || "Anonim"}</p>
                   {j.nim && <p className={styles.jawabanNim}>{j.nim}</p>}
                 </div>
                 <span className={styles.jawabanDate}>
-                  {new Date(j.createdAt).toLocaleDateString("id-ID", {
-                    day: "numeric", month: "short", year: "numeric",
-                  })}
+                  {new Date(j.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                 </span>
               </div>
-
-              {/* Pertanyaan (tampil kalau mode "semua pertanyaan") */}
               {selectedPertanyaanId === "all" && pteks && (
                 <p className={styles.jawabanPertanyaan}>❓ {pteks}</p>
               )}
-
-              {/* Isi jawaban */}
               <p className={styles.jawabanIsi}>{j.jawaban || <em style={{ color: "#9ca3af" }}>Tidak ada jawaban</em>}</p>
             </div>
           );

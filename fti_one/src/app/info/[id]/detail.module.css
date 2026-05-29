@@ -200,7 +200,18 @@
   min-width: 140px;
   text-transform: uppercase;
 }
+.infoLink {
+  font-size: 13.5px;
+  color: #2563eb;
+  font-weight: 500;
+  line-height: 1.6;
+  text-decoration: underline;
+  word-break: break-all;
+}
 
+.infoLink:hover {
+  color: #1d4ed8;
+}
 .infoValue {
   font-size: 13.5px;
   color: #374151; /* Warna text About */
