@@ -28,6 +28,7 @@ export default function Navbar() {
   ]);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Notif state
   const [unreadCount, setUnreadCount] = useState(0);
@@ -46,28 +47,53 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const fetchNotifPreview = async (token: string) => {
+  // ── Fetch notif untuk ADMIN ──
+  const fetchNotifPreviewAdmin = async (token: string) => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/dashboard/notifikasi?read=Belum+Dibaca",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = await res.json();
+        setUnreadCount(data.unreadCount ?? 0);
+        setNotifPreview((data.data ?? []).slice(0, 4));
+      } catch (err) {
+        console.error("fetchNotifPreview admin error:", err);
+      }
+    };
+
+    // ── Fetch notif untuk USER ──
+    const fetchNotifPreviewUser = async (token: string) => {
     try {
-      console.log("🔔 fetchNotifPreview dipanggil");
       const res = await fetch(
-        "http://localhost:5000/api/dashboard/notifikasi?read=Belum+Dibaca",
-        { headers: { Authorization: `Bearer ${token}` } }
+        "http://localhost:5000/api/notifikasi/user?read=Belum+Dibaca",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      console.log("🔔 status:", res.status);
+
       const data = await res.json();
-      console.log("🔔 data:", data);
+
+      console.log("🔔 USER NOTIF:", data);
+
       setUnreadCount(data.unreadCount ?? 0);
       setNotifPreview((data.data ?? []).slice(0, 4));
     } catch (err) {
-      console.error("🔔 fetchNotifPreview error:", err);
+      console.error("fetchNotifPreview user error:", err);
     }
   };
 
+  // ── Mark all read ──
   const markAllRead = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      await fetch("http://localhost:5000/api/dashboard/notifikasi/read-all", {
+      const endpoint = isAdmin
+        ? "http://localhost:5000/api/dashboard/notifikasi/read-all"
+        : "http://localhost:5000/api/notifikasi/user/read-all";
+      await fetch(endpoint, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -78,17 +104,18 @@ export default function Navbar() {
     }
   };
 
+  // ── Mark one read ──
   const markOneRead = async (id: string) => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      await fetch(
-        `http://localhost:5000/api/dashboard/notifikasi/${id}/read`,
-        {
-          method: "PATCH",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const endpoint = isAdmin
+        ? `http://localhost:5000/api/dashboard/notifikasi/${id}/read`
+        : `http://localhost:5000/api/notifikasi/${id}/read`;
+      await fetch(endpoint, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setNotifPreview((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
@@ -100,43 +127,58 @@ export default function Navbar() {
 
   useEffect(() => {
     const loadUserData = () => {
-  const stored = localStorage.getItem("user");
-  const token = localStorage.getItem("token");
-  
-  console.log("👤 stored:", stored);
-  console.log("👤 token:", token ? "ada" : "tidak ada");
-  
-  if (stored) {
-    const user = JSON.parse(stored);
-      console.log("👤 user.role:", user.role);
-      
-      const adminRole = user.role === "admin" || user.role === "superadmin";
-      console.log("👤 isAdmin:", adminRole);
-      
-      setProfilePhoto(user.profilePhoto || null);
-      setIsAdmin(adminRole);
+      const stored = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
 
-      if (adminRole) {
+      if (stored && token) {
+        const user = JSON.parse(stored);
+        const adminRole = user.role === "admin" || user.role === "superadmin";
+
+        setProfilePhoto(user.profilePhoto || null);
+        setIsAdmin(adminRole);
+        setIsLoggedIn(true);
+
+        if (adminRole) {
+          setNavLinks([
+            { label: "Home", href: "/dashboard" },
+            { label: "About Us", href: "/aboutus" },
+            { label: "Aspirasi", href: "/admin/aspirasi" },
+            { label: "Info", href: "/admin/info" },
+            { label: "Lost & Found", href: "/admin/lost-found" },
+          ]);
+          fetchNotifPreviewAdmin(token);
+        } else {
+          setNavLinks([
+            { label: "Home", href: "/homepage" },
+            { label: "About Us", href: "/aboutus" },
+            { label: "Aspirasi", href: "/aspirasi" },
+            { label: "Info", href: "/info" },
+            { label: "Lost & Found", href: "/lost-found" },
+          ]);
+          fetchNotifPreviewUser(token);
+        }
+      } else {
+        setProfilePhoto(null);
+        setIsAdmin(false);
+        setIsLoggedIn(false);
+        setUnreadCount(0);
+        setNotifPreview([]);
         setNavLinks([
-          { label: "Home", href: "/dashboard" },
+          { label: "Home", href: "/" },
           { label: "About Us", href: "/aboutus" },
-          { label: "Aspirasi", href: "/admin/aspirasi" },
-          { label: "Info", href: "/admin/info" },
-          { label: "Lost & Found", href: "/admin/lost-found" },
+          { label: "Aspirasi", href: "/aspirasi" },
+          { label: "Info", href: "/info" },
+          { label: "Lost & Found", href: "/lost-found" },
         ]);
-        if (token) fetchNotifPreview(token);
       }
-    } else {
-      setProfilePhoto(null);
-      setIsAdmin(false);
-      setUnreadCount(0);
-    }
-  };
+    };
 
     const handleLogout = () => {
       setProfilePhoto(null);
       setIsAdmin(false);
+      setIsLoggedIn(false);
       setUnreadCount(0);
+      setNotifPreview([]);
       setNavLinks([
         { label: "Home", href: "/" },
         { label: "About Us", href: "/aboutus" },
@@ -146,46 +188,40 @@ export default function Navbar() {
       ]);
     };
 
-    const handleLogin = () => loadUserData();
-
     loadUserData();
 
     window.addEventListener("storage", loadUserData);
     window.addEventListener("profileUpdated", loadUserData as EventListener);
-    window.addEventListener("userLoggedIn", handleLogin as EventListener);
+    window.addEventListener("userLoggedIn", loadUserData as EventListener);
     window.addEventListener("userLoggedOut", handleLogout as EventListener);
     window.addEventListener("focus", loadUserData);
 
-    // Poll unread count every 60s for admins
+    // Poll unread count every 60s untuk semua user yang login
     const interval = setInterval(() => {
       const token = localStorage.getItem("token");
       const stored = localStorage.getItem("user");
       if (token && stored) {
         const user = JSON.parse(stored);
         if (user.role === "admin" || user.role === "superadmin") {
-          fetchNotifPreview(token);
+          fetchNotifPreviewAdmin(token);
+        } else {
+          fetchNotifPreviewUser(token);
         }
       }
     }, 60000);
 
     return () => {
       window.removeEventListener("storage", loadUserData);
-      window.removeEventListener(
-        "profileUpdated",
-        loadUserData as EventListener
-      );
-      window.removeEventListener(
-        "userLoggedIn",
-        handleLogin as EventListener
-      );
-      window.removeEventListener(
-        "userLoggedOut",
-        handleLogout as EventListener
-      );
+      window.removeEventListener("profileUpdated", loadUserData as EventListener);
+      window.removeEventListener("userLoggedIn", loadUserData as EventListener);
+      window.removeEventListener("userLoggedOut", handleLogout as EventListener);
       window.removeEventListener("focus", loadUserData);
       clearInterval(interval);
     };
   }, []);
+
+  // Tentukan href notif page berdasarkan role
+  const notifPageHref = isAdmin ? "/admin/notifikasi" : "/notifikasi";
 
   return (
     <nav className={styles.navbar}>
@@ -213,10 +249,10 @@ export default function Navbar() {
         ))}
       </ul>
 
-      {/* Right side: bell (admin only) + profile */}
+      {/* Right side: bell (semua user yang login) + profile */}
       <div className={styles.navRight}>
-        {/* ── Bell Icon (admin/superadmin only) ── */}
-        {isAdmin && (
+        {/* ── Bell Icon (tampil jika sudah login) ── */}
+        {isLoggedIn && (
           <div className={styles.notifWrap} ref={notifRef}>
             <button
               className={styles.bellBtn}
@@ -276,7 +312,7 @@ export default function Navbar() {
                         onClick={() => {
                           markOneRead(n.id);
                           setShowNotifDropdown(false);
-                          router.push("/admin/notifikasi");
+                          router.push(notifPageHref);
                         }}
                       >
                         <div
@@ -296,16 +332,14 @@ export default function Navbar() {
                             {n.time}
                           </div>
                         </div>
-                        {!n.read && (
-                          <div className={styles.notifDropDot} />
-                        )}
+                        {!n.read && <div className={styles.notifDropDot} />}
                       </div>
                     ))
                   )}
                 </div>
 
                 <Link
-                  href="/admin/notifikasi"
+                  href={notifPageHref}
                   className={styles.notifDropFooter}
                   onClick={() => setShowNotifDropdown(false)}
                 >
@@ -317,11 +351,7 @@ export default function Navbar() {
         )}
 
         {/* Profile */}
-        <Link
-          href="/profile"
-          className={styles.profileLink}
-          aria-label="Profile"
-        >
+        <Link href="/profile" className={styles.profileLink} aria-label="Profile">
           <div className={styles.profileAvatar}>
             {profilePhoto ? (
               <img

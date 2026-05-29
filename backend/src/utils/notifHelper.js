@@ -13,7 +13,7 @@ const createNotif = async ({
   try {
     console.log("🔥 [createNotif] dipanggil dengan:", { title, category, target });
 
-    const allowedCategory = ["Lost & Found", "Aspirasi", "User", "Sistem"];
+    const allowedCategory = ["Lost & Found", "Aspirasi", "Info", "Sistem"];
     if (!allowedCategory.includes(category)) {
       console.warn(`⚠️ Category "${category}" tidak valid, fallback ke Sistem`);
       category = "Sistem";

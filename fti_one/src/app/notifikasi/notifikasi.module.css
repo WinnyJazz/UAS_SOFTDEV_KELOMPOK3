@@ -1,0 +1,291 @@
+/* ══════════════════════════════════════════
+   NOTIFIKASI USER — notifikasi.module.css
+   Mengikuti design system admin (purple-based)
+══════════════════════════════════════════ */
+
+/* PAGE WRAPPER */
+.page {
+    min-height: 100vh;
+    background: #f5f7fb;
+    color: #111827;
+    padding: 32px;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.header p {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* REFRESH BUTTON */
+.refreshBtn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.refreshBtn:hover {
+    background: #6d28d9;
+}
+
+/* SEARCH */
+.search {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 14px;
+    background: white;
+    color: #111827;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* FILTER ROW (chips) */
+.filterRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chip:hover {
+    border-color: #c4b5fd;
+    background: #faf5ff;
+    color: #7c3aed;
+}
+
+.chip span {
+    background: #f3f4f6;
+    color: #6b7280;
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.activeChip {
+    background: #7c3aed !important;
+    border-color: #7c3aed !important;
+    color: white !important;
+}
+
+.activeChip span {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: white !important;
+}
+
+/* CARD CONTAINER */
+.container {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    margin-top: 8px;
+}
+
+/* LOADING & EMPTY */
+.loading,
+.empty {
+    text-align: center;
+    padding: 48px 0;
+    color: #9ca3af;
+    font-size: 15px;
+}
+
+/* NOTIF CARD */
+.card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.card:last-child {
+    margin-bottom: 0;
+}
+
+.card:hover {
+    background: #f9fafb;
+}
+
+/* UNREAD STATE */
+.unread {
+    border-color: #c4b5fd !important;
+    background: #faf5ff !important;
+}
+
+.unread:hover {
+    background: #f3e8ff !important;
+}
+
+/* ICON */
+.icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+/* CONTENT */
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.content h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.content p {
+    margin: 4px 0 6px;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.time {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* CATEGORY TAGS */
+.tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.tagInfo {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.tagLostFound {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.tagAspirasi {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.tagSistem {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+
+/* DELETE BUTTON */
+.deleteBtn {
+    background: transparent;
+    border: none;
+    color: #d1d5db;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    min-width: 28px;
+    align-self: flex-start;
+}
+
+.deleteBtn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+/* ══════════════════════════
+   RESPONSIVE
+══════════════════════════ */
+@media (max-width: 768px) {
+    .page {
+        padding: 20px 16px;
+    }
+
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .card {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        font-size: 18px;
+    }
+}

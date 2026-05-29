@@ -671,7 +671,7 @@ export default function LostFoundAdmin() {
             {/* Claims search */}
             <div className={styles.claimsSearchRow}>
               <div className={styles.claimsSearchBar}>
-                <span>🔍</span>
+                <span>🔍  </span>
                 <input type="text" placeholder="Cari NIM, nama, atau nama barang..."
                   value={claimSearch} onChange={e => setClaimSearch(e.target.value)} />
               </div>

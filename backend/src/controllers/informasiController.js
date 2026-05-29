@@ -2,6 +2,7 @@ const Informasi = require("../models/Informasi");
 const cloudinary = require("../config/cloudinary");
 const multer = require("multer");
 const { Readable } = require("stream");
+const { createNotif } = require("../utils/notifHelper");
 
 // ── Multer: simpan di memory ──
 const storage = multer.memoryStorage();
@@ -93,9 +94,24 @@ exports.createInformasi = async (req, res) => {
       linkTerkait,
     });
 
+    // Buat notifikasi untuk semua user
+    console.log("📝 Membuat notifikasi info...");
+    const notifResult = await createNotif({
+      title: `📢 Info Baru: ${judul}`,
+      desc: isi.substring(0, 100),
+      category: "Info",
+      icon: "📰",
+      iconBg: "#fef3c7",
+      refType: "Informasi",
+      refId: newInfo._id.toString(),
+      target: "all",
+    });
+    console.log("✅ Notifikasi info berhasil:", notifResult ? notifResult._id : "null");
+
     res.status(201).json({ success: true, data: newInfo, message: "Informasi berhasil ditambahkan" });
   } catch (err) {
-    console.error("createInformasi error:", err);
+    console.error("❌ createInformasi error:", err);
+    console.error("   Stack:", err.stack);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

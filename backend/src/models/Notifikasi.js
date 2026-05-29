@@ -19,7 +19,7 @@ const notifikasiSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["Lost & Found", "Aspirasi", "User", "Sistem"],
+      enum: ["Lost & Found", "Aspirasi", "Info", "Sistem"],
       default: "Sistem",
     },
 
@@ -33,10 +33,10 @@ const notifikasiSchema = new mongoose.Schema(
       default: "#e0e7ff",
     },
 
-    // siapa target notif (admin / user)
+    // siapa target notif (admin / user / all = broadcast ke semua user)
     target: {
       type: String,
-      enum: ["admin", "user"],
+      enum: ["admin", "user", "all"],
       default: "admin",
     },
 

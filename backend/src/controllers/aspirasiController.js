@@ -216,20 +216,19 @@ exports.submitSesiAspirasi = async (req, res) => {
 
     const sesi = await SesiAspirasi.findById(sesiId);
 
-    // 🔔 NOTIF FIXED
-    const notif = await createNotif({
-      title: "Aspirasi Sesi Selesai",
-      desc: `Mahasiswa menyelesaikan sesi "${sesi?.nama || "Aspirasi"
-        }" (${saved.length} jawaban)`,
+    // 🔔 NOTIF FIXED (non-blocking)
+    createNotif({
+      title: "💬 Aspirasi Sesi Selesai",
+      desc: `Mahasiswa menyelesaikan sesi "${sesi?.nama || "Aspirasi"}" (${saved.length} jawaban)`,
       category: "Aspirasi",
       icon: "📋",
       iconBg: "#dbeafe",
-      refType: "sesi-aspirasi",
+      refType: "Aspirasi",
       refId: sesiId,
       target: "admin",
+    }).catch((err) => {
+      console.error("❌ Notif creation failed:", err);
     });
-
-    console.log("📩 notif result:", notif);
 
     return res.status(201).json({
       success: true,
@@ -248,19 +247,20 @@ exports.submitJawaban = async (req, res) => {
     const newJawaban = new Jawaban(req.body);
     await newJawaban.save();
     
-    // 🔔 TRIGGER NOTIFIKASI KE ADMIN
+    // 🔔 TRIGGER NOTIFIKASI KE ADMIN (non-blocking)
     const sesi = await SesiAspirasi.findById(sesiId);
-    const pertanyaan = await Pertanyaan.findById(pertanyaanId);
     
-    await createNotif({
-      title: "Jawaban Aspirasi Masuk",
-      desc: `Mahasiswa ${nama} (NIM: ${nim}) menjawab pertanyaan di sesi "${sesi?.nama || "Aspirasi"}"`,
+    createNotif({
+      title: "💬 Jawaban Aspirasi Masuk",
+      desc: `Mahasiswa ${nama} (NIM: ${nim}) menjawab di sesi "${sesi?.nama || "Aspirasi"}"`,
       category: "Aspirasi",
       icon: "📋",
       iconBg: "#dbeafe",
-      refType: "jawaban",
+      refType: "Jawaban",
       refId: newJawaban._id.toString(),
       target: "admin",
+    }).catch((err) => {
+      console.error("❌ Notif creation failed:", err);
     });
     
     res.status(201).json(newJawaban);
@@ -289,17 +289,19 @@ exports.createHasil = async (req, res) => {
     const hasil = new HasilRespons(req.body);
     await hasil.save();
     
-    // 🔔 TRIGGER NOTIFIKASI KE ADMIN
+    // 🔔 TRIGGER NOTIFIKASI KE ADMIN (non-blocking)
     const sesi = await SesiAspirasi.findById(hasil.sesiId);
-    await createNotif({
-      title: "Aspirasi Baru Masuk",
-      desc: `Sesi: ${sesi?.nama || "Aspirasi"} — Jawaban baru dari mahasiswa`,
+    createNotif({
+      title: "📋 Hasil Aspirasi Baru",
+      desc: `Sesi: ${sesi?.nama || "Aspirasi"} — Respons baru dari DPM`,
       category: "Aspirasi",
       icon: "📋",
       iconBg: "#dbeafe",
-      refType: "aspirasi",
+      refType: "Aspirasi",
       refId: hasil._id.toString(),
       target: "admin",
+    }).catch((err) => {
+      console.error("❌ Notif creation failed:", err);
     });
     
     res.status(201).json(hasil);

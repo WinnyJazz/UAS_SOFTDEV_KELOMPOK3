@@ -1,5 +1,6 @@
 const Barang = require("../models/Barang");
 const cloudinary = require("../config/cloudinary");
+const { createNotif } = require("../utils/notifHelper");
 
 // Helper: extract Cloudinary public_id from URL
 const getPublicIdFromUrl = (url) => {
@@ -109,13 +110,27 @@ const createBarang = async (req, res) => {
 
     await barang.save();
 
+    // Buat notifikasi untuk semua user
+    const deskripsiPreview = deskripsi ? deskripsi.substring(0, 60) : "";
+    await createNotif({
+      title: `Barang Baru: ${nama}`,
+      desc: `Ditemukan di ${lokasi}. ${deskripsiPreview}`,
+      category: "Lost & Found",
+      icon: "🔍",
+      iconBg: "#dbeafe",
+      refType: "Barang",
+      refId: barang._id.toString(),
+      target: "all",
+    });
+
     res.status(201).json({
       success: true,
       message: "Barang berhasil ditambahkan.",
       data: barang,
     });
   } catch (error) {
-    console.error("createBarang error:", error);
+    console.error("❌ createBarang error:", error);
+    console.error("   Stack:", error.stack);
     res.status(500).json({ success: false, message: "Gagal menambahkan barang." });
   }
 };

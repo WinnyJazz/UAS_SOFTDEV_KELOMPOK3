@@ -53,20 +53,24 @@ const createClaim = async (req, res) => {
       lokasiBarang: barang.lokasi,
     });
 
-    await createNotif({
-      title: "Pengajuan Klaim Baru",
-      desc: `${nama} (NIM: ${nim}) mengajukan klaim untuk barang "${barang.nama}".`,
+    // Buat notifikasi untuk admin (non-blocking)
+    createNotif({
+      title: "📦 Pengajuan Klaim Baru",
+      desc: `${nama} (NIM: ${nim}) mengajukan klaim untuk "${barang.nama}".`,
       category: "Lost & Found",
       icon: "📦",
       iconBg: "#fef3c7",
-      refType: "claim",
-      refId: claim.claimId,
+      refType: "Claim",
+      refId: claim._id.toString(),
       target: "admin",
+    }).catch((err) => {
+      console.error("❌ Notif creation failed:", err);
     });
 
     return res.status(201).json({ success: true, message: "Pengajuan klaim berhasil dikirim.", data: claim });
   } catch (error) {
-    console.error("createClaim error:", error);
+    console.error("❌ createClaim error:", error);
+    console.error("   Stack:", error.stack);
     return res.status(500).json({ success: false, message: "Gagal membuat pengajuan klaim." });
   }
 };
@@ -129,21 +133,24 @@ const updateClaimStatus = async (req, res) => {
     }
 
     const isApproved = status === "disetujui";
-    await createNotif({
-      title: isApproved ? "Klaim Disetujui" : "Klaim Ditolak",
-      desc: `Klaim barang "${namaBarang}" telah ${status}${catatan ? ` - ${catatan}` : ""}`,
-      // pakai namaBarang, bukan claim.barangId
+    // Buat notifikasi untuk admin (non-blocking)
+    createNotif({
+      title: isApproved ? "✅ Klaim Disetujui" : "❌ Klaim Ditolak",
+      desc: `Klaim untuk "${namaBarang}" telah ${status}${catatan ? ` - ${catatan}` : ""}`,
       category: "Lost & Found",
       icon: isApproved ? "✅" : "❌",
       iconBg: isApproved ? "#dcfce7" : "#fee2e2",
-      refType: "claim",
-      refId: claim.claimId,
+      refType: "Claim",
+      refId: claim._id.toString(),
       target: "admin",
+    }).catch((err) => {
+      console.error("❌ Notif creation failed:", err);
     });
 
     return res.json({ success: true, message: `Klaim berhasil ${status}`, data: claim });
   } catch (error) {
-    console.error("updateClaimStatus error:", error);
+    console.error("❌ updateClaimStatus error:", error);
+    console.error("   Stack:", error.stack);
     return res.status(500).json({ success: false, message: "Gagal update status klaim." });
   }
 };
