@@ -36,7 +36,7 @@ export default function StatusPage() {
     const init = async () => {
       setLoading(true);
       const t = token();
-      await fetch('${API_BASE}/api/claim/mine', {
+      await fetch(`${API_BASE}/api/claim/mine`, {
         headers: { Authorization: `Bearer ${t}` },
       })
         .then((r) => r.json())

@@ -152,7 +152,7 @@ export default function AdminInfoPage() {
   const fetchInfos = async () => {
     setLoading(true);
     try {
-      const res = await fetch('${API_BASE}/api/informasi');
+      const res = await fetch(`${API_BASE}/api/informasi`);
       const data = await res.json();
       if (data.success) setInfos(data.data);
     } catch (err) {

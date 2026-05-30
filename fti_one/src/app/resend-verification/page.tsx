@@ -18,7 +18,7 @@ export default function ResendVerification() {
     setIsSuccess(false);
 
     try {
-      const response = await fetch('${API_BASE}/api/auth/resend-verification', {
+      const response = await fetch(`${API_BASE}/api/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

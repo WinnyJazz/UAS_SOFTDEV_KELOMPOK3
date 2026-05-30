@@ -72,7 +72,7 @@ export default function AdminInfoTambahPage() {
 
       mediaFiles.forEach((file) => formData.append('media', file));
 
-      const res = await fetch('${API_BASE}/api/informasi', {
+      const res = await fetch(`${API_BASE}/api/informasi`, {
         method: 'POST',
         headers: {
           // Jangan set Content-Type, biar browser set boundary otomatis
