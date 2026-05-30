@@ -13,14 +13,11 @@ console.log("[Email Config] Password configured:", !!emailPassword);
 // Create transporter
 const transporter = nodemailer.createTransport({
   host: emailHost,
-  port: emailPort,
-  secure: false, // TLS
+  port: 465,       // ← hardcode 465, ignore env EMAIL_PORT
+  secure: true,    // ← ganti false ke true
   auth: {
     user: emailUser,
     pass: emailPassword,
-  },
-  tls: {
-    rejectUnauthorized: false,
   },
 });
 
