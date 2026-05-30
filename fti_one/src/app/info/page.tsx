@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './info.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface InfoItem {
   informasiId: string;
   _id?: string;
@@ -92,7 +94,7 @@ export default function PublicInfo() {
   const fetchInfos = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/informasi');
+      const res = await fetch(`${API_BASE}/api/informasi`);
       const data = await res.json();
       if (data.success) setInfos(data.data);
     } catch (err) {
