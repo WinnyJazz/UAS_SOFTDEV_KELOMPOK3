@@ -158,7 +158,7 @@ export default function LostFoundStudent() {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/claim', {
+      const res = await fetch(`${API_BASE}api/claim`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
