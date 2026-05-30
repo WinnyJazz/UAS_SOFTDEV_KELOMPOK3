@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './lostfound.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface BarangItem {
   barangId: string;
   nama: string;
@@ -15,7 +17,7 @@ interface BarangItem {
   foto: string | null;
 }
 
-const API_URL = 'http://localhost:5000/api/barang';
+const API_URL = `${API_BASE}/api/barang`;
 
 const getToken = () => {
   return localStorage.getItem("token") || "";
@@ -44,7 +46,7 @@ export default function LostFoundStudent() {
 
   const fetchAvailableLocations = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/barang/locations/available');
+      const res = await fetch(`${API_BASE}/api/barang/locations/available`);
       const data = await res.json();
       if (data.success) {
         setAvailableLocations(data.data);
