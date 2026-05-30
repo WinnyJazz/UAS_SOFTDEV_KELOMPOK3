@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './profile.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface UserData {
     userId: string;
     nama: string;
@@ -102,7 +104,7 @@ export default function Profile() {
                 payload.profilePhoto = photoPreview;
             }
 
-            const response = await fetch('http://localhost:5000/api/auth/update-profile', {
+            const response = await fetch('${API_BASE}/api/auth/update-profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

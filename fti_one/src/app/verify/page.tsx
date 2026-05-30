@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import styles from './verify.module.css';
 
-export default function VerifyEmail() {
+function VerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -30,6 +30,7 @@ export default function VerifyEmail() {
         if (response.ok) {
           setStatus('success');
           setMessage(data.message || 'Email berhasil diverifikasi!');
+
           setTimeout(() => {
             router.push('/login');
           }, 3000);
@@ -63,7 +64,9 @@ export default function VerifyEmail() {
             <div className={styles.successIcon}>✓</div>
             <h2>Email Terverifikasi!</h2>
             <p>{message}</p>
-            <p className={styles.redirect}>Redirecting ke login dalam 3 detik...</p>
+            <p className={styles.redirect}>
+              Redirecting ke login dalam 3 detik...
+            </p>
           </>
         )}
 
@@ -72,10 +75,12 @@ export default function VerifyEmail() {
             <div className={styles.errorIcon}>✗</div>
             <h2>Verifikasi Gagal</h2>
             <p>{message}</p>
+
             <div className={styles.actions}>
               <a href="/login" className={styles.button}>
                 Kembali ke Login
               </a>
+
               <a href="/register" className={styles.buttonSecondary}>
                 Daftar Ulang
               </a>
@@ -84,5 +89,13 @@ export default function VerifyEmail() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyContent />
+    </Suspense>
   );
 }

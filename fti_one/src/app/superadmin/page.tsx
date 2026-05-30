@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './superadmin.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 // ── Types ──────────────────────────────────────────────
 type Section = 'overview' | 'aspirasi' | 'userdata' | 'notif';
 type LFStatus = 'Pending' | 'Claimed' | 'Expired';
@@ -242,7 +244,7 @@ export default function SuperAdminDashboard() {
     // ── NEW: Fetch overview from backend ──────────────
     const fetchOverview = async (token: string) => {
         try {
-            const res = await fetch('http://localhost:5000/api/dashboard/overview', {
+            const res = await fetch('${API_BASE}/api/dashboard/overview', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
@@ -257,7 +259,7 @@ export default function SuperAdminDashboard() {
 
     const fetchUsers = async (token: string) => {
         try {
-            const res = await fetch('http://localhost:5000/api/auth/users', {
+            const res = await fetch('${API_BASE}/api/auth/users', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
@@ -276,7 +278,7 @@ export default function SuperAdminDashboard() {
 
     const fetchLF = async (token: string) => {
         try {
-            const res = await fetch('http://localhost:5000/api/dashboard/lostfound', {
+            const res = await fetch('${API_BASE}/api/dashboard/lostfound', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
@@ -288,7 +290,7 @@ export default function SuperAdminDashboard() {
 
     const fetchNotifs = async (token: string) => {
         try {
-            const res = await fetch('http://localhost:5000/api/dashboard/notifikasi', {
+            const res = await fetch('${API_BASE}/api/dashboard/notifikasi', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
@@ -300,7 +302,7 @@ export default function SuperAdminDashboard() {
 
     const fetchSesi = async (token: string) => {
         try {
-            const res = await fetch('http://localhost:5000/api/aspirasi/sesi', {
+            const res = await fetch('${API_BASE}/api/aspirasi/sesi', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
@@ -327,7 +329,7 @@ export default function SuperAdminDashboard() {
         try {
             setLoadingJawaban(true);
             const res = await fetch(
-                `http://localhost:5000/api/aspirasi/jawaban?sesiId=${sesiId}`,
+                `${API_BASE}/api/aspirasi/jawaban?sesiId=${sesiId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             if (res.ok) {
@@ -341,7 +343,7 @@ export default function SuperAdminDashboard() {
     const fetchJawabanTerkini = async (token: string, sesiId: string) => {
         try {
             const res = await fetch(
-                `http://localhost:5000/api/aspirasi/jawaban?sesiId=${sesiId}`,
+                `${API_BASE}/api/aspirasi/jawaban?sesiId=${sesiId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             if (res.ok) {
@@ -354,7 +356,7 @@ export default function SuperAdminDashboard() {
 
     const fetchHasil = async (token: string) => {
         try {
-            const res = await fetch('http://localhost:5000/api/aspirasi/hasil', {
+            const res = await fetch('${API_BASE}/api/aspirasi/hasil', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
@@ -382,7 +384,7 @@ export default function SuperAdminDashboard() {
         if (!token) return;
         setChangingRole(true);
         try {
-            const res = await fetch('http://localhost:5000/api/auth/change-role', {
+            const res = await fetch('${API_BASE}/api/auth/change-role', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ userIds: selectedUsers, newRole: 'admin' }),
@@ -400,7 +402,7 @@ export default function SuperAdminDashboard() {
         if (!confirm(`Yakin mau downgrade ${selectedAdmins.length} admin ke mahasiswa?`)) return;
         setDowngradingAdmin(true);
         try {
-            const res = await fetch('http://localhost:5000/api/auth/downgrade-admin', {
+            const res = await fetch('${API_BASE}/api/auth/downgrade-admin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ userIds: selectedAdmins }),

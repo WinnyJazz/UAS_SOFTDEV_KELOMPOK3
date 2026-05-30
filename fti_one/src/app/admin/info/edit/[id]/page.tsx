@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './edit.module.css';
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 interface InfoItem {
   informasiId: string;
   _id?: string;
@@ -60,7 +62,7 @@ export default function AdminInfoEditPage() {
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/informasi/${id}`);
+      const res = await fetch(`${API_BASE}/api/informasi/${id}`);
       const data = await res.json();
       if (data.success) {
         const info: InfoItem = data.data;
@@ -132,7 +134,7 @@ export default function AdminInfoEditPage() {
       // Kirim file baru
       newFiles.forEach((file) => formData.append('media', file));
 
-      const res = await fetch(`http://localhost:5000/api/informasi/${id}`, {
+      const res = await fetch(`${API_BASE}/api/informasi/${id}`, {
         method: 'PUT',
         headers: {
           // Jangan set Content-Type, biar browser set boundary otomatis

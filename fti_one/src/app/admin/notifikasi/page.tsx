@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./notifikasi.module.css";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 type Category = "Semua" | "Lost & Found" | "Aspirasi" | "User" | "Sistem";
 type ReadFilter = "Semua" | "Belum Dibaca" | "Sudah Dibaca";
 
@@ -39,7 +41,7 @@ export default function NotifikasiPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await fetch(
-        "http://localhost:5000/api/dashboard/notifikasi",
+        "${API_BASE}/api/dashboard/notifikasi",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -77,7 +79,7 @@ export default function NotifikasiPage() {
 
     console.log("🗑️ DELETE id:", id); // ← cek id yang dikirim
 
-    const res = await fetch(`http://localhost:5000/api/dashboard/notifikasi/${id}`, {
+    const res = await fetch(`${API_BASE}/api/dashboard/notifikasi/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -3,6 +3,9 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./aspirasi.module.css";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface UserData {
   userId: string;
   nama: string;
@@ -118,8 +121,6 @@ function CustomSelect({
   );
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
 export default function AdminAspirasiPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"timeline" | "form" | "hasil" | "response">("timeline");
@@ -181,13 +182,13 @@ function TimelineTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<TimelineStep>>({});
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newStep, setNewStep] = useState({ label: "", deskripsi: "", status: "pending" as const, tanggal: "" });
+  const [newStep, setNewStep] = useState<{ label: string; deskripsi: string; status: TimelineStep["status"]; tanggal: string }>({ label: "", deskripsi: "", status: "pending", tanggal: "" });
 
   useEffect(() => { fetchSteps(); }, []);
 
   const fetchSteps = async () => {
     try {
-      const res = await fetch(`${API}/api/aspirasi/timeline`);
+      const res = await fetch(`${API_BASE}/api/aspirasi/timeline`);
       const data = await res.json();
       setSteps(data.sort((a: TimelineStep, b: TimelineStep) => a.urutan - b.urutan));
     } catch {
@@ -203,7 +204,7 @@ function TimelineTab() {
 
   const saveEdit = async (id: string) => {
     try {
-      await fetch(`${API}/api/aspirasi/timeline/${id}`, {
+      await fetch(`${API_BASE}/api/aspirasi/timeline/${id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editData),
       });
     } catch { }
@@ -214,7 +215,7 @@ function TimelineTab() {
   const addStep = async () => {
     const step: TimelineStep = { _id: Date.now().toString(), ...newStep, urutan: steps.length + 1 };
     try {
-      const res = await fetch(`${API}/api/aspirasi/timeline`, {
+      const res = await fetch(`${API_BASE}/api/aspirasi/timeline`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newStep),
       });
       const created = await res.json();
@@ -226,7 +227,7 @@ function TimelineTab() {
 
   const deleteStep = async (id: string) => {
     if (!confirm("Hapus langkah ini?")) return;
-    try { await fetch(`${API}/api/aspirasi/timeline/${id}`, { method: "DELETE" }); } catch { }
+    try { await fetch(`${API_BASE}/api/aspirasi/timeline/${id}`, { method: "DELETE" }); } catch { }
     setSteps(steps.filter(s => s._id !== id));
   };
 
@@ -268,7 +269,7 @@ function TimelineTab() {
                   <CustomSelect
                     variant="light"
                     value={editData.status ?? step.status}
-                    onChange={v => setEditData({ ...editData, status: v as any })}
+                    onChange={v => setEditData({ ...editData, status: v as TimelineStep["status"] })}
                     options={STATUS_OPTIONS}
                   />
                   <input type="date" className={styles.editInput} value={editData.tanggal ?? step.tanggal}
@@ -317,7 +318,7 @@ function TimelineTab() {
             <CustomSelect
               variant="light"
               value={newStep.status}
-              onChange={v => setNewStep({ ...newStep, status: v as any })}
+              onChange={v => setNewStep({ ...newStep, status: v as TimelineStep["status"] })}
               options={STATUS_OPTIONS}
             />
             <input type="date" className={styles.editInput} value={newStep.tanggal}
@@ -354,7 +355,7 @@ function IsiFormTab() {
 
   const fetchSesi = async () => {
     try {
-      const res = await fetch(`${API}/api/aspirasi/sesi`);
+      const res = await fetch(`${API_BASE}/api/aspirasi/sesi`);
       const data = await res.json();
       setSesiList(data);
     } catch {
@@ -374,7 +375,7 @@ function IsiFormTab() {
     const nama = `Aspirasi ${BULAN[newSesi.bulan - 1]} ${newSesi.tahun}`;
     const sesi: Sesi = { _id: Date.now().toString(), nama, bulan: newSesi.bulan, tahun: newSesi.tahun, pertanyaan: [], createdAt: new Date().toISOString() };
     try {
-      const res = await fetch(`${API}/api/aspirasi/sesi`, {
+      const res = await fetch(`${API_BASE}/api/aspirasi/sesi`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...newSesi, nama }),
       });
       const created = await res.json();
@@ -385,7 +386,7 @@ function IsiFormTab() {
 
   const deleteSesi = async (id: string) => {
     if (!confirm("Hapus sesi ini beserta semua pertanyaannya?")) return;
-    try { await fetch(`${API}/api/aspirasi/sesi/${id}`, { method: "DELETE" }); } catch { }
+    try { await fetch(`${API_BASE}/api/aspirasi/sesi/${id}`, { method: "DELETE" }); } catch { }
     setSesiList(sesiList.filter(s => s._id !== id));
     if (selectedSesi?._id === id) setSelectedSesi(null);
   };
@@ -394,7 +395,7 @@ function IsiFormTab() {
     if (!selectedSesi || !newPertanyaan.trim()) return;
     const p: Pertanyaan = { _id: Date.now().toString(), teks: newPertanyaan, sesiId: selectedSesi._id };
     try {
-      const res = await fetch(`${API}/api/aspirasi/sesi/${selectedSesi._id}/pertanyaan`, {
+      const res = await fetch(`${API_BASE}/api/aspirasi/sesi/${selectedSesi._id}/pertanyaan`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teks: newPertanyaan }),
       });
       const created = await res.json();
@@ -411,7 +412,7 @@ function IsiFormTab() {
 
   const deletePertanyaan = async (pid: string) => {
     if (!selectedSesi) return;
-    try { await fetch(`${API}/api/aspirasi/pertanyaan/${pid}`, { method: "DELETE" }); } catch { }
+    try { await fetch(`${API_BASE}/api/aspirasi/pertanyaan/${pid}`, { method: "DELETE" }); } catch { }
     const updated = { ...selectedSesi, pertanyaan: selectedSesi.pertanyaan.filter(p => p._id !== pid) };
     setSelectedSesi(updated);
     setSesiList(sesiList.map(s => s._id === selectedSesi._id ? updated : s));
@@ -420,7 +421,7 @@ function IsiFormTab() {
   const saveEditPertanyaan = async () => {
     if (!selectedSesi || !editPertanyaanId) return;
     try {
-      await fetch(`${API}/api/aspirasi/pertanyaan/${editPertanyaanId}`, {
+      await fetch(`${API_BASE}/api/aspirasi/pertanyaan/${editPertanyaanId}`, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teks: editPertanyaanTeks }),
       });
     } catch { }
@@ -574,8 +575,8 @@ function HasilTab() {
   const fetchAll = async () => {
     try {
       const [sRes, hRes] = await Promise.all([
-        fetch(`${API}/api/aspirasi/sesi`),
-        fetch(`${API}/api/aspirasi/hasil`),
+        fetch(`${API_BASE}/api/aspirasi/sesi`),
+        fetch(`${API_BASE}/api/aspirasi/hasil`),
       ]);
       setSesiList(await sRes.json());
       setHasilList(await hRes.json());
@@ -597,13 +598,13 @@ function HasilTab() {
     const sesi = sesiList.find(s => s._id === form.sesiId);
     const payload = { ...form, namaSesi: sesi?.nama || "" };
     if (editId) {
-      try { await fetch(`${API}/api/aspirasi/hasil/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch { }
+      try { await fetch(`${API_BASE}/api/aspirasi/hasil/${editId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch { }
       setHasilList(hasilList.map(h => h._id === editId ? { ...h, ...payload } : h));
       setEditId(null);
     } else {
       const newH: HasilRespons = { _id: Date.now().toString(), ...payload, uploadedAt: new Date().toISOString() };
       try {
-        const res = await fetch(`${API}/api/aspirasi/hasil`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const res = await fetch(`${API_BASE}/api/aspirasi/hasil`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         setHasilList([...hasilList, await res.json()]);
       } catch { setHasilList([...hasilList, newH]); }
     }
@@ -613,7 +614,7 @@ function HasilTab() {
 
   const deleteHasil = async (id: string) => {
     if (!confirm("Hapus hasil ini?")) return;
-    try { await fetch(`${API}/api/aspirasi/hasil/${id}`, { method: "DELETE" }); } catch { }
+    try { await fetch(`${API_BASE}/api/aspirasi/hasil/${id}`, { method: "DELETE" }); } catch { }
     setHasilList(hasilList.filter(h => h._id !== id));
   };
 
@@ -791,8 +792,8 @@ function ResponseTab() {
     setLoading(true);
     try {
       const [sesiData, jawabanData] = await Promise.all([
-        fetch(`${API}/api/aspirasi/sesi`).then(r => r.json()),
-        fetch(`${API}/api/aspirasi/jawaban`).then(r => r.json()),
+        fetch(`${API_BASE}/api/aspirasi/sesi`).then(r => r.json()),
+        fetch(`${API_BASE}/api/aspirasi/jawaban`).then(r => r.json()),
       ]);
       setSesiList(sesiData);
       setJawabanList(jawabanData);

@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './status.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface ClaimItem {
   claimId: string;
   barangId: { nama: string; lokasi: string; foto: string | null } | null;
@@ -34,7 +36,7 @@ export default function StatusPage() {
     const init = async () => {
       setLoading(true);
       const t = token();
-      await fetch('http://localhost:5000/api/claim/mine', {
+      await fetch('${API_BASE}/api/claim/mine', {
         headers: { Authorization: `Bearer ${t}` },
       })
         .then((r) => r.json())

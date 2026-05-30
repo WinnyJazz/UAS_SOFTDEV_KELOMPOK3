@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import styles from './reset-password.module.css';
 
-export default function ResetPassword() {
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+function ResetPasswordInner() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get('token');
@@ -37,7 +39,6 @@ export default function ResetPassword() {
         setMessage('');
         setIsSuccess(false);
 
-        // Validasi password dan confirm password
         if (formData.newPassword !== formData.confirmPassword) {
             setMessage('Password dan konfirmasi password tidak sama.');
             setLoading(false);
@@ -45,7 +46,7 @@ export default function ResetPassword() {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+            const response = await fetch('${API_BASE}/api/auth/reset-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -60,6 +61,7 @@ export default function ResetPassword() {
                 setIsSuccess(true);
                 setMessage(data.message || 'Password berhasil direset!');
                 setFormData({ newPassword: '', confirmPassword: '' });
+
                 setTimeout(() => {
                     router.push('/login');
                 }, 3000);
@@ -70,7 +72,6 @@ export default function ResetPassword() {
         } catch (error) {
             setIsSuccess(false);
             setMessage('Error: Tidak bisa terhubung ke server.');
-            console.error('Reset password error:', error);
         } finally {
             setLoading(false);
         }
@@ -85,66 +86,50 @@ export default function ResetPassword() {
                     {!tokenValid ? (
                         <>
                             <div className={`${styles.message} ${styles.error}`}>
-                                Token tidak valid atau sudah expired. Silakan minta link reset password baru.
+                                Token tidak valid atau sudah expired.
                             </div>
-                            <p className={styles.footer}>
-                                <a href="/forgot-password">Minta link reset password baru</a>
-                            </p>
                         </>
                     ) : (
                         <>
-                            <p className={styles.subtitle}>
-                                Masukkan password baru kamu
-                            </p>
-
-                            {message && (
-                                <div className={`${styles.message} ${isSuccess ? styles.success : styles.error}`}>
-                                    {message}
-                                </div>
-                            )}
-
                             <form onSubmit={handleSubmit}>
-                                <div className={styles.formGroup}>
-                                    <label htmlFor="newPassword">Password Baru</label>
-                                    <input
-                                        type="password"
-                                        id="newPassword"
-                                        name="newPassword"
-                                        value={formData.newPassword}
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="Masukkan Password Baru"
-                                    />
-                                    <small style={{ color: '#999', marginTop: '5px', display: 'block' }}>
-                                        Minimal 8 karakter, dengan huruf besar, huruf kecil, angka, dan simbol
-                                    </small>
-                                </div>
+                                <input
+                                    type="password"
+                                    name="newPassword"
+                                    value={formData.newPassword}
+                                    onChange={handleChange}
+                                    placeholder="Password Baru"
+                                />
 
-                                <div className={styles.formGroup}>
-                                    <label htmlFor="confirmPassword">Konfirmasi Password</label>
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="Konfirmasi Password Baru"
-                                    />
-                                </div>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    placeholder="Konfirmasi Password"
+                                />
 
-                                <button type="submit" disabled={loading} className={styles.submitBtn}>
-                                    {loading ? 'Sedang Reset...' : 'Reset Password'}
+                                <button disabled={loading}>
+                                    {loading ? 'Loading...' : 'Reset Password'}
                                 </button>
                             </form>
 
-                            <p className={styles.footer}>
-                                <a href="/login">Kembali ke login</a>
-                            </p>
+                            {message && (
+                                <p className={isSuccess ? styles.success : styles.error}>
+                                    {message}
+                                </p>
+                            )}
                         </>
                     )}
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ResetPasswordInner />
+        </Suspense>
     );
 }

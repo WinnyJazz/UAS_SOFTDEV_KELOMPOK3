@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import styles from './register.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface RegistrationResponse {
   message: string;
   errors?: string[];
@@ -38,7 +40,7 @@ export default function Register() {
     setIsSuccess(false);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch('${API_BASE}/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

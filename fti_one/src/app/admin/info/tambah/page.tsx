@@ -4,6 +4,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './tambah.module.css';
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  
 export default function AdminInfoTambahPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,7 +72,7 @@ export default function AdminInfoTambahPage() {
 
       mediaFiles.forEach((file) => formData.append('media', file));
 
-      const res = await fetch('http://localhost:5000/api/informasi', {
+      const res = await fetch('${API_BASE}/api/informasi', {
         method: 'POST',
         headers: {
           // Jangan set Content-Type, biar browser set boundary otomatis

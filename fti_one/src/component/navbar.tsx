@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import styles from "./navbar.module.css";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface NotifPreview {
   id: string;
   icon: string;
@@ -52,7 +54,7 @@ export default function Navbar() {
     try {
       const res = await fetch(
 
-        "http://localhost:5000/api/notifikasi?read=Belum+Dibaca",
+        "${API_BASE}/api/notifikasi?read=Belum+Dibaca",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -67,7 +69,7 @@ export default function Navbar() {
   const fetchNotifPreviewUser = async (token: string) => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/notifikasi/user?read=Belum+Dibaca",
+        "${API_BASE}/api/notifikasi/user?read=Belum+Dibaca",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -84,8 +86,8 @@ export default function Navbar() {
     if (!token) return;
     try {
       const endpoint = isAdmin
-        ? "http://localhost:5000/api/notifikasi/read-all"
-        : "http://localhost:5000/api/notifikasi/user/read-all";
+        ? "${API_BASE}/api/notifikasi/read-all"
+        : "${API_BASE}/api/notifikasi/user/read-all";
       await fetch(endpoint, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
@@ -102,7 +104,7 @@ export default function Navbar() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      await fetch(`http://localhost:5000/api/notifikasi/${id}/read`, {
+      await fetch(`${API_BASE}/api/notifikasi/${id}/read`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });

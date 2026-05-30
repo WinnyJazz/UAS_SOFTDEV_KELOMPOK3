@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./notifikasi.module.css";
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 type Category = "Semua" | "Info" | "Lost & Found" | "Aspirasi" | "Sistem";
 
 type ReadFilter = "Semua" | "Belum Dibaca" | "Sudah Dibaca";
@@ -61,7 +64,7 @@ export default function NotifikasiUserPage() {
       const token = localStorage.getItem("token");
       console.log("📡 [fetchData] token:", token ? "✅ ada" : "❌ tidak ada");
 
-      const res = await fetch("http://localhost:5000/api/notifikasi/user", {
+      const res = await fetch("`${API_BASE}/api/notifikasi/user", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

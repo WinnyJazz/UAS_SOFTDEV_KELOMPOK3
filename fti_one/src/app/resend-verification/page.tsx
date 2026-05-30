@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import styles from './resend.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 export default function ResendVerification() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export default function ResendVerification() {
     setIsSuccess(false);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+      const response = await fetch('${API_BASE}/api/auth/resend-verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

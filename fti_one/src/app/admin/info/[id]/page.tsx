@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './detail.module.css';
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface InfoItem {
   informasiId: string;
   _id?: string;
@@ -40,7 +43,7 @@ export default function AdminInfoDetailPage() {
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/informasi/${id}`);
+      const res = await fetch(`${API_BASE}/api/informasi/${id}`);
       const data = await res.json();
       if (data.success) setInfo(data.data);
     } catch (err) {
@@ -54,7 +57,7 @@ export default function AdminInfoDetailPage() {
     if (!confirm('Apakah kamu yakin ingin menghapus informasi ini?')) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/informasi/${id}`, {
+      const res = await fetch(`${API_BASE}/api/informasi/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

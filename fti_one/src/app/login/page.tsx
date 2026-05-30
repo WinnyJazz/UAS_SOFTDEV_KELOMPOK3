@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './login.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface LoginResponse {
   message: string;
   token?: string;
@@ -35,7 +37,7 @@ export default function Login() {
     setIsSuccess(false);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('${API_BASE}/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -309,4 +311,4 @@ export default function Login() {
       </div>
     </div>
   );
-}'
+}

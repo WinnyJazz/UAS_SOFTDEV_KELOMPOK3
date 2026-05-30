@@ -116,7 +116,7 @@ export default function AdminPage() {
     const fetchDashboardData = async (token: string) => {
         try {
             const res = await fetch(
-                'http://localhost:5000/api/admin/dashboard',
+                '`${BASE_URL}/api/admin/dashboard',
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

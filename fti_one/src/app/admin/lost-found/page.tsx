@@ -4,6 +4,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './lostfound.module.css';
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 interface BarangItem {
   barangId: string;
   nama: string;
@@ -57,8 +60,8 @@ interface FormData {
   foto: string | null;
 }
 
-const API_URL = 'http://localhost:5000/api/barang';
-const CLAIMS_API_URL = 'http://localhost:5000/api/claim';
+const API_URL = `${API_BASE}/api/barang`;
+const CLAIMS_API_URL = `${API_BASE}/api/claim`;
 
 // Helper: ubah status backend → label display
 const statusLabel = (status: ClaimItem['status']) => {
@@ -116,11 +119,13 @@ export default function LostFoundAdmin() {
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
   const [zoomKtm, setZoomKtm] = useState<string | null>(null);
+
   const getToken = () => localStorage.getItem('token') || '';
 
+  // ── FIX 1: single backtick template literal ──
   const fetchAvailableLocations = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/barang/locations/available');
+      const res = await fetch(`${API_BASE}/api/barang/locations/available`);
       const data = await res.json();
       if (data.success) {
         setAvailableLocations(data.data);
@@ -130,12 +135,11 @@ export default function LostFoundAdmin() {
     }
   };
 
-  const fetchBarang = async (searchQuery?: string) => {
+  // ── FIX 2: removed nested duplicate fetchBarang, unified parameter name ──
+  const fetchBarang = async (searchQuery = search) => {
     try {
-      const query = searchQuery !== undefined ? searchQuery : search;
-
       const params = new URLSearchParams();
-      if (query) params.append('search', query);
+      if (searchQuery) params.append('search', searchQuery);
       if (filterTanggal) params.append('tanggal', filterTanggal);
       if (filterLokasi) params.append('lokasi', filterLokasi);
 
@@ -156,19 +160,12 @@ export default function LostFoundAdmin() {
       } else {
         console.log("FETCH BARANG FAILED:", data.message);
       }
-
     } catch (err) {
       console.error('Fetch barang error:', err);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const timeout = setTimeout(() => fetchBarang(search), 400);
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -268,8 +265,6 @@ export default function LostFoundAdmin() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      // console.log("CLAIMS DATA:", data); 
-      // console.log("CLAIMS ARRAY:", data.data); 
       console.log("RESPONSE CLAIMS:", data);
 
       if (data.success) {
@@ -289,19 +284,8 @@ export default function LostFoundAdmin() {
     }
   }, [activeTab]);
 
-  // Polling otomatis setiap 10 detik (seperti barang & lokasi)
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     fetchClaims();
-  //   }, 10000);
-  //   return () => clearInterval(interval);
-  // }, []);
-
-  // auth check
-
+  // Auth check
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
     const initialize = async () => {
       const storedUser = localStorage.getItem('user');
       const token = localStorage.getItem('token');
@@ -321,18 +305,15 @@ export default function LostFoundAdmin() {
       await fetchBarang();
       await fetchClaims();
       await fetchAvailableLocations();
-
     };
 
     initialize();
-
-    return () => clearInterval(interval);
   }, [router]);
 
   // Refresh available locations periodically
   useEffect(() => {
     fetchAvailableLocations();
-    const interval = setInterval(fetchAvailableLocations, 10000); // Refresh setiap 10 detik
+    const interval = setInterval(fetchAvailableLocations, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -370,7 +351,7 @@ export default function LostFoundAdmin() {
       const token = getToken();
 
       console.log("🚀 Approve claim:", claimId);
-      console.log("🚀 URL:", `${CLAIMS_API_URL}/${claimId}/status`)
+      console.log("🚀 URL:", `${CLAIMS_API_URL}/${claimId}/status`);
       const res = await fetch(`${CLAIMS_API_URL}/${claimId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -378,7 +359,6 @@ export default function LostFoundAdmin() {
       });
       const data = await res.json();
       if (data.success) {
-        // Update lokal tanpa refetch
         setClaims(prev => prev.map(c =>
           c.claimId === claimId ? { ...c, status: 'disetujui', updatedAt: new Date().toISOString() } : c
         ));
@@ -388,7 +368,6 @@ export default function LostFoundAdmin() {
           `Claim ${approved?.nama ?? ''} untuk ${approved?.barangId?.nama ?? 'barang'} disetujui`,
           'approved'
         );
-        // Refresh barang supaya status ikut update
         fetchBarang();
         fetchAvailableLocations();
       } else {
@@ -444,12 +423,7 @@ export default function LostFoundAdmin() {
     }
   };
 
-
-
-  const addNotif = (
-    message: string,
-    type: Notification['type']
-  ) => {
+  const addNotif = (message: string, type: Notification['type']) => {
     const newNotif: Notification = {
       id: crypto.randomUUID(),
       message,
@@ -457,7 +431,6 @@ export default function LostFoundAdmin() {
       time: 'Baru saja',
       read: false,
     };
-
     setNotifications(prev => [newNotif, ...prev]);
   };
 
@@ -919,23 +892,25 @@ export default function LostFoundAdmin() {
           </div>
         </div>
       )}
+
+      {/* ── ZOOM KTM ── */}
       {zoomKtm && (
-          <div 
-            onClick={() => setZoomKtm(null)}
-            style={{
-              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              zIndex: 9999, cursor: 'zoom-out', padding: '20px'
-            }}
-          >
-            <img 
-              src={zoomKtm} 
-              alt="KTM Zoom"
-              style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: '12px', objectFit: 'contain' }}
-              onClick={e => e.stopPropagation()}
-            />
-          </div>
-        )}
+        <div
+          onClick={() => setZoomKtm(null)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 9999, cursor: 'zoom-out', padding: '20px'
+          }}
+        >
+          <img
+            src={zoomKtm}
+            alt="KTM Zoom"
+            style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: '12px', objectFit: 'contain' }}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

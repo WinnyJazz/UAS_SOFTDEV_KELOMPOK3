@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './claims.module.css';
-import ChatPanel from '@/component/ChatPanel';
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 interface ClaimItem {
   claimId: string;
@@ -19,7 +21,7 @@ interface ClaimItem {
   catatan?: string;
 }
 
-const API_URL = 'http://localhost:5000/api/claim';
+const API_URL = `${API_BASE}/api/claim`;
 
 function getInitials(name: string) {
   return name
@@ -313,20 +315,6 @@ export default function AdminClaims() {
                 </div>
               )}
             </div>
-
-            {/* Chat Panel */}
-            {showChat && (
-              <div style={{ padding: '0 24px 20px' }}>
-                <ChatPanel
-                  konteksType="claim"
-                  konteksId={selectedClaim.claimId}
-                  userId={selectedClaim.claimUserId || ''}
-                  role="admin"
-                  itemName={selectedClaim.barangId?.nama}
-                  onClose={() => setShowChat(false)}
-                />
-              </div>
-            )}
           </div>
         </div>
       )}
