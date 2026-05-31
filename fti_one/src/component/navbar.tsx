@@ -59,7 +59,7 @@ useEffect(() => {
     try {
       const res = await fetch(
 
-        "${API_BASE}/api/notifikasi?read=Belum+Dibaca",
+        `${API_BASE}/api/notifikasi?read=Belum+Dibaca`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -74,7 +74,7 @@ useEffect(() => {
   const fetchNotifPreviewUser = async (token: string) => {
     try {
       const res = await fetch(
-        "${API_BASE}/api/notifikasi/user?read=Belum+Dibaca",
+        `${API_BASE}/api/notifikasi/user?read=Belum+Dibaca`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -91,8 +91,8 @@ useEffect(() => {
     if (!token) return;
     try {
       const endpoint = isAdmin
-        ? "${API_BASE}/api/notifikasi/read-all"
-        : "${API_BASE}/api/notifikasi/user/read-all";
+        ? `${API_BASE}/api/notifikasi/read-all`
+        : `${API_BASE}/api/notifikasi/user/read-all`;
       await fetch(endpoint, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
