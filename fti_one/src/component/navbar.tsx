@@ -36,7 +36,12 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifPreview, setNotifPreview] = useState<NotifPreview[]>([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  setMenuOpen(false);
+}, [pathname]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -230,19 +235,30 @@ export default function Navbar() {
       </Link>
 
       {/* Nav Links */}
-      <ul className={styles.navLinks}>
+      <ul className={`${styles.navLinks} ${menuOpen ? styles.navLinksOpen : ''}`}>
         {navLinks.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
               className={`${styles.navItem} ${pathname === link.href ? styles.active : ""
-                }`}
+                }`}  onClick={() => setMenuOpen(false)}
             >
               {link.label}
             </Link>
           </li>
         ))}
       </ul>
+
+
+    <button
+      className={styles.hamburger}
+      onClick={() => setMenuOpen((v) => !v)}
+      aria-label="Toggle menu"
+    >
+      <span className={`${styles.bar} ${menuOpen ? styles.barOpen1 : ''}`} />
+      <span className={`${styles.bar} ${menuOpen ? styles.barOpen2 : ''}`} />
+      <span className={`${styles.bar} ${menuOpen ? styles.barOpen3 : ''}`} />
+    </button>
 
       {/* Right side: bell (semua user yang login) + profile */}
       <div className={styles.navRight}>
