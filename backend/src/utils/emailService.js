@@ -1,13 +1,13 @@
-const { Resend } = require("resend");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const frontendBaseUrl = process.env.FRONTEND_BASE_URL || "http://localhost:3000";
 
 const sendVerificationEmail = async (toEmail, nama, token) => {
   const verificationLink = `${frontendBaseUrl}/verify?token=${token}`;
-  
-  const { data, error } = await resend.emails.send({
-    from: "onboarding@resend.dev", // pakai ini dulu untuk testing
+
+  await sgMail.send({
+    from: process.env.SENDGRID_SENDER,
     to: toEmail,
     subject: "Verifikasi Email - FTI One",
     html: `
@@ -21,11 +21,11 @@ const sendVerificationEmail = async (toEmail, nama, token) => {
           </a>
         </div>
         <p><code>${verificationLink}</code></p>
+        <p style="color: #666; font-size: 12px;">Link berlaku 24 jam.</p>
       </div>
     `,
   });
 
-  if (error) throw new Error(error.message);
   console.log(`[Email] ✅ Sent to ${toEmail}`);
   return { success: true };
 };
@@ -33,8 +33,8 @@ const sendVerificationEmail = async (toEmail, nama, token) => {
 const sendResetPasswordEmail = async (toEmail, nama, token) => {
   const resetLink = `${frontendBaseUrl}/reset-password?token=${token}`;
 
-  const { data, error } = await resend.emails.send({
-    from: "onboarding@resend.dev", // pakai ini dulu untuk testing
+  await sgMail.send({
+    from: process.env.SENDGRID_SENDER,
     to: toEmail,
     subject: "Reset Password - FTI One",
     html: `
@@ -53,7 +53,6 @@ const sendResetPasswordEmail = async (toEmail, nama, token) => {
     `,
   });
 
-  if (error) throw new Error(error.message);
   console.log(`[Email] ✅ Reset email sent to ${toEmail}`);
   return { success: true };
 };
