@@ -52,17 +52,17 @@ const validateRegistrationInput = (nama, email, password) => {
   //   errors.push("Email harus menggunakan domain @stu.untar.ac.id");
   // }
 
-  // Extract dan validasi NIM dari email
-  const nim = extractNimFromEmail(email);
-  if (!nim) {
-    errors.push("Format email tidak valid. Gunakan format: nama.NIM@stu.untar.ac.id");
-  } else {
+  // // Extract dan validasi NIM dari email
+  // const nim = extractNimFromEmail(email);
+  // if (!nim) {
+  //   errors.push("Format email tidak valid. Gunakan format: nama.NIM@stu.untar.ac.id");
+  // } else {
 
-    const nimValidation = validateNim(nim);
-    if (!nimValidation.valid) {
-      errors.push(nimValidation.error);
-    }
-  }
+  //   const nimValidation = validateNim(nim);
+  //   if (!nimValidation.valid) {
+  //     errors.push(nimValidation.error);
+  //   }
+  // }
 
   // Validasi password:
   // - Minimal 8 karakter
