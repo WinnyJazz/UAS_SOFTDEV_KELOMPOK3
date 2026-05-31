@@ -8,6 +8,7 @@
     display: flex;
 }
 
+/* ── SIDEBAR ── */
 .sidebar {
     width: 260px;
     background: white;
@@ -16,6 +17,7 @@
     padding: 28px 20px;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 }
 
 .sidebarProfile {
@@ -28,6 +30,14 @@
     width: 72px;
     height: 72px;
     font-size: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    overflow: hidden;
 }
 
 .sidebarProfile h3 {
@@ -55,6 +65,10 @@
     font-size: 15px;
     cursor: pointer;
     transition: 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .menu button:hover {
@@ -66,6 +80,17 @@
     color: white;
 }
 
+.badge {
+    background: #ef4444;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    min-width: 20px;
+    text-align: center;
+}
+
 .logoutBtn {
     margin-top: auto;
     border: none;
@@ -75,19 +100,75 @@
     border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
+    font-family: inherit;
+    font-size: 15px;
+    transition: background 0.2s;
 }
 
+.logoutBtn:hover {
+    background: #dc2626;
+}
+
+/* ── HAMBURGER BUTTON (mobile only) ── */
+.sidebarToggle {
+    display: none;
+    position: fixed;
+    top: 76px;
+    right: 16px;
+    z-index: 200;
+    width: 40px;
+    height: 40px;
+    background: #7c3aed;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 8px;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+}
+
+.bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    transform-origin: center;
+}
+
+.barOpen1 { transform: translateY(7px) rotate(45deg); }
+.barOpen2 { opacity: 0; transform: scaleX(0); }
+.barOpen3 { transform: translateY(-7px) rotate(-45deg); }
+
+/* ── OVERLAY ── */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 150;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── MAIN ── */
 .main {
     flex: 1;
     padding: 32px;
+    min-width: 0;
 }
 
+/* ── WELCOME ── */
 .welcomeCard {
-    background: linear-gradient(
-        135deg,
-        #7c3aed,
-        #5b21b6
-    );
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
     border-radius: 24px;
     padding: 32px;
     color: white;
@@ -108,12 +189,10 @@
     opacity: 0.9;
 }
 
+/* ── STATS ── */
 .statsGrid {
     display: grid;
-    grid-template-columns: repeat(
-        auto-fit,
-        minmax(220px, 1fr)
-    );
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
     margin-bottom: 28px;
 }
@@ -137,6 +216,7 @@
     align-items: center;
     justify-content: center;
     font-size: 24px;
+    flex-shrink: 0;
 }
 
 .statsCard h3 {
@@ -150,6 +230,7 @@
     font-size: 30px;
 }
 
+/* ── BOTTOM GRID ── */
 .bottomGrid {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
@@ -185,24 +266,14 @@
     align-items: center;
     justify-content: center;
     font-size: 20px;
+    flex-shrink: 0;
 }
 
-.activityItem h4 {
-    margin: 0;
-    font-size: 15px;
-}
+.activityItem h4 { margin: 0; font-size: 15px; }
+.activityItem p  { margin: 4px 0; color: #6b7280; font-size: 14px; }
+.activityItem span { font-size: 12px; color: #9ca3af; }
 
-.activityItem p {
-    margin: 4px 0;
-    color: #6b7280;
-    font-size: 14px;
-}
-
-.activityItem span {
-    font-size: 12px;
-    color: #9ca3af;
-}
-
+/* ── NOTIF ── */
 .pageTitle {
     font-size: 30px;
     font-weight: 700;
@@ -217,14 +288,13 @@
     margin-bottom: 16px;
     cursor: pointer;
     transition: 0.2s;
+    border: 1px solid transparent;
 }
 
-.notifCard:hover {
-    background: #f9fafb;
-}
+.notifCard:hover { background: #f9fafb; }
 
 .unread {
-    border: 1px solid #c4b5fd;
+    border-color: #c4b5fd;
     background: #faf5ff;
 }
 
@@ -236,21 +306,16 @@
     align-items: center;
     justify-content: center;
     font-size: 22px;
+    flex-shrink: 0;
 }
 
-.notifCard h3 {
-    margin: 0;
-}
+.notifCard h3 { margin: 0; }
+.notifCard p  { margin: 6px 0; color: #6b7280; }
+.notifCard span { font-size: 12px; color: #9ca3af; }
 
-.notifCard p {
-    margin: 6px 0;
-    color: #6b7280;
-}
-
-.notifCard span {
-    font-size: 12px;
-    color: #9ca3af;
-}
+/* ══════════════════════════
+   RESPONSIVE
+══════════════════════════ */
 
 @media (max-width: 1000px) {
     .bottomGrid {
@@ -259,15 +324,53 @@
 }
 
 @media (max-width: 768px) {
+    /* Show hamburger */
+    .sidebarToggle {
+        display: flex;
+    }
+
+    /* Sidebar jadi drawer */
     .sidebar {
-        display: none;
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        z-index: 160;
+        width: 260px;
+        min-height: 100vh;
+        transition: left 0.3s ease;
+        box-shadow: none;
+        padding-top: 80px;
+    }
+
+    .sidebarOpen {
+        left: 0 !important;
+        box-shadow: 4px 0 32px rgba(0,0,0,0.15);
     }
 
     .main {
-        padding: 20px;
+        padding: 20px 16px;
     }
 
     .welcomeCard h1 {
         font-size: 24px;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .welcomeCard {
+        padding: 20px;
+    }
+
+    .welcomeCard h1 {
+        font-size: 20px;
     }
 }

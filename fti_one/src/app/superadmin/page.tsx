@@ -184,6 +184,7 @@ export default function SuperAdminDashboard() {
     const [sesiTerkini, setSesiTerkini] = useState<SesiAspirasi | null>(null);
 
     const [activeSection, setActiveSection] = useState<Section>('overview');
+    const [sidebarOpen, setSidebarOpen] = useState(false); // ← NEW
     const [nimFilter, setNimFilter] = useState('');
     const [lfItems, setLfItems] = useState<LFItem[]>([]);
 
@@ -227,7 +228,7 @@ export default function SuperAdminDashboard() {
         fetchNotifs(token);
         fetchSesi(token);
         fetchHasil(token);
-        fetchOverview(token); 
+        fetchOverview(token);
         setLoading(false);
 
         const handleProfileUpdate = () => {
@@ -241,17 +242,13 @@ export default function SuperAdminDashboard() {
         return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
     }, [router]);
 
-    // ── NEW: Fetch overview from backend ──────────────
     const fetchOverview = async (token: string) => {
         try {
             const res = await fetch(`${API_BASE}/api/dashboard/overview`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
-            console.log('overviewData:', data);
-            if (res.ok) {
-                setOverviewData(data.data);
-            }
+            if (res.ok) setOverviewData(data.data);
         } catch (err) {
             console.error('fetchOverview error:', err);
         }
@@ -307,14 +304,10 @@ export default function SuperAdminDashboard() {
             });
             if (res.ok) {
                 const data: SesiAspirasi[] = await res.json();
-
-                // Sort dari yang paling baru (tahun & bulan terbesar duluan)
                 const sorted = [...data].sort((a, b) =>
                     b.tahun !== a.tahun ? b.tahun - a.tahun : b.bulan - a.bulan
                 );
-
                 setSesiList(sorted);
-
                 if (sorted.length > 0) {
                     const terkini = sorted[0];
                     setSesiTerkini(terkini);
@@ -441,19 +434,16 @@ export default function SuperAdminDashboard() {
         )
         : mahasiswaBiasa;
 
-    // ── Use overviewData for Lost & Found stats (correct pending count) ──
     const lfTotal = overviewData?.lostFound?.totalBarang ?? lfItems.length;
     const lfClaimed = overviewData?.lostFound?.claimed ?? lfItems.filter(i => i.status === 'Claimed').length;
     const lfPending = overviewData?.lostFound?.pending ?? lfItems.filter(i => i.status === 'Pending').length;
     const lfExpired = overviewData?.lostFound?.expired ?? lfItems.filter(i => i.status === 'Expired').length;
 
-    // ── Aspirasi stats ──
     const aspirasiDalamProsesCount = overviewData?.aspirasi?.dalamProses ?? Math.max(0, sesiList.length - hasilList.length);
     const aspirasiResponseRate = sesiList.length > 0
         ? Math.round((hasilList.length / sesiList.length) * 100)
         : 0;
 
-    // ── Recent activity: prefer API data, fallback to static ──
     const recentActivity = overviewData?.recentActivity?.map(a => ({
         icon: a.icon,
         iconBg: a.iconBg,
@@ -461,15 +451,19 @@ export default function SuperAdminDashboard() {
         desc: a.category,
         time: a.time,
     })) ?? [
-            { icon: '📦', iconBg: '#ede9fe', title: 'Claim Barang Baru', desc: 'Mahasiswa melakukan claim barang', time: '2 menit lalu' },
-            { icon: '💬', iconBg: '#d1fae5', title: 'Aspirasi Baru', desc: 'Aspirasi baru telah masuk', time: '10 menit lalu' },
-            { icon: '👤', iconBg: '#dbeafe', title: 'User Baru', desc: 'Mahasiswa baru berhasil register', time: '1 jam lalu' },
-        ];
+        { icon: '📦', iconBg: '#ede9fe', title: 'Claim Barang Baru', desc: 'Mahasiswa melakukan claim barang', time: '2 menit lalu' },
+        { icon: '💬', iconBg: '#d1fae5', title: 'Aspirasi Baru', desc: 'Aspirasi baru telah masuk', time: '10 menit lalu' },
+        { icon: '👤', iconBg: '#dbeafe', title: 'User Baru', desc: 'Mahasiswa baru berhasil register', time: '1 jam lalu' },
+    ];
 
     if (loading) return <div className={styles.loading}>Loading...</div>;
     if (!user) return null;
 
-    const nav = (s: Section) => setActiveSection(s);
+    // ← UPDATED: close sidebar on nav
+    const nav = (s: Section) => {
+        setActiveSection(s);
+        setSidebarOpen(false);
+    };
 
     const navItems: { id: Section; label: string }[] = [
         { id: 'overview', label: 'Overview' },
@@ -481,10 +475,27 @@ export default function SuperAdminDashboard() {
 
     return (
         <div className={styles.root}>
+
+            {/* ── HAMBURGER TOGGLE (mobile only) ── */}
+            <button
+                className={styles.sidebarToggle}
+                onClick={() => setSidebarOpen(v => !v)}
+                aria-label="Toggle sidebar"
+            >
+                <span className={`${styles.sidebarBar} ${sidebarOpen ? styles.sidebarBarOpen1 : ''}`} />
+                <span className={`${styles.sidebarBar} ${sidebarOpen ? styles.sidebarBarOpen2 : ''}`} />
+                <span className={`${styles.sidebarBar} ${sidebarOpen ? styles.sidebarBarOpen3 : ''}`} />
+            </button>
+
+            {/* ── OVERLAY ── */}
+            {sidebarOpen && (
+                <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />
+            )}
+
             <div className={styles.layout}>
 
                 {/* ── SIDEBAR ── */}
-                <aside className={styles.sidebar}>
+                <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
                     <div className={styles.sidebarAvatar}>
                         {user.profilePhoto ? (
                             <img
