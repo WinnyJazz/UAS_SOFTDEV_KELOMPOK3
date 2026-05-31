@@ -7,6 +7,23 @@
   font-family: "Nunito", "Poppins", sans-serif;
 }
 
+@keyframes floatMascot {
+  0%, 100% { transform: translateY(-52%) translateX(0px); }
+  25%       { transform: translateY(-55%) translateX(6px); }
+  50%       { transform: translateY(-49%) translateX(0px); }
+  75%       { transform: translateY(-54%) translateX(-6px); }
+}
+
+@keyframes rotateOrbit {
+  from { transform: translateY(-48%) rotate(0deg); }
+  to   { transform: translateY(-48%) rotate(360deg); }
+}
+
+@keyframes floatMascotMobile {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
 /* ══════════════════════════
    HERO 
    ══════════════════════════ */
@@ -105,6 +122,7 @@
   object-fit: contain;
   z-index: 2;
   filter: drop-shadow(0 16px 48px rgba(0,0,0,0.3));
+  animation: floatMascot 4s ease-in-out infinite;
 }
 
 .orbit {
@@ -118,6 +136,8 @@
   object-fit: contain;
   z-index: 1;
   opacity: 0.9;
+  animation: rotateOrbit 18s linear infinite;
+  transform-origin: center center;
 }
 
 /* ══════════════════════════
@@ -403,12 +423,14 @@
     transform: none;
     width: 48%;
     max-width: 200px;
+    animation: floatMascotMobile 4s ease-in-out infinite;
   }
   .orbit {
     right: -20px;
     top: 30px;
     transform: none;
     max-width: 320px;
+    animation: rotateOrbit 18s linear infinite;
   }
 
   .exploreBtn { padding: 16px 40px; font-size: 15px; min-width: 160px; }
