@@ -587,6 +587,7 @@ function HistoryTab({ user }: HistoryTabProps) {
 
   const groupBySesi = (data: UserJawaban[]) => {
     return data.reduce((acc: Record<string, UserJawaban[]>, item) => {
+      if (!item.sesiId?._id) return acc; // ← skip kalau null
       const key = item.sesiId._id;
       if (!acc[key]) acc[key] = [];
       acc[key].push(item);
@@ -613,7 +614,7 @@ function HistoryTab({ user }: HistoryTabProps) {
   const grouped = groupBySesi(jawaban);
   const sesiList = Object.entries(grouped).map(([sesiId, answers]) => ({
     sesiId,
-    ...answers[0].sesiId,
+    ...answers[0]?.sesiId,
     answers,
   }));
 
@@ -644,7 +645,7 @@ function HistoryTab({ user }: HistoryTabProps) {
                 >
                   <div className={styles.historyAnswerQuestion}>
                     <span className={styles.historyQNum}>{idx + 1}</span>
-                    <span className={styles.historyQText}>{answer.pertanyaanId.teks}</span>
+                    <span className={styles.historyQText}>{answer.pertanyaanId?.teks ?? "Pertanyaan tidak tersedia"}</span>
                   </div>
                   <div className={styles.historyAnswerMeta}>
                     <span className={styles.historySubmitDate}>
