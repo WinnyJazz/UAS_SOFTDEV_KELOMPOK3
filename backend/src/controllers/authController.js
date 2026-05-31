@@ -47,10 +47,10 @@ const validateRegistrationInput = (nama, email, password) => {
   const errors = [];
 
   // Validasi email: harus @stu.untar.ac.id
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@stu\.untar\.ac\.id$/;
-  if (!emailRegex.test(email)) {
-    errors.push("Email harus menggunakan domain @stu.untar.ac.id");
-  }
+  // const emailRegex = /^[a-zA-Z0-9._%+-]+@stu\.untar\.ac\.id$/;
+  // if (!emailRegex.test(email)) {
+  //   errors.push("Email harus menggunakan domain @stu.untar.ac.id");
+  // }
 
   // Extract dan validasi NIM dari email
   const nim = extractNimFromEmail(email);
