@@ -64,7 +64,7 @@ export default function NotifikasiUserPage() {
       const token = localStorage.getItem("token");
       console.log("📡 [fetchData] token:", token ? "✅ ada" : "❌ tidak ada");
 
-      const res = await fetch("`${API_BASE}/api/notifikasi/user", {
+      const res = await fetch(`${API_BASE}/api/notifikasi/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -107,7 +107,7 @@ export default function NotifikasiUserPage() {
     try {
       const token = localStorage.getItem("token");
 
-      await fetch(`http://localhost:5000/api/notifikasi/${id}/read`, {
+      await fetch(`${API_BASE}/api/notifikasi/${id}/read`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -130,7 +130,7 @@ export default function NotifikasiUserPage() {
     try {
       const token = localStorage.getItem("token");
 
-      await fetch(`http://localhost:5000/api/notifikasi/${id}`, {
+      await fetch(`${API_BASE}/api/notifikasi/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

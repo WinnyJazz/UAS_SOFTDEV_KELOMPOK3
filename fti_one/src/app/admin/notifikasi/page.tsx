@@ -40,9 +40,7 @@ export default function NotifikasiPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `/api/dashboard/notifikasi`,
-        {
+      const res = await fetch(`${API_BASE}/api/notifikasi`, {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
@@ -62,9 +60,7 @@ export default function NotifikasiPage() {
 
   const markAsRead = async (id: string) => {
     const token = localStorage.getItem("token");
-    await fetch(
-      `http://localhost:5000/api/dashboard/notifikasi/${id}/read`,
-      {
+    await fetch(`${API_BASE}/api/notifikasi/${id}/read`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       }
