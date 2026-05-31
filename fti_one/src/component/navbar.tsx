@@ -27,6 +27,7 @@ export default function Navbar() {
     { label: "Aspirasi", href: "/aspirasi" },
     { label: "Info", href: "/info" },
     { label: "Lost & Found", href: "/lost-found" },
+    { label: "Contact Us", href: "#footer" },
   ]);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -166,6 +167,7 @@ useEffect(() => {
           { label: "Aspirasi", href: "/aspirasi" },
           { label: "Info", href: "/info" },
           { label: "Lost & Found", href: "/lost-found" },
+          { label: "Contact Us", href: "#footer" },
         ]);
       }
     };
@@ -238,13 +240,25 @@ useEffect(() => {
       <ul className={`${styles.navLinks} ${menuOpen ? styles.navLinksOpen : ''}`}>
         {navLinks.map((link) => (
           <li key={link.href}>
-            <Link
-              href={link.href}
-              className={`${styles.navItem} ${pathname === link.href ? styles.active : ""
-                }`}  onClick={() => setMenuOpen(false)}
-            >
-              {link.label}
-            </Link>
+            {link.href === "#footer" ? (
+              <button
+                className={styles.navItem}
+                onClick={() => {
+                  setMenuOpen(false);
+                  document.getElementById("footer")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                {link.label}
+              </button>
+            ) : (
+              <Link
+                href={link.href}
+                className={`${styles.navItem} ${pathname === link.href ? styles.active : ""}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            )}
           </li>
         ))}
       </ul>

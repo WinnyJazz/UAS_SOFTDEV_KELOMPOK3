@@ -5,7 +5,7 @@ import { FaInstagram, FaYoutube, FaTiktok } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className={styles.footer}>
+    <footer id="footer" className={styles.footer}>
       <div className={styles.inner}>
 
         {/* ── LEFT ── */}
