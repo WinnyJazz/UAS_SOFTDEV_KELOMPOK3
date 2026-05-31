@@ -41,7 +41,7 @@ export default function NotifikasiPage() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await fetch(
-        "${API_BASE}/api/dashboard/notifikasi",
+        `/api/dashboard/notifikasi`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
