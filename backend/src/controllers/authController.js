@@ -47,22 +47,22 @@ const validateRegistrationInput = (nama, email, password) => {
   const errors = [];
 
   // Validasi email: harus @stu.untar.ac.id
-  // const emailRegex = /^[a-zA-Z0-9._%+-]+@stu\.untar\.ac\.id$/;
-  // if (!emailRegex.test(email)) {
-  //   errors.push("Email harus menggunakan domain @stu.untar.ac.id");
-  // }
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@stu\.untar\.ac\.id$/;
+  if (!emailRegex.test(email)) {
+    errors.push("Email harus menggunakan domain @stu.untar.ac.id");
+  }
 
-  // // Extract dan validasi NIM dari email
-  // const nim = extractNimFromEmail(email);
-  // if (!nim) {
-  //   errors.push("Format email tidak valid. Gunakan format: nama.NIM@stu.untar.ac.id");
-  // } else {
+  // Extract dan validasi NIM dari email
+  const nim = extractNimFromEmail(email);
+  if (!nim) {
+    errors.push("Format email tidak valid. Gunakan format: nama.NIM@stu.untar.ac.id");
+  } else {
 
-  //   const nimValidation = validateNim(nim);
-  //   if (!nimValidation.valid) {
-  //     errors.push(nimValidation.error);
-  //   }
-  // }
+    const nimValidation = validateNim(nim);
+    if (!nimValidation.valid) {
+      errors.push(nimValidation.error);
+    }
+  }
 
   // Validasi password:
   // - Minimal 8 karakter
