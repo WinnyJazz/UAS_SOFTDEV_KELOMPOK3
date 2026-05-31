@@ -27,11 +27,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
+      <body style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
         <Suspense fallback={null}>
           <Navbar />
         </Suspense>
-        <main style={{ paddingTop: "62px" }}>
+        <main style={{ paddingTop: "62px", flex: 1 }}>
           {children}
         </main>
         <FooterSwitcher />

@@ -6,7 +6,7 @@
 /* PAGE WRAPPER */
 .page {
     padding: 28px;
-    background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
+    background: transparent;
     min-height: 100vh;
     color: #ffffff;
 }

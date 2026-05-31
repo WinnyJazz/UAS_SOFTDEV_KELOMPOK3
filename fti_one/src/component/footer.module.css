@@ -6,6 +6,7 @@
     background: #0f0f0f;
     color: #ffffff;
     padding: 48px 64px 0;
+    margin-top: 80px; /* ← tambah ini */
 }
 
 .inner {

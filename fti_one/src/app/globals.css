@@ -1,5 +1,5 @@
 :root {
-  --background: #ffffff;
+  --background: transparent; /* ← ganti */
   --foreground: #171717;
 }
 
@@ -25,8 +25,9 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--foreground);
-  background: var(--background);
+  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%); /* ← ganti ini */
   font-family: Arial, Helvetica, sans-serif;
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

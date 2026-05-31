@@ -2,7 +2,7 @@
    BASE
    ══════════════════════════ */
 .page {
-  background: radial-gradient(ellipse 110% 80% at 65% 20%, #7b3fe4 0%, #5020bc 30%, #3a10a8 55%, #280888 100%);
+  background: transparent;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;

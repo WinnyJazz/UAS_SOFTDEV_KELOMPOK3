@@ -4,7 +4,7 @@
 
 .pageWrapper {
   min-height: 100vh;
-  background: radial-gradient(ellipse at 55% 50%, #8b3cf7 0%, #6d28d9 35%, #4c1d95 70%, #2e1065 100%);
+  background: transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
