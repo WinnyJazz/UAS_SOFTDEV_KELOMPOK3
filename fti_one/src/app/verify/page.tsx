@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import styles from './verify.module.css';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 function VerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -22,7 +24,7 @@ function VerifyContent() {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/auth/verify-email?token=${token}`
+          `${API_BASE}/api/auth/verify-email?token=${token}`
         );
 
         const data = await response.json();
