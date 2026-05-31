@@ -12,41 +12,22 @@ const {
   forgotPassword,
   resetPassword,
   updateProfile,
+  deleteUser,
 } = require("../controllers/authController");
 
 const { verifyToken, verifySuperAdmin, verifyAdminOrSuperAdmin } = require("../middleware/authMiddleware");
 
-// POST /api/auth/register
 router.post("/register", register);
-
-// GET  /api/auth/verify-email?token=xxx
 router.get("/verify-email", verifyEmail);
-
-// POST /api/auth/login
 router.post("/login", login);
-
-// POST /api/auth/forgot-password
 router.post("/forgot-password", forgotPassword);
-
-// POST /api/auth/reset-password
 router.post("/reset-password", resetPassword);
-
-// PUT /api/auth/update-profile (hanya user yang terautentikasi)
 router.put("/update-profile", verifyToken, updateProfile);
-
-// POST /api/auth/register-admin (hanya superadmin)
 router.post("/register-admin", verifySuperAdmin, registerAdmin);
-
-// GET /api/auth/users (admin/superadmin)
 router.get("/users", verifyAdminOrSuperAdmin, getAllUsers);
-
-// POST /api/auth/resend-verification
 router.post("/resend-verification", resendVerification);
-
-// POST /api/auth/change-role (hanya superadmin)
 router.post("/change-role", verifySuperAdmin, changeRole);
-
-// POST /api/auth/downgrade-admin (hanya superadmin)
 router.post("/downgrade-admin", verifySuperAdmin, downgradeAdmin);
+router.delete("/users/:userId", verifySuperAdmin, deleteUser);
 
 module.exports = router;

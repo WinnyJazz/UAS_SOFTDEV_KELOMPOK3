@@ -406,6 +406,20 @@ export default function SuperAdminDashboard() {
         finally { setDowngradingAdmin(false); }
     };
 
+    const handleDeleteUser = async (userId: string, nama: string) => {
+        if (!confirm(`Yakin mau hapus user "${nama}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/users/${userId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) { alert('User berhasil dihapus!'); fetchUsers(token); }
+            else { const err = await res.json(); alert('Gagal: ' + err.message); }
+        } catch { alert('Terjadi kesalahan'); }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -721,7 +735,7 @@ export default function SuperAdminDashboard() {
                                                         onChange={e => setSelectedUsers(e.target.checked ? filteredMahasiswaBiasa.map(m => m.userId) : [])}
                                                     />
                                                 </th>
-                                                <th>Nama</th><th>Email</th><th>NIM</th><th>Status</th>
+                                                <th>Nama</th><th>Email</th><th>NIM</th><th>Status</th><th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -740,10 +754,18 @@ export default function SuperAdminDashboard() {
                                                             ? <span className={styles.badgeVerified}>✅ Terverifikasi</span>
                                                             : <span className={styles.badgeUnverified}>❌ Belum Verifikasi</span>}
                                                     </td>
+                                                    <td>
+                                                        <button
+                                                            className={styles.btnDangerSmall}
+                                                            onClick={() => handleDeleteUser(mhs.userId, mhs.nama)}
+                                                        >
+                                                            Hapus
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={5} className={styles.emptyState}>
+                                                    <td colSpan={6} className={styles.emptyState}>
                                                         {nimFilter.trim() ? `Tidak ada mahasiswa dengan NIM/nama "${nimFilter}"` : 'Tidak ada mahasiswa'}
                                                     </td>
                                                 </tr>

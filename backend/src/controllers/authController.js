@@ -756,4 +756,31 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, verifyEmail, login, resendVerification, registerAdmin, getAllUsers, changeRole, downgradeAdmin, forgotPassword, resetPassword, updateProfile };
+// ─────────────────────────────────────────
+// DELETE /api/auth/users/:userId
+// Hanya superadmin yang bisa hapus user
+// ─────────────────────────────────────────
+const deleteUser = async (req, res) => {
+  try {
+    if (req.user.role !== "superadmin") {
+      return res.status(403).json({ message: "Hanya superadmin yang bisa menghapus user." });
+    }
+
+    const { userId } = req.params;
+
+    const mahasiswa = await Mahasiswa.findOneAndDelete({ userId });
+    if (!mahasiswa) {
+      return res.status(404).json({ message: "User tidak ditemukan." });
+    }
+
+    // Hapus juga dari Admin collection kalau ada
+    await Admin.deleteOne({ email: mahasiswa.email });
+
+    return res.status(200).json({ message: "User berhasil dihapus." });
+  } catch (error) {
+    console.error("[deleteUser]", error);
+    return res.status(500).json({ message: "Terjadi kesalahan server." });
+  }
+};
+
+module.exports = { register, verifyEmail, login, resendVerification, registerAdmin, getAllUsers, changeRole, downgradeAdmin, forgotPassword, resetPassword, updateProfile, deleteUser };
