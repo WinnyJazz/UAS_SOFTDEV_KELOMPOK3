@@ -292,6 +292,8 @@ button.navItem {
   align-items: center;        /* ← tambah ini */
 }
 
+
+
 /* ── HAMBURGER ── */
 .hamburger {
   display: none;

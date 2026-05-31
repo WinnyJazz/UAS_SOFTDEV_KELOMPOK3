@@ -152,6 +152,7 @@ useEffect(() => {
             { label: "Aspirasi", href: "/aspirasi" },
             { label: "Info", href: "/info" },
             { label: "Lost & Found", href: "/lost-found" },
+            { label: "Contact Us", href: "#footer" },
           ]);
           fetchNotifPreviewUser(token);
         }
